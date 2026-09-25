@@ -1,0 +1,6 @@
+# A final-newline difference cannot end the backport before its retained
+# trailing rows; an independently identified interior difference still
+# appears.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

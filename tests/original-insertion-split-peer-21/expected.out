@@ -1,0 +1,44 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     Patch 1: patch1     ┃     Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines
+quoted in the patches.
+
+═══════════════════════════════════════════════════
+*    DELTA DIFFERENCES                            *
+═══════════════════════════════════════════════════
+Signs mark edits made by only that patch. A
+sign-less line with one number is an edit both
+patches make: a new number means both add it, an
+old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f               ┃ old new│f
+        │@@ init_ring(); ┃        │@@ local_before2
+        │                ┃  23  23│local_before2
+      24│init_ring();    ┃      24│init_ring();
+      25│start_ring();   ┃      25│start_ring();
+        │                ┃+     26│local_middle();
+        │────────────────╂────────┼────────────────
+        │@@ flush_ring();┃        │@@ flush_ring();
+      29│flush_ring();   ┃      27│flush_ring();
+      30│stop_ring();    ┃      28│stop_ring();
+        │                ┃  24  29│local_after0
+
+═══════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                          *
+═══════════════════════════════════════════════════
+Signs mark lines present in only one result: -
+patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f               ┃     new│f
+        │@@ init_ring(); ┃        │@@ init_ring();
+      24│init_ring();    ┃      24│init_ring();
+      25│start_ring();   ┃      25│start_ring();
+-     26│remote_between0;┃+     26│local_middle();
+-     27│remote_between1;┃        │
+-     28│remote_between2;┃        │
+      29│flush_ring();   ┃      27│flush_ring();
+      30│stop_ring();    ┃      28│stop_ring();

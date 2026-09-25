@@ -1,0 +1,14 @@
+--- a/f
++++ b/f
+@@ -21,6 +21,11 @@
+ local_before0
+ local_before1
+ local_before2
++init_ring();
++start_ring();
++local_middle();
++flush_ring();
++stop_ring();
+ local_after0
+ local_after1
+ local_after2

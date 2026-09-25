@@ -1,0 +1,16 @@
+--- a/f
++++ b/f
+@@ -21,9 +21,13 @@
+ remote_before0
+ remote_before1
+ remote_before2
++init_ring();
++start_ring();
+ remote_between0;
+ remote_between1;
+ remote_between2;
++flush_ring();
++stop_ring();
+ remote_after0
+ remote_after1
+ remote_after2

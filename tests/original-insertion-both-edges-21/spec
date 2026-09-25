@@ -1,0 +1,4 @@
+# Both ends of one original insertion differ while its middle remains shared.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

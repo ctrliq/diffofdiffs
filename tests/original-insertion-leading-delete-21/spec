@@ -1,0 +1,4 @@
+# The edge of one original insertion differs before its shared added code.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

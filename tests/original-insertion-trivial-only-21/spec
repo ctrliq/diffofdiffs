@@ -1,0 +1,5 @@
+# A blank row and brace alone cannot identify corresponding original
+# insertions.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0
