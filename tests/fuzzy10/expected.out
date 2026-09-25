@@ -1,0 +1,28 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                           Patch 1: patch1                            ┃                           Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                 *
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│net/ceph/ceph_common.c                                       ┃     new│net/ceph/ceph_common.c
+        │@@ void ceph_destroy_client(struct ceph_client *client)      ┃        │@@ void ceph_reset_client_addr(struct ceph_client *client)
+     681│}                                                            ┃     785│}
+-    682│EXPORT_SYMBOL(ceph_destroy_client);                          ┃+    786│EXPORT_SYMBOL(ceph_reset_client_addr);
+     683│                                                             ┃     787│
+     684│/*                                                           ┃     788│/*
+     685│ * mount: join the ceph cluster, and open root directory.    ┃     789│ * mount: join the ceph cluster, and open root directory.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│net/ceph/debugfs.c                                           ┃     new│net/ceph/debugfs.c
+        │@@ static int monmap_show(struct seq_file *s, void *p)       ┃        │@@ static int monmap_show(struct seq_file *s, void *p)
+      48│			   ENTITY_NAME(inst->name),           ┃      49│			   ENTITY_NAME(inst->name),
+-     49│			   ceph_pr_addr(&inst->addr.in_addr));┃+     50│			   ceph_pr_addr(&inst->addr));
+      50│	}                                                     ┃      51│	}
+      51│                                                             ┃      52│
+      52│out_unlock:                                                  ┃      53│out_unlock:

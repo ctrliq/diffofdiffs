@@ -1,0 +1,6 @@
+# Corresponding counter changes remain comparable across source indentation
+# changes. A distant label separated by unquoted source cannot name the DELTA
+# hunk.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

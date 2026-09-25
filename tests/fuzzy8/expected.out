@@ -1,0 +1,52 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                        Patch 1: patch1                                        ┃                                        Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                                                         *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   old   new│net/netfilter/nf_tables_api.c                                                     ┃   old   new│net/netfilter/nf_tables_api.c
+            │@@ static int __nf_tables_abort(struct net *net, enum nfnl_abort_action action)   ┃            │@@ static int __nf_tables_abort(struct net *net, enum nfnl_abort_action action)
+  9625  9663│			break;                                                         ┃  9956  9994│				list_splice(&nft_trans_chain_hooks(trans),
+  9626  9664│		case NFT_MSG_DELCHAIN:                                                 ┃  9957  9995│					    &nft_trans_basechain(trans)->hook_list);
+  9627  9665│		case NFT_MSG_DESTROYCHAIN:                                             ┃  9958  9996│			} else {
+- 9628      │			trans->ctx.table->use++;                                       ┃- 9959      │				trans->ctx.table->use++;
++       9666│			nft_use_inc_restore(&trans->ctx.table->use);                   ┃+       9997│				nft_use_inc_restore(&trans->ctx.table->use);
+  9629  9667│			nft_clear(trans->ctx.net, trans->ctx.chain);                   ┃  9960  9998│				nft_clear(trans->ctx.net, trans->ctx.chain);
+            │                                                                                  ┃  9961  9999│			}
+  9630  9668│			nft_trans_destroy(trans);                                      ┃  9962 10000│			nft_trans_destroy(trans);
+  9631  9669│			break;                                                         ┃            │
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                                                                   *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         new│net/netfilter/nf_tables_api.c                                                     ┃         new│net/netfilter/nf_tables_api.c
+            │@@ static int nf_tables_newset(struct sk_buff *skb, const struct nfnl_info *info, ┃            │@@ static int nf_tables_newset(struct sk_buff *skb, const struct nfnl_info *info,
+        4797│	if (!nft_use_inc(&table->use))                                                 ┃        5025│	if (!nft_use_inc(&table->use))
+        4798│		return -EMFILE;                                                        ┃        5026│		return -EMFILE;
+        4799│                                                                                  ┃        5027│
+-       4800│	set = kvzalloc(alloc_size, GFP_KERNEL);                                        ┃+       5028│	set = kvzalloc(alloc_size, GFP_KERNEL_ACCOUNT);
+        4801│	if (!set) {                                                                    ┃        5029│	if (!set) {
+        4802│		err = -ENOMEM;                                                         ┃        5030│		err = -ENOMEM;
+        4803│		goto err_alloc;                                                        ┃        5031│		goto err_alloc;
+        4804│	}                                                                              ┃        5032│	}
+        4805│                                                                                  ┃        5033│
+-       4806│	name = nla_strdup(nla[NFTA_SET_NAME], GFP_KERNEL);                             ┃+       5034│	name = nla_strdup(nla[NFTA_SET_NAME], GFP_KERNEL_ACCOUNT);
+        4807│	if (!name) {                                                                   ┃        5035│	if (!name) {
+            │──────────────────────────────────────────────────────────────────────────────────╂────────────┼──────────────────────────────────────────────────────────────────────────────────
+            │@@ static int nf_tables_newflowtable(struct sk_buff *skb,                         ┃            │@@ static int nf_tables_newflowtable(struct sk_buff *skb,
+        8048│	if (!nft_use_inc(&table->use))                                                 ┃        8294│	if (!nft_use_inc(&table->use))
+        8049│		return -EMFILE;                                                        ┃        8295│		return -EMFILE;
+        8050│                                                                                  ┃        8296│
+-       8051│	flowtable = kzalloc(sizeof(*flowtable), GFP_KERNEL);                           ┃+       8297│	flowtable = kzalloc(sizeof(*flowtable), GFP_KERNEL_ACCOUNT);
+        8052│	if (!flowtable) {                                                              ┃        8298│	if (!flowtable) {
+        8053│		err = -ENOMEM;                                                         ┃        8299│		err = -ENOMEM;
+        8054│		goto flowtable_alloc;                                                  ┃        8300│		goto flowtable_alloc;

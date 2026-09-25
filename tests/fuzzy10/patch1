@@ -1,0 +1,148 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Example Backporter <backporter@example.com>
+Date: Wed, 18 Feb 2026 13:52:58 -0500
+Subject: [PATCH] libceph: fix potential use-after-free in
+ have_mon_and_osd_map()
+
+Check client->monc.monmap and client->osdc.osdmap with
+client->monc.mutex and client->osdc.lock held, and tidy up the
+surrounding timeout handling.  monmap_show() and osdmap_show() now
+take the respective lock as well.
+---
+ net/ceph/ceph_common.c | 53 +++++++++++++++++++++++++-----------------
+ net/ceph/debugfs.c     | 14 +++++++----
+ 2 files changed, 42 insertions(+), 25 deletions(-)
+
+diff --git a/net/ceph/ceph_common.c b/net/ceph/ceph_common.c
+index 91d7783eee7df..47b3aa42b21d3 100644
+--- a/net/ceph/ceph_common.c
++++ b/net/ceph/ceph_common.c
+@@ -681,42 +681,53 @@ void ceph_destroy_client(struct ceph_client *client)
+ }
+ EXPORT_SYMBOL(ceph_destroy_client);
+ 
+-/*
+- * true if we have the mon map (and have thus joined the cluster)
+- */
+-static bool have_mon_and_osd_map(struct ceph_client *client)
+-{
+-	return client->monc.monmap && client->monc.monmap->epoch &&
+-	       client->osdc.osdmap && client->osdc.osdmap->epoch;
+-}
+-
+ /*
+  * mount: join the ceph cluster, and open root directory.
+  */
+ int __ceph_open_session(struct ceph_client *client, unsigned long started)
+ {
+-	unsigned long timeout = client->options->mount_timeout;
+-	long err;
++	DEFINE_WAIT_FUNC(wait, woken_wake_function);
++	long timeout = ceph_timeout_jiffies(client->options->mount_timeout);
++	bool have_monmap, have_osdmap;
++	int err;
+ 
+ 	/* open session, and wait for mon and osd maps */
+ 	err = ceph_monc_open_session(&client->monc);
+ 	if (err < 0)
+ 		return err;
+ 
+-	while (!have_mon_and_osd_map(client)) {
+-		if (timeout && time_after_eq(jiffies, started + timeout))
+-			return -ETIMEDOUT;
++	add_wait_queue(&client->auth_wq, &wait);
++	for (;;) {
++		mutex_lock(&client->monc.mutex);
++		err = client->auth_err;
++		have_monmap = client->monc.monmap && client->monc.monmap->epoch;
++		mutex_unlock(&client->monc.mutex);
++
++		down_read(&client->osdc.lock);
++		have_osdmap = client->osdc.osdmap && client->osdc.osdmap->epoch;
++		up_read(&client->osdc.lock);
++
++		if (err || (have_monmap && have_osdmap))
++			break;
++
++		if (signal_pending(current)) {
++			err = -ERESTARTSYS;
++			break;
++		}
++
++		if (!timeout) {
++			err = -ETIMEDOUT;
++			break;
++		}
+ 
+ 		/* wait */
+ 		dout("mount waiting for mon_map\n");
+-		err = wait_event_interruptible_timeout(client->auth_wq,
+-			have_mon_and_osd_map(client) || (client->auth_err < 0),
+-			ceph_timeout_jiffies(timeout));
+-		if (err < 0)
+-			return err;
+-		if (client->auth_err < 0)
+-			return client->auth_err;
++		timeout = wait_woken(&wait, TASK_INTERRUPTIBLE, timeout);
+ 	}
++	remove_wait_queue(&client->auth_wq, &wait);
++
++	if (err)
++		return err;
+ 
+ 	pr_info("client%llu fsid %pU\n", ceph_client_gid(client),
+ 		&client->fsid);
+diff --git a/net/ceph/debugfs.c b/net/ceph/debugfs.c
+index 009767c3bcaa4..9f3540a1f7d8b 100644
+--- a/net/ceph/debugfs.c
++++ b/net/ceph/debugfs.c
+@@ -35,8 +35,9 @@ static int monmap_show(struct seq_file *s, void *p)
+ 	int i;
+ 	struct ceph_client *client = s->private;
+ 
++	mutex_lock(&client->monc.mutex);
+ 	if (client->monc.monmap == NULL)
+-		return 0;
++		goto out_unlock;
+ 
+ 	seq_printf(s, "epoch %d\n", client->monc.monmap->epoch);
+ 	for (i = 0; i < client->monc.monmap->num_mon; i++) {
+@@ -47,6 +48,9 @@ static int monmap_show(struct seq_file *s, void *p)
+ 			   ENTITY_NAME(inst->name),
+ 			   ceph_pr_addr(&inst->addr.in_addr));
+ 	}
++
++out_unlock:
++	mutex_unlock(&client->monc.mutex);
+ 	return 0;
+ }
+ 
+@@ -55,13 +59,14 @@ static int osdmap_show(struct seq_file *s, void *p)
+ 	int i;
+ 	struct ceph_client *client = s->private;
+ 	struct ceph_osd_client *osdc = &client->osdc;
+-	struct ceph_osdmap *map = osdc->osdmap;
++	struct ceph_osdmap *map;
+ 	struct rb_node *n;
+ 
++	down_read(&osdc->lock);
++	map = osdc->osdmap;
+ 	if (map == NULL)
+-		return 0;
++		goto out_unlock;
+ 
+-	down_read(&osdc->lock);
+ 	seq_printf(s, "epoch %u barrier %u flags 0x%x\n", map->epoch,
+ 			osdc->epoch_barrier, map->flags);
+ 
+@@ -128,6 +133,7 @@ static int osdmap_show(struct seq_file *s, void *p)
+ 		seq_printf(s, "]\n");
+ 	}
+ 
++out_unlock:
+ 	up_read(&osdc->lock);
+ 	return 0;
+ }
+-- 
+2.53.0
+

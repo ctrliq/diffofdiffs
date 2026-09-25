@@ -1,0 +1,75 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                       Patch 1: patch1                                        ┃                                       Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                                                       *
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│net/wireless/util.c                                                                  ┃ old new│net/wireless/util.c
+        │@@                                                                                   ┃        │@@ ieee80211_amsdu_subframe_length(void *field, u8 mesh_flags, u8 hdr_type)
+        │                                                                                     ┃ 791 791│
+        │                                                                                     ┃ 792 792│bool ieee80211_is_valid_amsdu(struct sk_buff *skb, u8 mesh_hdr)
+        │                                                                                     ┃ 793 793│{
+        │                                                                                     ┃-794    │	int offset = 0, remaining, subframe_len, padding;
+        │                                                                                     ┃+    794│	int offset = 0, subframe_len, padding;
+        │                                                                                     ┃ 795 795│
+        │                                                                                     ┃ 796 796│	for (offset = 0; offset < skb->len; offset += subframe_len + padding) {
+        │                                                                                     ┃+    797│		int remaining = skb->len - offset;
+        │                                                                                     ┃ 797 798│		struct {
+        │                                                                                     ┃ 798 799│		    __be16 len;
+        │                                                                                     ┃ 799 800│		    u8 mesh_flags;
+        │                                                                                     ┃ 800 801│		} hdr;
+        │                                                                                     ┃ 801 802│		u16 len;
+        │                                                                                     ┃ 802 803│
+        │                                                                                     ┃+    804│		if (sizeof(hdr) > remaining)
+        │                                                                                     ┃+    805│			return false;
+        │                                                                                     ┃+    806│
+        │                                                                                     ┃ 803 807│		if (skb_copy_bits(skb, offset + 2 * ETH_ALEN, &hdr, sizeof(hdr)) < 0)
+        │                                                                                     ┃ 804 808│			return false;
+        │                                                                                     ┃ 805 809│
+        │─────────────────────────────────────────────────────────────────────────────────────╂────────┼─────────────────────────────────────────────────────────────────────────────────────
+        │@@                                                                                   ┃        │@@ bool ieee80211_is_valid_amsdu(struct sk_buff *skb, u8 mesh_hdr)
+        │                                                                                     ┃ 807 811│						      mesh_hdr);
+        │                                                                                     ┃ 808 812│		subframe_len = sizeof(struct ethhdr) + len;
+        │                                                                                     ┃ 809 813│		padding = (4 - subframe_len) & 0x3;
+        │                                                                                     ┃-810    │		remaining = skb->len - offset;
+        │                                                                                     ┃ 811 814│
+        │                                                                                     ┃ 812 815│		if (subframe_len > remaining)
+        │                                                                                     ┃ 813 816│			return false;
+        │─────────────────────────────────────────────────────────────────────────────────────╂────────┼─────────────────────────────────────────────────────────────────────────────────────
+        │@@ void ieee80211_amsdu_to_8023s(struct sk_buff *skb, struct sk_buff_head *list,     ┃        │@@ void ieee80211_amsdu_to_8023s(struct sk_buff *skb, struct sk_buff_head *list,
+ 768 769│		int len;                                                              ┃ 843 847│		int len, mesh_len = 0;
+ 769 770│		u8 padding;                                                           ┃ 844 848│		u8 padding;
+ 770 771│                                                                                     ┃ 845 849│
++    772│		if (sizeof(eth) > remaining)                                          ┃+    850│		if (copy_len > remaining)
+     773│			goto purge;                                                   ┃     851│			goto purge;
+     774│                                                                                     ┃     852│
+ 771 775│		skb_copy_bits(skb, offset, &eth, sizeof(eth));                        ┃        │
+        │                                                                                     ┃ 846 853│		skb_copy_bits(skb, offset, &hdr, copy_len);
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                                                                 *
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│net/wireless/util.c                                                                  ┃     new│net/wireless/util.c
+        │@@ void ieee80211_amsdu_to_8023s(struct sk_buff *skb, struct sk_buff_head *list,     ┃        │@@ void ieee80211_amsdu_to_8023s(struct sk_buff *skb, struct sk_buff_head *list,
+     757│	struct sk_buff *frame = NULL;                                                 ┃     830│	struct sk_buff *frame = NULL;
+-    758│	u16 ethertype;                                                                ┃        │
+-    759│	u8 *payload;                                                                  ┃        │
+     760│	int offset = 0;                                                               ┃     831│	int offset = 0;
+        │─────────────────────────────────────────────────────────────────────────────────────╂────────┼─────────────────────────────────────────────────────────────────────────────────────
+        │@@ void ieee80211_amsdu_to_8023s(struct sk_buff *skb, struct sk_buff_head *list,     ┃        │@@ void ieee80211_amsdu_to_8023s(struct sk_buff *skb, struct sk_buff_head *list,
+     766│	while (!last) {                                                               ┃     844│	while (!last) {
+     767│		int remaining = skb->len - offset;                                    ┃     845│		int remaining = skb->len - offset;
+     768│		unsigned int subframe_len;                                            ┃     846│		unsigned int subframe_len;
+-    769│		int len;                                                              ┃+    847│		int len, mesh_len = 0;
+     770│		u8 padding;                                                           ┃     848│		u8 padding;
+     771│                                                                                     ┃     849│
+-    772│		if (sizeof(eth) > remaining)                                          ┃+    850│		if (copy_len > remaining)

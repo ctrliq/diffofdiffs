@@ -1,0 +1,5 @@
+# The overlapping hunks disagree about their source. Keep their changes
+# unresolved and label only their original signed rows.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
