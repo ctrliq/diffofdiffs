@@ -1,0 +1,9 @@
+@@ -3,7 +3,7 @@ plain_def():
+     body2
+     body3
+     body4
+-    body5_old
++    body5_new
+     body6
+     body7
+     body8

@@ -1,0 +1,6 @@
+header_line1
+header_line2
+some_def():
+    inserted_body
+    body1
+    body2

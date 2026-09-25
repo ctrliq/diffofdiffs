@@ -1,0 +1,18 @@
+@@ -1,7 +1,7 @@
+ lead1
+ lead2
+ lead3
+-changeA-old
++changeA-new
+ gap1
+ gap2
+ gap3
+@@ -9,7 +9,7 @@
+ gap5
+ gap6
+ gap7
+-changeB-old
++changeB-new
+ tail1
+ tail2
+ tail3

@@ -1,0 +1,4 @@
+# With no anchors, the ordinary native alignment remains unchanged.
+bin: UDIFF_DRIVER
+args: -U 0 --validate a b
+exit: 1

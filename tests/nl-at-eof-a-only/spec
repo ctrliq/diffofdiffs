@@ -1,0 +1,3 @@
+bin: UDIFF_DRIVER
+args: -U 3 a b
+exit: 1

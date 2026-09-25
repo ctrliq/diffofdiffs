@@ -1,0 +1,9 @@
+outer_def():
+    inner_pre1
+    inner_def():
+        body1
+        body2
+        body3_old
+        body4
+        body5
+        body6
