@@ -108,3 +108,9 @@ tests/support/no-locale.so: tests/support/no-locale.c $(HEADERS)
 clean:
 	$(call show,CLEAN,build files)
 	$(Q)rm -rf build diffofdiffs
+
+.PHONY: check check-matches
+check: check-matches
+
+check-matches: tests/support/match-driver
+	$(Q)"$(PYTHON)" tests/check-matches.py tests/support/match-driver
