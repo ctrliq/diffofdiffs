@@ -1,0 +1,15 @@
+--- a/f.c
++++ b/f.c
+@@ -1,10 +1,11 @@ int fx(void)
+ 	y0
+ 	y1
+ 	y2
++	struct params *sp;
+ 	y3
+ 	y4
+ 	y5
+-	int data = 0;
++	u32 data = 0;
+ 	tail1
+ 	tail2
+ 	tail3

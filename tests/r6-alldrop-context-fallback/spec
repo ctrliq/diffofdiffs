@@ -1,0 +1,12 @@
+# Patch1 and patch2 start from versions of g that differ in part of the quoted
+# text: patch1's has pad07 to pad09, gamma, and pad13 where patch2's has ZZZ07
+# to ZZZ09, ZZZ12, and ZZZ13. Patch1 changes alpha at line 10 to beta, patch2
+# changes ZZZ12 to omega, and both change delta at line 16 to epsilon. The
+# report must show each patch's own change beside the other patch's version of
+# those lines, and leave the shared change at line 16 out of the delta section.
+# Its context section must show the results differing at lines 12 and 13, which
+# sit between lines both results share, but not at lines 7 to 9, above which
+# nothing is known.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

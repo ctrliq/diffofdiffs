@@ -1,0 +1,43 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Patch 1: patch1          ┃          Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the
+patches.
+
+═══════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches *
+═══════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one
+number is an edit both patches make: a new number means both add it, an
+old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f.c                       ┃ old new│f.c
+        │@@                        ┃        │@@ int fx(void)
+        │                          ┃   1   1│	y0
+        │                          ┃   2   2│	y1
+        │                          ┃   3   3│	y2
+        │                          ┃+      4│	struct params *sp;
+        │                          ┃   4   5│	y3
+        │                          ┃   5   6│	y4
+        │                          ┃   6   7│	y5
+
+═══════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                                              *
+═══════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f.c                       ┃     new│f.c
+        │@@                        ┃        │@@ int fx(void)
+-      1│	x0                 ┃+      1│	y0
+-      2│	x1                 ┃+      2│	y1
+-      3│	x2                 ┃+      3│	y2
+-      4│	x3                 ┃+      4│	struct params *sp;
+-      5│	x4                 ┃+      5│	y3
+-      6│	x5                 ┃+      6│	y4
+        │                          ┃+      7│	y5
+       7│	u32 data = 0;      ┃       8│	u32 data = 0;
+       8│	tail1              ┃       9│	tail1
+       9│	tail2              ┃      10│	tail2

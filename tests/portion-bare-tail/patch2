@@ -1,0 +1,11 @@
+--- a/f.c
++++ b/f.c
+@@ -1,6 +1,6 @@ int fx(void)
+ 	c1
+-	a_old
++	a_p2
+ 	c2
+ 	c3
+ 	c4
+-	g_old
++	g_p2

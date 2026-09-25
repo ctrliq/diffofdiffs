@@ -1,0 +1,18 @@
+--- a/g
++++ b/g
+@@ -7,7 +7,7 @@
+ ZZZ07
+ ZZZ08
+ ZZZ09
+ alpha
+ pad11
+-ZZZ12
++omega
+ ZZZ13
+@@ -14,5 +14,5 @@
+ pad14
+ pad15
+-delta
++epsilon
+ pad17
+ pad18

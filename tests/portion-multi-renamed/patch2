@@ -1,0 +1,15 @@
+--- a/f.c
++++ b/f.c
+@@ -1,8 +1,8 @@ int top(void)
+ 	c1
+-	a_old
++	a_p2
+ 	c2
+-int helper(void)
+-	b_old
++int helper(int x)
++	b_p2
+ 	c3
+-	c_old
++	c_p2
+ 	c4

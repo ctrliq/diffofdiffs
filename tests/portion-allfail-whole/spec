@@ -1,0 +1,9 @@
+# Patch1 and patch2 start from versions of f.c that differ at lines 2 and 4:
+# patch1's holds a_zulu and b_zulu, and patch2's holds a_old and b_old. Patch1
+# changes c2 at line 3 to c2_p1, and patch2 changes lines 2 and 4 to a_p2 and
+# b_p2 and leaves c2 alone. The report must show each patch's edits on its own
+# side, beside the other patch's version of those lines as context, and a
+# context section in which the two results differ at lines 2 to 4.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

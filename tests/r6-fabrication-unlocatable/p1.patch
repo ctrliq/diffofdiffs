@@ -1,0 +1,11 @@
+--- a/g
++++ b/g
+@@ -7,7 +7,7 @@
+ pad07
+ pad08
+ pad09
+-alpha
++beta
+ pad11
+ gamma
+ pad13

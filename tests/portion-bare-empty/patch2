@@ -1,0 +1,17 @@
+--- a/f.c
++++ b/f.c
+@@ -1,12 +1,12 @@ int fx(void)
+ 	c1
+ def_row
+
+ 	c2
+ 	c3
+ 	c4
+-	g_old
++	g_p2
+ 	c5
+ 	c6
+ 	c7
+-	a_old
++	a_p2
+ 	c8

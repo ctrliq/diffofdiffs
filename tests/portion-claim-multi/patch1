@@ -1,0 +1,14 @@
+--- a/f.c
++++ b/f.c
+@@ -1,9 +1,9 @@
+ 	c1
+ 	a_zulu
+ 	c2
+-	b_old
++	b_p1
+ 	mid_p1
+-	d_old
++	d_p1
+ 	c3
+ 	c_zulu
+ 	c4

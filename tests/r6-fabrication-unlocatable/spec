@@ -1,0 +1,9 @@
+# The first hunk of r6-alldrop-context-fallback, with patch2 quoting ZZZ11 where
+# patch1 quotes pad11. Patch1 changes alpha at line 10 to beta, and patch2
+# changes ZZZ12 to omega. The report must show each change on its own patch's
+# side beside the other patch's version of the line. Since no line next to the
+# differing ones is the same in both results, none of those differences can be
+# placed, and the report must have no context section.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0
