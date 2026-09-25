@@ -1404,10 +1404,135 @@ struct file_list *add_to_list(struct cds_list_head *list,
 	return make;
 }
 
+/* A proven display prefix never belongs to the path being compared */
+static const char *patch_name_key(const struct patch_name *name, int depth)
+{
+	if (name->prefix == PATCH_PREFIX_GIT)
+		depth = MAX(depth, 1);
+	return stripped(name->text, depth);
+}
+
+static bool patch_names_equal(const struct patch_name *a,
+			      const struct patch_name *b, int depth)
+{
+	return a->prefix != PATCH_PREFIX_AMBIGUOUS &&
+	       b->prefix != PATCH_PREFIX_AMBIGUOUS &&
+	       a->verbatim == b->verbatim &&
+	       !strcmp(patch_name_key(a, depth), patch_name_key(b, depth));
+}
+
+/*
+ * A bare creation or deletion has only one non-null label, so b/name can mean a
+ * literal directory or a Git display prefix. A concrete counterpart can resolve
+ * that choice, but two different counterpart paths leave it open.
+ */
+static enum patch_prefix resolve_bare_prefix(const struct patch_name *name,
+					     struct cds_list_head *other)
+{
+	struct patch_name git = *name, literal = *name;
+	bool found_git = false, found_literal = false;
+	struct file_list *at;
+
+	literal.prefix = PATCH_PREFIX_LITERAL;
+	git.prefix = PATCH_PREFIX_GIT;
+	cds_list_for_each_entry(at, other, node) {
+		if (at->file->prefix != PATCH_PREFIX_GIT &&
+		    at->file->prefix != PATCH_PREFIX_LITERAL)
+			continue;
+
+		found_git |= patch_names_equal(&git, at->file, 0);
+		found_literal |= patch_names_equal(&literal, at->file, 0);
+	}
+
+	if (found_git && found_literal)
+		return PATCH_PREFIX_AMBIGUOUS;
+
+	if (found_git)
+		return PATCH_PREFIX_GIT;
+
+	if (found_literal)
+		return PATCH_PREFIX_LITERAL;
+
+	return PATCH_PREFIX_INCOMPLETE;
+}
+
 struct patch_name_resolution {
 	struct patch_name *name;
 	enum patch_prefix prefix;
 };
+
+/* Resolve together so a guess cannot become another record's evidence */
+void resolve_name_prefixes(struct cds_list_head *list1,
+			   struct cds_list_head *list2)
+{
+	struct patch_name_resolution *resolved __free(free) = NULL;
+	struct cds_list_head *lists[] = { list1, list2 };
+	struct file_list *at;
+	size_t count = 0;
+
+	for (size_t i = 0; i < ARRAY_SIZE(lists); i++) {
+		cds_list_for_each_entry(at, lists[i], node)
+			count += at->file->prefix == PATCH_PREFIX_INCOMPLETE;
+	}
+
+	if (!count)
+		return;
+
+	resolved = xmalloc_array(count, sizeof(*resolved));
+	count = 0;
+	for (size_t i = 0; i < ARRAY_SIZE(lists); i++) {
+		cds_list_for_each_entry(at, lists[i], node) {
+			if (at->file->prefix != PATCH_PREFIX_INCOMPLETE)
+				continue;
+
+			resolved[count++] = (typeof(*resolved)){
+				.name = at->file,
+				.prefix = resolve_bare_prefix(at->file,
+							      lists[1 - i])
+			};
+		}
+	}
+
+	for (size_t i = 0; i < count; i++)
+		resolved[i].name->prefix = resolved[i].prefix;
+}
+
+/* Counts the complete pathname components two names share at the end */
+static int common_suffix_components(const char *a, const char *b)
+{
+	const char *pa = a + strlen(a), *pb = b + strlen(b);
+	int n = 0;
+
+	/* Compare basenames first, then extend the suffix toward each root */
+	for (;;) {
+		const char *sa, *sb;
+
+		/* Match whole left components, never a suffix within one */
+		for (sa = pa; sa > a && sa[-1] != '/'; sa--)
+			;
+
+		/* The right path may have a different prefix */
+		for (sb = pb; sb > b && sb[-1] != '/'; sb--)
+			;
+
+		if (pa - sa != pb - sb || memcmp(sa, sb, pa - sa))
+			break;
+
+		n++;
+		if (sa == a || sb == b)
+			break;
+
+		/* Repeated separators do not add matching components */
+		for (pa = sa - 1; pa > a && pa[-1] == '/'; pa--)
+			;
+
+		/* The right path can have a different number of separators */
+		for (pb = sb - 1; pb > b && pb[-1] == '/'; pb--)
+			;
+	}
+
+	return n;
+}
 
 enum file_pair_stage {
 	FILE_PAIR_FULL_NAME,
@@ -1430,6 +1555,284 @@ struct file_groups {
 	struct file_group *groups;
 	size_t count;
 };
+
+static void file_groups_free(struct file_groups *groups)
+{
+	for (size_t i = 0; i < groups->count; i++)
+		free(groups->groups[i].records);
+	free(groups->groups);
+}
+
+DEFINE_FREE(file_groups, struct file_groups, file_groups_free(&_T))
+
+static void file_groups_read(struct file_groups *groups,
+			     struct cds_list_head *list)
+{
+	struct file_list *record;
+	size_t count = 0;
+
+	cds_list_for_each_entry(record, list, node)
+		count++;
+	groups->groups = xzalloc_array(count, sizeof(*groups->groups));
+	cds_list_for_each_entry(record, list, node) {
+		struct file_group *group;
+		size_t i;
+
+		for (i = 0; i < groups->count; i++) {
+			if (patch_names_equal(groups->groups[i].name,
+					      record->file, 0))
+				break;
+		}
+		group = &groups->groups[i];
+		if (i == groups->count) {
+			group->name = record->file;
+			groups->count++;
+		}
+		group->records = xrealloc_array(group->records,
+						group->count + 1,
+						sizeof(*group->records));
+		group->records[group->count++] = record;
+	}
+}
+
+static int file_pair_score(const struct file_group *a,
+			   const struct file_group *b, int depth,
+			   enum file_pair_stage stage)
+{
+	const struct patch_name *left = a->name, *right = b->name;
+	int score;
+
+	if (stage == FILE_PAIR_FULL_NAME)
+		return patch_names_equal(left, right, 0);
+
+	if (stage == FILE_PAIR_STRIPPED_NAME) {
+		if (!patch_names_equal(left, right, depth))
+			return 0;
+	} else if (a->exact || b->exact || left->verbatim || right->verbatim ||
+		   left->prefix == PATCH_PREFIX_AMBIGUOUS ||
+		   right->prefix == PATCH_PREFIX_AMBIGUOUS) {
+		return 0;
+	}
+
+	score = common_suffix_components(patch_name_key(left, 0),
+					 patch_name_key(right, 0));
+
+	/* The chosen strip depth can establish even a basename-only identity */
+	if (stage == FILE_PAIR_STRIPPED_NAME || score >= PAIR_MIN_COMPONENTS)
+		return score;
+	return 0;
+}
+
+static void consider_file_pair(struct file_group *group,
+			       struct file_group *other, int score)
+{
+	if (score > group->score) {
+		group->best = other;
+		group->score = score;
+		group->tied = false;
+	} else if (score && score == group->score) {
+		group->tied = true;
+	}
+}
+
+static void reset_file_choices(struct file_groups *groups)
+{
+	for (size_t i = 0; i < groups->count; i++) {
+		groups->groups[i].best = NULL;
+		groups->groups[i].score = 0;
+		groups->groups[i].tied = false;
+	}
+}
+
+static void match_file_groups(struct file_groups *left,
+			      struct file_groups *right, int depth,
+			      enum file_pair_stage stage)
+{
+	bool progress;
+
+	/*
+	 * Accepted pairs leave the candidate pool and can resolve other ties.
+	 * Recompute choices until no remaining pair is uniquely best both ways.
+	 */
+	do {
+		reset_file_choices(left);
+		reset_file_choices(right);
+
+		/* Score every candidate before committing any choice */
+		for (size_t i = 0; i < left->count; i++) {
+			struct file_group *a = &left->groups[i];
+
+			if (a->pair)
+				continue;
+
+			for (size_t j = 0; j < right->count; j++) {
+				struct file_group *b = &right->groups[j];
+				int score;
+
+				if (b->pair)
+					continue;
+
+				score = file_pair_score(a, b, depth, stage);
+				consider_file_pair(a, b, score);
+				consider_file_pair(b, a, score);
+			}
+		}
+		progress = false;
+
+		/* Mutual uniqueness removes traversal-order dependence */
+		for (size_t i = 0; i < left->count; i++) {
+			struct file_group *a = &left->groups[i], *b = a->best;
+
+			if (!b || a->tied || b->tied || b->best != a)
+				continue;
+
+			a->pair = b;
+			b->pair = a;
+			progress = true;
+			pr_dbg("Paired %s with %s at name tier %d\n",
+			       a->name->text, b->name->text, stage);
+		}
+	} while (progress);
+
+	/* Unresolved equal-score choices need an ambiguity diagnostic */
+	for (size_t i = 0; i < left->count; i++) {
+		if (left->groups[i].tied)
+			pr_dbg("No unique counterpart for %s at name tier %d\n",
+			       left->groups[i].name->text, stage);
+	}
+}
+
+static void pair_group_record(struct file_list *record,
+			      const struct file_group *group, bool same_kind)
+{
+	for (size_t i = 0; i < group->count; i++) {
+		struct file_list *other = group->records[i];
+
+		if (other->pair ||
+		    (same_kind && other->mode_only != record->mode_only))
+			continue;
+
+		record->pair = other;
+		other->pair = record;
+		return;
+	}
+}
+
+static void pair_group_records(const struct file_group *group)
+{
+	/* Reserve like-kind records before a metadata/content fallback */
+	for (int pass = 0; pass < 2; pass++) {
+		for (size_t i = 0; i < group->count; i++) {
+			struct file_list *record = group->records[i];
+
+			if (!record->pair)
+				pair_group_record(record, group->pair, !pass);
+		}
+	}
+}
+
+void pair_file_lists(struct cds_list_head *list1, struct cds_list_head *list2,
+		     int depth)
+{
+	struct file_groups right __free(file_groups) = {};
+	struct file_groups left __free(file_groups) = {};
+
+	/* Repeated records of one path cannot compete as distinct identities */
+	file_groups_read(&left, list1);
+	file_groups_read(&right, list2);
+	for (size_t i = 0; i < left.count; i++) {
+		for (size_t j = 0; j < right.count; j++) {
+			if (patch_names_equal(left.groups[i].name,
+					      right.groups[j].name, depth)) {
+				left.groups[i].exact = true;
+				right.groups[j].exact = true;
+			}
+		}
+	}
+
+	/*
+	 * Full names precede stripped names, then suffix-only candidates. Each
+	 * choice must be uniquely best from both sides, using the original path
+	 * components to distinguish names that stripping made identical. An
+	 * exhausted exact identity cannot redirect its remaining records.
+	 */
+	for (enum file_pair_stage stage = FILE_PAIR_FULL_NAME;
+	     stage <= FILE_PAIR_SUFFIX; stage++)
+		match_file_groups(&left, &right, depth, stage);
+
+	for (size_t i = 0; i < left.count; i++) {
+		if (left.groups[i].pair)
+			pair_group_records(&left.groups[i]);
+	}
+}
+
+/*
+ * Choose the smallest strip depth that produces a shared file identity.
+ */
+int determine_ignore_components(struct cds_list_head *list1,
+				struct cds_list_head *list2)
+{
+	struct cds_list_head *lists[] = { list1, list2 };
+	struct file_list *l, *l1, *l2;
+	int max_components = 0;
+
+	for (size_t i = 0; i < ARRAY_SIZE(lists); i++) {
+		cds_list_for_each_entry(l, lists[i], node) {
+			int components;
+
+			if (l->mode_only ||
+			    name_is_dev_null(l->file->text,
+					     strlen(l->file->text)))
+				continue;
+
+			components = removable_path_components(l->file->text);
+			if (components > max_components)
+				max_components = components;
+		}
+	}
+
+	/*
+	 * Mode-only records sit this out, since their opener names cannot
+	 * determine how much an authored header should strip. A run whose every
+	 * record is mode-only settles at zero, where complete block names
+	 * establish the identities the pairing walk compares.
+	 *
+	 * Compare the authored spelling before normalized identity: stripping
+	 * is counted from that spelling, including any Git prefix. Identity
+	 * also rejects ambiguous names that happen to have the same displayed
+	 * text.
+	 */
+	for (int p = 0; p <= max_components; p++) {
+		cds_list_for_each_entry(l1, list1, node) {
+			const char *name1;
+
+			if (l1->mode_only)
+				continue;
+
+			name1 = stripped(l1->file->text, p);
+			cds_list_for_each_entry(l2, list2, node) {
+				if (!l2->mode_only &&
+				    !strcmp(name1,
+					    stripped(l2->file->text, p)) &&
+				    patch_names_equal(l1->file, l2->file, p))
+					return p;
+			}
+		}
+	}
+
+	return 0;
+}
+
+void file_list_free(struct cds_list_head *list)
+{
+	struct file_list *at, *next;
+
+	cds_list_for_each_entry_safe(at, next, list, node) {
+		cds_list_del(&at->node);
+		patch_name_free(at->file);
+		free(at);
+	}
+}
 
 /*
  * Keep mode recognition and field parsing on the same vocabulary. Creation and
