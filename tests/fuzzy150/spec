@@ -1,0 +1,7 @@
+# Large repeated replacement runs retain their full real result difference.
+# Independently applying both original patches and the output recipe checks
+# the expected complete files.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+timeout: 30
+exit: 0

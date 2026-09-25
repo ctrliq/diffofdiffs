@@ -1,0 +1,6 @@
+# A long replacement with repeated surrounding rows must preserve every
+# differing result row and its real source position.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+timeout: 10
+exit: 0

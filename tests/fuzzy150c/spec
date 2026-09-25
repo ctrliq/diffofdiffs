@@ -1,0 +1,8 @@
+# The shared b rows remain present while all 2400 differing a rows are
+# removed. The complete-file recipe checks that none of the original result
+# difference disappears.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+timeout: 7
+exit: 0
+stdout-sha1: 61a11eefa0219b005ffaad93fae5221814f2dd68

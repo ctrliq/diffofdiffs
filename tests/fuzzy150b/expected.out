@@ -1,0 +1,43 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               Patch 1: patch1               ┃               Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                     *
+═══════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both
+patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│big                               ┃  old  new│big
+          │@@ ctx 2 xxxxxxxxxxxxxxxxxxxxxxxx ┃          │@@ ctx 2 xxxxxxxxxxxxxxxxxxxxxxxx
+    2    2│ctx 2 xxxxxxxxxxxxxxxxxxxxxxxx    ┃    2    2│ctx 2 xxxxxxxxxxxxxxxxxxxxxxxx
+    3     │q one xxxxxxxxxxxxxxxxxxxxxxxx    ┃    3     │q one xxxxxxxxxxxxxxxxxxxxxxxx
+    4     │q two xxxxxxxxxxxxxxxxxxxxxxxx    ┃    4     │q two xxxxxxxxxxxxxxxxxxxxxxxx
+-   5     │q three xxxxxxxxxxxxxxxxxxxxxxxx  ┃-   5     │zz absent xxxxxxxxxxxxxxxxxxxxxxxx
+          │                                  ┃+        3│y head xxxxxxxxxxxxxxxxxxxxxxxx
+         3│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃         4│x same xxxxxxxxxxxxxxxxxxxxxxxx
+         4│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃         5│x same xxxxxxxxxxxxxxxxxxxxxxxx
+         5│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃         6│x same xxxxxxxxxxxxxxxxxxxxxxxx
+          │──────────────────────────────────╂──────────┼──────────────────────────────────
+          │@@ x same xxxxxxxxxxxxxxxxxxxxxxxx┃          │@@ x same xxxxxxxxxxxxxxxxxxxxxxxx
+      2000│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃      2001│x same xxxxxxxxxxxxxxxxxxxxxxxx
+      2001│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃      2002│x same xxxxxxxxxxxxxxxxxxxxxxxx
+      2002│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃      2003│x same xxxxxxxxxxxxxxxxxxxxxxxx
++     2003│z sep1 xxxxxxxxxxxxxxxxxxxxxxxx   ┃+     2004│y sep1 xxxxxxxxxxxxxxxxxxxxxxxx
++     2004│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃          │
+      2005│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃      2005│x same xxxxxxxxxxxxxxxxxxxxxxxx
+      2006│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃      2006│x same xxxxxxxxxxxxxxxxxxxxxxxx
+      2007│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃      2007│x same xxxxxxxxxxxxxxxxxxxxxxxx
+          │──────────────────────────────────╂──────────┼──────────────────────────────────
+          │@@ x same xxxxxxxxxxxxxxxxxxxxxxxx┃          │@@ x same xxxxxxxxxxxxxxxxxxxxxxxx
+      4001│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃      4001│x same xxxxxxxxxxxxxxxxxxxxxxxx
+      4002│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃      4002│x same xxxxxxxxxxxxxxxxxxxxxxxx
+      4003│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃      4003│x same xxxxxxxxxxxxxxxxxxxxxxxx
++     4004│y sep1 xxxxxxxxxxxxxxxxxxxxxxxx   ┃          │
+      4005│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃      4004│x same xxxxxxxxxxxxxxxxxxxxxxxx
+          │                                  ┃+     4005│y sep2 xxxxxxxxxxxxxxxxxxxxxxxx
+    6 4006│ctx 3 xxxxxxxxxxxxxxxxxxxxxxxx    ┃    6 4006│ctx 3 xxxxxxxxxxxxxxxxxxxxxxxx
+    7 4007│ctx 4 xxxxxxxxxxxxxxxxxxxxxxxx    ┃    7 4007│ctx 4 xxxxxxxxxxxxxxxxxxxxxxxx
