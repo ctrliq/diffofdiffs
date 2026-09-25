@@ -1,0 +1,6 @@
+# A pack index opening with the real magic but naming version 3: the refusal
+# calls the version out by number, so a future index format surfaces as a
+# format boundary instead of unparsable bytes or missing objects.
+bin: GITREAD_UNIT
+args: idx-version
+exit: 1

@@ -1,0 +1,6 @@
+# A shallow clone's boundary commits name parents the store deliberately
+# lacks, so the open refuses before any lookup can walk history the store
+# cannot answer.
+bin: GITREAD_UNIT
+args: fail-shallow
+exit: 1

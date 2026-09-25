@@ -1,0 +1,7 @@
+# An annotated tag peels to the commit it names through both accepted
+# spellings: the v1 shorthand rides the reference path (dwim, resolve, peel)
+# and the tag object's own id rides the object-store-first path. Both lines
+# print the tip commit B, so a peel that stops working moves these bytes.
+bin: GITREAD_UNIT
+args: resolve-tag
+exit: 0

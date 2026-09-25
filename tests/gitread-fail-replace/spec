@@ -1,0 +1,6 @@
+# A refs/replace reference makes git substitute objects at read time, which
+# libgit2 never does, so the open refuses the store outright rather than
+# resolve objects git itself would swap away.
+bin: GITREAD_UNIT
+args: fail-replace
+exit: 1

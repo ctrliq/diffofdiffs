@@ -1,0 +1,8 @@
+# The whole two-commit store moves into one pack and the loose copies are
+# removed, so reference resolution, prefix search, the parent walk, and the blob
+# read can only be answered from the pack and its index. Packing at this scale
+# may store objects whole rather than deltified, so this fixture doesn't cover
+# delta decoding.
+bin: GITREAD_UNIT
+args: packed-objects
+exit: 0

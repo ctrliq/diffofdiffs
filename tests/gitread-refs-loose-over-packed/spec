@@ -1,0 +1,10 @@
+# Loose references take precedence over packed ones. packed-refs maps
+# refs/heads/x at the root commit A while the loose file maps it at the tip B,
+# and resolution prints B, matching git's own order. The control removes the
+# loose file and reopens, and the same name then prints A through packed-refs
+# alone, so both sources are proven readable and the order is proven to be the
+# deciding fact. A reader that read packed-refs first would silently return the
+# wrong commit for any repository whose packed branch has since moved.
+bin: GITREAD_UNIT
+args: refs-loose-over-packed
+exit: 0

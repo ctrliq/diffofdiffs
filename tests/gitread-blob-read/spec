@@ -1,0 +1,7 @@
+# The blob read against the tip commit: the file's mode, length, and exact
+# bytes print; a path the tree lacks reports absent (ordinary data for a
+# differ, not a failure); a path that descends through a file rather than a
+# directory reports absent the same way.
+bin: GITREAD_UNIT
+args: blob-read
+exit: 0

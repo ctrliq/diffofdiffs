@@ -1,0 +1,9 @@
+# The accepted name spellings against one two-commit store, all resolving to the
+# tip commit B: the full 40-hex object id, a 7-hex prefix, the branch shorthand
+# x, the full reference path refs/heads/x, and HEAD through its symbolic chain.
+# The output covers the reader's whole accepted grammar at once, so a spelling
+# that stops resolving (or starts resolving to something else) changes these
+# bytes.
+bin: GITREAD_UNIT
+args: resolve-forms
+exit: 0

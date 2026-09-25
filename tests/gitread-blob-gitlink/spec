@@ -1,0 +1,6 @@
+# A gitlink entry (a nested repository pin) has no file bytes to hand back,
+# so the read refuses with the reader's own words; rendering gitlinks as
+# Subproject-commit lines is the differ's later duty, never a blob read.
+bin: GITREAD_UNIT
+args: blob-gitlink
+exit: 1

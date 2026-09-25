@@ -1,0 +1,7 @@
+# core.repositoryformatversion 2: the library implements versions up to 1
+# and refuses the open itself, so the reader reports its generic open
+# refusal. The reader's own version guard stays behind it for a library
+# that raises its ceiling.
+bin: GITREAD_UNIT
+args: fail-formatversion
+exit: 1

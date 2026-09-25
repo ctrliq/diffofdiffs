@@ -1,0 +1,7 @@
+# extensions.partialclone at format version 0: the library only enforces
+# extensions at version 1, so the store opens fine and the reader's own
+# guard refuses a store whose objects are missing by design. The version-1
+# spelling is refused by the library itself with the generic open refusal.
+bin: GITREAD_UNIT
+args: fail-partialclone
+exit: 1

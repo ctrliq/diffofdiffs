@@ -1,0 +1,1 @@
+gitread-unit: the blob at big in commit b36ffc211b5227b6f3ceceb42b6b4b17074673d3 carries 67108865 bytes, over the diff engine's 64 MiB per-image payload ceiling

@@ -1,0 +1,6 @@
+# A symbolic-link entry reads as its target-path bytes at mode 120000 and is
+# never followed: the link's own content is the blob, per the ruled per-file-
+# kind table.
+bin: GITREAD_UNIT
+args: blob-symlink
+exit: 0

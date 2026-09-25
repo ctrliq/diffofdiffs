@@ -1,0 +1,7 @@
+# Every ruled directory form opens and answers: the working tree itself (the
+# .git inside it), a bare store, a gitfile whose one line points at another
+# repository's .git, and a .git that is a filesystem symbolic link. Each open
+# resolves HEAD to prove which store actually answered.
+bin: GITREAD_UNIT
+args: open-forms
+exit: 0

@@ -1,0 +1,7 @@
+# A directory that holds no repository refuses at open with the reader's own
+# words: the open never walks upward out of the named directory, so the
+# enclosing real repository this suite itself runs inside can never answer in
+# its place.
+bin: GITREAD_UNIT
+args: open-missing
+exit: 1

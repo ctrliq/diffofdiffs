@@ -1,0 +1,7 @@
+# A blob one byte past the engine's 64 MiB per-image payload ceiling
+# refuses at the read with the size and the ceiling both named, before the
+# oversized image can reach the engine. Zeros keep the loose object tiny on
+# disk while the recorded size carries the excess.
+bin: GITREAD_UNIT
+args: blob-over-ceiling
+exit: 1

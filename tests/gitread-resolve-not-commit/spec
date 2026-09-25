@@ -1,0 +1,6 @@
+# The full hex id of a blob resolves as an object but refuses to stand as a
+# commit: the reader peels only tags, so a blob or tree name is a fatal
+# refusal rather than a silent misread.
+bin: GITREAD_UNIT
+args: resolve-not-commit
+exit: 1

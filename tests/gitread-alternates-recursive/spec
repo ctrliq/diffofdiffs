@@ -1,0 +1,8 @@
+# A three-store alternates chain (s3 borrows from s2, s2 from s1) holding every
+# object in s1 alone, the layout and depth the real kernel trees use. Resolution
+# by full id and by 7-hex prefix plus the blob read must chase the chain to its
+# end. References never cross an alternates boundary, so this fixture resolves
+# no reference names.
+bin: GITREAD_UNIT
+args: alternates-recursive
+exit: 0

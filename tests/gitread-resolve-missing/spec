@@ -1,0 +1,6 @@
+# A name that is neither an object prefix nor any reference refuses loudly
+# with the reader's own words and exits nonzero having printed nothing to
+# stdout, the tree-mode eager-failure contract.
+bin: GITREAD_UNIT
+args: resolve-missing
+exit: 1

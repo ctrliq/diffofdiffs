@@ -1,0 +1,6 @@
+# An info/grafts file rewrites parenthood that libgit2 reads only from the
+# commit objects themselves, so a grafted store refuses at open rather than
+# report parents git itself would override.
+bin: GITREAD_UNIT
+args: fail-grafts
+exit: 1

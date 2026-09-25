@@ -1,0 +1,7 @@
+# The driver writes filler blobs until two share a 4-hex prefix (the
+# collision point is a pure function of the fixed content sequence), then
+# resolves that prefix. An abbreviation matching more than one object is a
+# fatal ambiguity refusal, never a silent pick.
+bin: GITREAD_UNIT
+args: resolve-ambiguous
+exit: 1

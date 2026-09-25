@@ -1,0 +1,7 @@
+# The store holds a pack index that isn't a valid index, next to an empty pack
+# file. libgit2 on its own would skip the pair and read the store as if the pack
+# weren't there, so the reader must refuse the store with an error when it opens
+# it, rather than letting the pack's objects look missing.
+bin: GITREAD_UNIT
+args: garbage-idx
+exit: 1

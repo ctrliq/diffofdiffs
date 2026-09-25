@@ -1,0 +1,7 @@
+# extensions.objectformat naming sha256 at format version 1: this libgit2
+# build has no sha256 support, so the library refuses the open itself and
+# the reader reports its generic open refusal. The reader's own object-id
+# guard stays behind it for any library build that opens such stores.
+bin: GITREAD_UNIT
+args: fail-objectformat
+exit: 1

@@ -1,0 +1,7 @@
+# Parent walks over a three-commit store: the root prints 0 parents, the tip
+# prints 1 with the root as its first parent, and a merge of tip and root
+# prints 2 with the tip first, which is the side the ruled first-parent patch
+# derivation diffs against.
+bin: GITREAD_UNIT
+args: parents
+exit: 0
