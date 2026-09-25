@@ -1,0 +1,26 @@
+<!-- SPDX-License-Identifier: GPL-2.0-only -->
+<div class="controls">
+  <div class="toolbar">
+    <label>Show <select id="section-select"><option value="all">All differences</option><option value="delta">Delta differences</option><option value="context">Context differences</option></select></label>
+    <label>File <select id="file-select"><option value="">Choose a file</option></select></label>
+    <button type="button" id="previous-change" title="Previous difference group">Previous</button>
+    <button type="button" id="next-change" title="Next difference group">Next</button>
+    <span id="change-position" role="status"></span>
+    <button type="button" id="copy-report" title="Copy the complete plain-text report, including hidden sections">Copy report</button>
+    <button type="button" id="download-report" title="Save the complete plain-text report">Save text</button>
+    <span id="copy-status" role="status"></span>
+  </div>
+  <details class="preferences" open>
+    <summary>Viewing options</summary>
+    <div class="toolbar">
+      <label>Layout <select id="layout-select"><option value="review">Review</option><option value="console">Console</option></select></label>
+      <label>Theme <select id="theme-select"><option value="dark">Dark</option><option value="light">Light</option></select></label>
+      <label>Highlight <select id="highlight-select"><option value="words">Words</option><option value="characters">Exact characters</option><option value="none">Off</option></select></label>
+      <label><input id="shared-yellow" type="checkbox"> Yellow shared edits</label>
+      <label><input id="gap-hatching" type="checkbox"> Mark gaps</label>
+      <label><input id="wrap-lines" type="checkbox"> Wrap lines</label>
+      <label>Text size <select id="font-size"><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option></select></label>
+    </div>
+  </details>
+</div>
+<noscript><p>All source rows are shown below. Enable JavaScript to use the viewing controls.</p></noscript>
