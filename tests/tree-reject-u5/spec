@@ -1,0 +1,4 @@
+# tree-reject at -U5: every hunk in both sections must carry five lines of
+# context from the commits' own files instead of three.
+bin: DIFFOFDIFFS
+args: -U5 --git-tree=repo bp wildtip

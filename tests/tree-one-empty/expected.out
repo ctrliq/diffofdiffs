@@ -1,0 +1,57 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              Commit 1: empty               ┃                Commit 2: up
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and after each commit.
+
+═════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                   *
+═════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit
+both patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│alpha                              ┃ old new│alpha
+        │@@ alpha row 09                    ┃        │@@ alpha row 09
+   9   9│alpha row 09                       ┃   9   9│alpha row 09
+  10  10│alpha row 10                       ┃  10  10│alpha row 10
+  11  11│alpha row 11                       ┃  11  11│alpha row 11
+        │                                   ┃- 12    │alpha row 12
+  12  12│alpha row 12 reworked by upstream  ┃+     12│alpha row 12 reworked by upstream
+  13  13│alpha row 13                       ┃  13  13│alpha row 13
+  14  14│alpha row 14                       ┃  14  14│alpha row 14
+  15  15│alpha row 15                       ┃  15  15│alpha row 15
+        │───────────────────────────────────╂────────┼───────────────────────────────────
+        │@@ alpha row 52                    ┃        │@@ alpha row 52
+  52  52│alpha row 52                       ┃  52  52│alpha row 52
+  53  53│alpha row 53                       ┃  53  53│alpha row 53
+  54  54│alpha row 54                       ┃  54  54│alpha row 54
+        │                                   ┃- 55    │alpha row 55
+  55  55│alpha row 55 adjusted by upstream  ┃+     55│alpha row 55 adjusted by upstream
+  56  56│alpha row 56                       ┃  56  56│alpha row 56
+  57  57│alpha row 57                       ┃  57  57│alpha row 57
+  58  58│alpha row 58                       ┃  58  58│alpha row 58
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│gamma                              ┃ old new│gamma
+        │                                   ┃        │Create file
+        │                                   ┃        │New mode: 100644
+        │@@ gamma row one                   ┃        │@@ gamma row one
+   1   1│gamma row one                      ┃+      1│gamma row one
+   2   2│gamma row two                      ┃+      2│gamma row two
+   3   3│gamma row three                    ┃+      3│gamma row three
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│notail                             ┃ old new│notail
+        │@@ notail row one                  ┃        │@@ notail row one
+   1   1│notail row one                     ┃   1   1│notail row one
+        │                                   ┃-  2    │notail row two
+   2   2│notail row two adjusted by upstream┃+      2│notail row two adjusted by upstream
+   3   3│notail row three                   ┃   3   3│notail row three
+   4   4│notail unterminated tail row       ┃   4   4│notail unterminated tail row
+\       │No newline at end of file          ┃\       │No newline at end of file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│runme                              ┃ old new│runme
+        │                                   ┃        │Old mode: 100644
+        │                                   ┃        │New mode: 100755

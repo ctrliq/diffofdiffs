@@ -1,0 +1,62 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        Commit 1: wild         ┃        Commit 2: frag
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and after each
+commit.
+
+═══════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                        *
+═══════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with
+one number is an edit both patches make: a new number means
+both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│alpha                 ┃ old new│alpha
+        │@@ alpha row 12       ┃        │@@ alpha row 12
+      12│alpha row 12          ┃      12│alpha row 12
+      13│alpha row 13          ┃      13│alpha row 13
+      14│alpha row 14          ┃      14│alpha row 14
+      15│alpha row 15          ┃      15│alpha row 15
+      16│alpha row 16          ┃      16│alpha row 16
++     17│alpha row 17          ┃+     17│  frag preamble row 17
++     18│alpha row 18          ┃+     18│  frag preamble row 18
+      19│alpha row 19          ┃      19│alpha row 19
++     20│alpha row 20          ┃+     20│  frag stanza row 20
++     21│alpha row 21          ┃+     21│  frag stanza row 21
++     22│alpha row 22          ┃+     22│  frag stanza row 22
++     23│alpha row 23          ┃+     23│  frag stanza row 23
++     24│alpha row 24          ┃+     24│  frag stanza row 24
+      25│alpha row 25          ┃      25│alpha row 25
+      26│alpha row 26          ┃      26│alpha row 26
+      27│alpha row 27          ┃      27│alpha row 27
+      28│alpha row 28          ┃      28│alpha row 28
+      29│alpha row 29          ┃      29│alpha row 29
+        │──────────────────────╂────────┼──────────────────────
+        │@@ alpha row 43       ┃        │@@ alpha row 43
+      43│alpha row 43          ┃      43│alpha row 43
+      44│alpha row 44          ┃      44│alpha row 44
+      45│alpha row 45          ┃      45│alpha row 45
+      46│alpha row 46          ┃      46│alpha row 46
+      47│alpha row 47          ┃      47│alpha row 47
++     48│wild row 48           ┃+     48│alpha row 48
++     49│wild row 49           ┃+     49│alpha row 49
++     50│wild row 50           ┃+     50│alpha row 50
++     51│wild row 51           ┃+     51│alpha row 51
++     52│wild row 52           ┃+     52│alpha row 52
++     53│wild row 53           ┃+     53│alpha row 53
++     54│wild row 54           ┃+     54│alpha row 54
++     55│wild row 55           ┃+     55│alpha row 55
++     56│wild row 56           ┃+     56│alpha row 56
++     57│wild row 57           ┃+     57│alpha row 57
++     58│wild row 58           ┃+     58│alpha row 58
++     59│wild row 59           ┃+     59│alpha row 59
++     60│wild row 60           ┃+     60│alpha row 60
++     61│wild row 61           ┃+     61│alpha row 61
++     62│wild row 62           ┃+     62│alpha row 62
+      63│alpha row 63          ┃      63│alpha row 63
+      64│alpha row 64          ┃      64│alpha row 64
+      65│alpha row 65          ┃      65│alpha row 65
+      66│alpha row 66          ┃      66│alpha row 66
+      67│alpha row 67          ┃      67│alpha row 67

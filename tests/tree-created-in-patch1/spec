@@ -1,0 +1,7 @@
+# In git tree mode, wild is a root commit that creates alpha, 72 lines, and its
+# child wildtip changes wild row 55 of that file. The report must show the whole
+# creation, with its create-file and mode notes, on wild's side, beside
+# wildtip's line-55 change with the rest of alpha as unchanged lines.
+# tree-fill-fails runs the same two commits in the other order.
+bin: DIFFOFDIFFS
+args: --git-tree=repo wild wildtip

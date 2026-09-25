@@ -1,0 +1,4 @@
+# tree-delta at -U4: every hunk in both sections must carry four lines of
+# context from the commits' own files instead of three.
+bin: DIFFOFDIFFS
+args: -U4 --git-tree=repo bp up

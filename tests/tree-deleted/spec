@@ -1,0 +1,8 @@
+# In git tree mode, del1 and del2 each delete del, a 20-line file whose two
+# parent versions differ only at lines 9-12 (del leg one block against del leg
+# two block). The report must pair the two deletions and show the differing
+# removed lines side by side, with the lines both commits remove unsigned, and
+# -U5 sets the context to five of those lines on each side. Identical deletions
+# would be left out entirely, which is why each parent holds its own version.
+bin: DIFFOFDIFFS
+args: -U5 --git-tree=repo del1 del2

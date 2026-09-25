@@ -1,0 +1,10 @@
+# In git tree mode, bp and up start from the same tree and rewrite row 12 of
+# alpha differently. bp alone rewrites row 34 and replaces rows 48-62 with a
+# ten-line backport block, which covers row 55, where up changes the line
+# instead. up alone creates gamma, changes notail, whose last line has no
+# newline, and makes runme executable. The report must show the two row-12
+# rewrites side by side and each commit's other changes on its own side, and the
+# context section must show where the two results differ around the backport
+# block.
+bin: DIFFOFDIFFS
+args: --git-tree=repo bp up

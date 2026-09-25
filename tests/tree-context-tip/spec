@@ -1,0 +1,8 @@
+# Both patches replace old() with first() and second(). The only surrounding
+# difference is backport() versus upstream(), at line 7 in each resulting
+# file. Three rows of context on each side therefore include first(), second(),
+# and one() above it, and two(), three(), and four() below it. The context hunk
+# starts at tip line 4 and neither omits the added rows nor quotes old().
+bin: DIFFOFDIFFS
+args: --git-tree=repo bp up
+exit: 0

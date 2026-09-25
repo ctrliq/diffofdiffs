@@ -1,0 +1,8 @@
+# The patches change one() differently beside a surrounding-code difference.
+# Those rows share a native edit run, so CONTEXT must retain the whole run as
+# real -/+ rows. Its background backport()/upstream() difference requests the
+# window, while one_bp()/one_up() cannot request a context window on their own.
+# Three real rows on each side bound this hunk at tip lines 3 through 10.
+bin: DIFFOFDIFFS
+args: --git-tree=repo mixed-bp mixed-up
+exit: 0

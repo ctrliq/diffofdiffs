@@ -1,0 +1,6 @@
+# In git tree mode, the commits of tree-reject-split, bp then fragtip, with -U9.
+# The report must show each commit's changes on its own side beside the other's
+# unchanged lines, and a context section that sets the two tips side by side,
+# bp's alpha rows at lines 17 to 24 against fragtip's frag rows.
+bin: DIFFOFDIFFS
+args: -U9 --git-tree=repo bp fragtip

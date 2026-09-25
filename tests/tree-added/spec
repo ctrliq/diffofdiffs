@@ -1,0 +1,8 @@
+# In git tree mode, wild and frag are both root commits that create alpha, 72
+# lines each, and the two files differ at lines 17-18, 20-24, and 48-62. The
+# report must pair the two creations and show the differing lines side by side
+# as each commit's own additions, with the lines both commits add between them
+# unsigned. -U5 sets the context around each run of differences to five of those
+# shared lines.
+bin: DIFFOFDIFFS
+args: -U5 --git-tree=repo wild frag

@@ -1,0 +1,7 @@
+# In git tree mode, the commits of tree-reject-split in the other order, fragtip
+# then bp, with -U11. The report must show each commit's changes on its own side
+# beside the other's unchanged lines, and a context section that sets the two
+# tips side by side, fragtip's frag rows at lines 17 to 24 against bp's alpha
+# rows, with eleven matching lines kept around the differences.
+bin: DIFFOFDIFFS
+args: -U11 --git-tree=repo fragtip bp

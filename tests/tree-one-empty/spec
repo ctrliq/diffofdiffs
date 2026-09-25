@@ -1,0 +1,6 @@
+# In git tree mode, empty is a commit on top of up that changes nothing. The run
+# must warn that empty doesn't contain a patch and carry on, and the report must
+# show up's changes on its side alone, beside the matching lines of empty's
+# files as unchanged lines.
+bin: DIFFOFDIFFS
+args: --git-tree=repo empty up

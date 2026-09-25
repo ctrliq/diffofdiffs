@@ -1,0 +1,24 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Commit 1: repeated-bp   ┃   Commit 2: repeated-up
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and
+after each commit.
+
+═══════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                              *
+═══════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1,
++ patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│frame.c           ┃     new│frame.c
+        │@@ static void fra┃        │@@ static void fra
+        │me(void)          ┃        │me(void)
+       3│	repeat();  ┃       3│	repeat();
+       4│	new();     ┃       4│	new();
+       5│	one();     ┃       5│	one();
+-      6│	backport();┃+      6│	upstream();
+       7│	two();     ┃       7│	two();
+       8│	three();   ┃       8│	three();
+       9│	four();    ┃       9│	four();

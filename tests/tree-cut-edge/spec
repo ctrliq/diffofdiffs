@@ -1,0 +1,10 @@
+# In git tree mode with -U12, up and fragtip start from different versions of
+# alpha: frag, fragtip's parent, has frag preamble and frag stanza lines at rows
+# 17-18 and 20-24 where up's parent has plain alpha rows. up changes rows 12 and
+# 55 of alpha, creates gamma, changes notail, and makes runme executable;
+# fragtip changes rows 22 and 29 of alpha. The report must show each commit's
+# changes on its own side with twelve lines of context read from that commit's
+# own files, so rows 17-24 read differently on the two sides, and the context
+# section must show where the two results differ.
+bin: DIFFOFDIFFS
+args: -U12 --git-tree=repo up fragtip

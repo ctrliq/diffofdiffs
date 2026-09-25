@@ -1,0 +1,24 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       Commit 1: bp        ┃       Commit 2: up
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and
+after each commit.
+
+═══════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                              *
+═══════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1,
++ patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│frame.c           ┃     new│frame.c
+        │@@ static void fra┃        │@@ static void fra
+        │me(void)          ┃        │me(void)
+       4│	first();   ┃       4│	first();
+       5│	second();  ┃       5│	second();
+       6│	one();     ┃       6│	one();
+-      7│	backport();┃+      7│	upstream();
+       8│	two();     ┃       8│	two();
+       9│	three();   ┃       9│	three();
+      10│	four();    ┃      10│	four();

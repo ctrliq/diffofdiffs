@@ -1,0 +1,45 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Commit 1: mixed-bp     ┃    Commit 2: mixed-up
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and
+after each commit.
+
+═══════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                *
+═══════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less
+line with one number is an edit both patches make: a
+new number means both add it, an old number means both
+remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│frame.c           ┃ old new│frame.c
+        │@@ static void fra┃        │@@ static void fra
+        │me(void)          ┃        │me(void)
+   5    │	one();     ┃   5    │	one();
+       4│	first();   ┃       4│	first();
+       5│	second();  ┃       5│	second();
++      6│	one_bp();  ┃+      6│	one_up();
+   6   7│	backport();┃   6   7│	upstream();
+   7   8│	two();     ┃   7   8│	two();
+   8   9│	three();   ┃   8   9│	three();
+
+═══════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                              *
+═══════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1,
++ patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│frame.c           ┃     new│frame.c
+        │@@ static void fra┃        │@@ static void fra
+        │me(void)          ┃        │me(void)
+       3│	before();  ┃       3│	before();
+       4│	first();   ┃       4│	first();
+       5│	second();  ┃       5│	second();
+-      6│	one_bp();  ┃+      6│	one_up();
+-      7│	backport();┃+      7│	upstream();
+       8│	two();     ┃       8│	two();
+       9│	three();   ┃       9│	three();
+      10│	four();    ┃      10│	four();

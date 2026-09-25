@@ -1,0 +1,8 @@
+# Both patches delete one of two identical repeat() rows and replace old().
+# Their surviving background difference therefore moves from parent line 7
+# to tip line 6. Authored hunk coordinates, including the deletion among equal
+# rows, define that mapping; another alignment must not infer row ownership.
+# Three real context rows above the difference include the authored new().
+bin: DIFFOFDIFFS
+args: --git-tree=repo repeated-bp repeated-up
+exit: 0

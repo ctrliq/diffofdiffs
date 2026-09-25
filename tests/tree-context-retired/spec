@@ -1,0 +1,8 @@
+# In git tree mode, rejected-bp and rejected-up each add common() as line 5 of
+# frame.c, but the lines around it differ between the two parents: before_bp()
+# against before_up(), old_bp() against old_up(), and so on. The shared addition
+# must be left out, and the context section must still show the two results'
+# differing lines around it, with common() at line 5 on both sides.
+bin: DIFFOFDIFFS
+args: --git-tree=repo rejected-bp rejected-up
+exit: 0

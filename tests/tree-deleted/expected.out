@@ -1,0 +1,31 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         Commit 1: del1         ┃         Commit 2: del2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and after each
+commit.
+
+═════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                          *
+═════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with
+one number is an edit both patches make: a new number means both
+add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│del                    ┃ old new│del
+        │@@ del row 04          ┃        │@@ del row 04
+   4    │del row 04             ┃   4    │del row 04
+   5    │del row 05             ┃   5    │del row 05
+   6    │del row 06             ┃   6    │del row 06
+   7    │del row 07             ┃   7    │del row 07
+   8    │del row 08             ┃   8    │del row 08
+-  9    │del leg one block row 1┃-  9    │del leg two block row 1
+- 10    │del leg one block row 2┃- 10    │del leg two block row 2
+- 11    │del leg one block row 3┃- 11    │del leg two block row 3
+- 12    │del leg one block row 4┃- 12    │del leg two block row 4
+  13    │del row 09             ┃  13    │del row 09
+  14    │del row 10             ┃  14    │del row 10
+  15    │del row 11             ┃  15    │del row 11
+  16    │del row 12             ┃  16    │del row 12
+  17    │del row 13             ┃  17    │del row 13

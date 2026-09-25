@@ -1,0 +1,9 @@
+# In git tree mode, bp and fragtip change alpha from parents that differ at
+# lines 17-18 and 20-24, where fragtip's parent holds frag preamble and frag
+# stanza rows. bp changes lines 12 and 34 and replaces lines 48 to 62 with ten
+# backport block rows. fragtip changes frag stanza row 22 and alpha row 29. The
+# report must show each commit's changes on its own side beside the other's
+# unchanged lines, and a context section that marks fragtip's frag rows around
+# line 22 as present only in its tip.
+bin: DIFFOFDIFFS
+args: --git-tree=repo bp fragtip

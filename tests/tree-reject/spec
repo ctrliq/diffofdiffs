@@ -1,0 +1,9 @@
+# In git tree mode, bp and wildtip start from different versions of alpha: bp's
+# parent has plain alpha rows where wild, wildtip's parent, has wild rows 48-62.
+# bp rewrites rows 12 and 34 and replaces rows 48-62 with a ten-line backport
+# block; wildtip changes wild row 55. The report must show bp's changes on its
+# side alone and wildtip's row-55 change in the same hunk as the backport block,
+# since row 55 falls inside the rows bp replaces, and the context section must
+# show where the two results differ there.
+bin: DIFFOFDIFFS
+args: --git-tree=repo bp wildtip

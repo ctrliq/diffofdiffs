@@ -1,0 +1,7 @@
+# tree-created-in-patch1 with the commits swapped: wildtip, which changes wild
+# row 55 of alpha, comes first, and wild, the root commit that creates alpha,
+# second. The report must mirror that test's: wildtip's line-55 change among the
+# unchanged rest of alpha on the left, and the whole creation with its
+# create-file and mode notes on the right.
+bin: DIFFOFDIFFS
+args: --git-tree=repo wildtip wild

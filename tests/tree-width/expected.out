@@ -1,0 +1,128 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                   Commit 1: bp                   ┃                   Commit 2: up
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and after each commit.
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                               *
+═════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches
+make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│alpha                                    ┃ old new│alpha
+        │@@ alpha row 09                          ┃        │@@ alpha row 09
+   9   9│alpha row 09                             ┃   9   9│alpha row 09
+  10  10│alpha row 10                             ┃  10  10│alpha row 10
+  11  11│alpha row 11                             ┃  11  11│alpha row 11
+  12    │alpha row 12                             ┃  12    │alpha row 12
++     12│alpha row 12 reworked by the backport    ┃+     12│alpha row 12 reworked by upstream
+  13  13│alpha row 13                             ┃  13  13│alpha row 13
+  14  14│alpha row 14                             ┃  14  14│alpha row 14
+  15  15│alpha row 15                             ┃  15  15│alpha row 15
+  16  16│alpha row 16                             ┃  16  16│alpha row 16
+        │─────────────────────────────────────────╂────────┼─────────────────────────────────────────
+        │@@ alpha row 30                          ┃        │@@ alpha row 30
+  30  30│alpha row 30                             ┃  30  30│alpha row 30
+  31  31│alpha row 31                             ┃  31  31│alpha row 31
+  32  32│alpha row 32                             ┃  32  32│alpha row 32
+  33  33│alpha row 33                             ┃  33  33│alpha row 33
+- 34    │alpha row 34                             ┃  34  34│alpha row 34
++     34│alpha row 34 touched only by the backport┃        │
+  35  35│alpha row 35                             ┃  35  35│alpha row 35
+  36  36│alpha row 36                             ┃  36  36│alpha row 36
+  37  37│alpha row 37                             ┃  37  37│alpha row 37
+  38  38│alpha row 38                             ┃  38  38│alpha row 38
+        │─────────────────────────────────────────╂────────┼─────────────────────────────────────────
+        │@@ alpha row 44                          ┃        │@@ alpha row 44
+  44  44│alpha row 44                             ┃  44  44│alpha row 44
+  45  45│alpha row 45                             ┃  45  45│alpha row 45
+  46  46│alpha row 46                             ┃  46  46│alpha row 46
+  47  47│alpha row 47                             ┃  47  47│alpha row 47
+- 48    │alpha row 48                             ┃  48  48│alpha row 48
+- 49    │alpha row 49                             ┃  49  49│alpha row 49
+- 50    │alpha row 50                             ┃  50  50│alpha row 50
+- 51    │alpha row 51                             ┃  51  51│alpha row 51
+- 52    │alpha row 52                             ┃  52  52│alpha row 52
+- 53    │alpha row 53                             ┃  53  53│alpha row 53
+- 54    │alpha row 54                             ┃  54  54│alpha row 54
+  55    │alpha row 55                             ┃  55    │alpha row 55
+        │                                         ┃+     55│alpha row 55 adjusted by upstream
+- 56    │alpha row 56                             ┃  56  56│alpha row 56
+- 57    │alpha row 57                             ┃  57  57│alpha row 57
+- 58    │alpha row 58                             ┃  58  58│alpha row 58
+- 59    │alpha row 59                             ┃  59  59│alpha row 59
+- 60    │alpha row 60                             ┃  60  60│alpha row 60
+- 61    │alpha row 61                             ┃  61  61│alpha row 61
+- 62    │alpha row 62                             ┃  62  62│alpha row 62
++     48│alpha backport block row 1               ┃        │
++     49│alpha backport block row 2               ┃        │
++     50│alpha backport block row 3               ┃        │
++     51│alpha backport block row 4               ┃        │
++     52│alpha backport block row 5               ┃        │
++     53│alpha backport block row 6               ┃        │
++     54│alpha backport block row 7               ┃        │
++     55│alpha backport block row 8               ┃        │
++     56│alpha backport block row 9               ┃        │
++     57│alpha backport block row 10              ┃        │
+  63  58│alpha row 63                             ┃  63  63│alpha row 63
+  64  59│alpha row 64                             ┃  64  64│alpha row 64
+  65  60│alpha row 65                             ┃  65  65│alpha row 65
+  66  61│alpha row 66                             ┃  66  66│alpha row 66
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│gamma                                    ┃ old new│gamma
+        │                                         ┃        │Create file
+        │                                         ┃        │New mode: 100644
+        │@@                                       ┃        │@@ gamma row one
+        │                                         ┃+      1│gamma row one
+        │                                         ┃+      2│gamma row two
+        │                                         ┃+      3│gamma row three
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│notail                                   ┃ old new│notail
+        │@@ notail row one                        ┃        │@@ notail row one
+   1   1│notail row one                           ┃   1   1│notail row one
+   2   2│notail row two                           ┃-  2    │notail row two
+        │                                         ┃+      2│notail row two adjusted by upstream
+   3   3│notail row three                         ┃   3   3│notail row three
+   4   4│notail unterminated tail row             ┃   4   4│notail unterminated tail row
+\       │No newline at end of file                ┃\       │No newline at end of file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│runme                                    ┃ old new│runme
+        │                                         ┃        │Old mode: 100644
+        │                                         ┃        │New mode: 100755
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                         *
+═════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│alpha                                    ┃     new│alpha
+        │@@ alpha row 44                          ┃        │@@ alpha row 47
+      44│alpha row 44                             ┃        │
+      45│alpha row 45                             ┃        │
+      46│alpha row 46                             ┃        │
+      47│alpha row 47                             ┃      47│alpha row 47
+-     48│alpha backport block row 1               ┃+     48│alpha row 48
+-     49│alpha backport block row 2               ┃+     49│alpha row 49
+-     50│alpha backport block row 3               ┃+     50│alpha row 50
+-     51│alpha backport block row 4               ┃+     51│alpha row 51
+-     52│alpha backport block row 5               ┃+     52│alpha row 52
+-     53│alpha backport block row 6               ┃+     53│alpha row 53
+-     54│alpha backport block row 7               ┃+     54│alpha row 54
+-     55│alpha backport block row 8               ┃+     55│alpha row 55 adjusted by upstream
+-     56│alpha backport block row 9               ┃+     56│alpha row 56
+-     57│alpha backport block row 10              ┃+     57│alpha row 57
+        │                                         ┃+     58│alpha row 58
+        │                                         ┃+     59│alpha row 59
+        │                                         ┃+     60│alpha row 60
+        │                                         ┃+     61│alpha row 61
+        │                                         ┃+     62│alpha row 62
+      58│alpha row 63                             ┃      63│alpha row 63
+      59│alpha row 64                             ┃        │
+      60│alpha row 65                             ┃        │
+      61│alpha row 66                             ┃        │

@@ -1,0 +1,25 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     Commit 1: rejected-bp      ┃     Commit 2: rejected-up
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and after each
+commit.
+
+═════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                                        *
+═════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│frame.c                ┃     new│frame.c
+        │@@ static void frame(vo┃        │@@ static void frame(vo
+        │id)                    ┃        │id)
+       1│static void frame(void)┃       1│static void frame(void)
+       2│{                      ┃       2│{
+-      3│	before_bp();    ┃+      3│	before_up();
+-      4│	old_bp();       ┃+      4│	old_up();
+       5│	common();       ┃       5│	common();
+-      6│	backport();     ┃+      6│	upstream();
+-      7│	after_bp();     ┃+      7│	after_up();
+-      8│	last_bp();      ┃+      8│	last_up();
+       9│}                      ┃       9│}
