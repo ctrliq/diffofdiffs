@@ -515,6 +515,263 @@ bool gitread_commit_parent_of(struct gitread *gr, const struct gitread_oid *tip,
 	return found;
 }
 
+static git_tree *commit_tree(struct gitread *gr,
+			     const struct gitread_oid *commit, char *hex)
+{
+	git_tree *tree = NULL;
+	git_commit *c;
+	int ret;
+
+	if (!commit)
+		return NULL;
+
+	c = lookup_commit(gr, commit);
+	gitread_oid_hex(commit, hex);
+	ret = git_commit_tree(&tree, c);
+	git_commit_free(c);
+	if (ret) {
+		dbg_last_error("tree lookup");
+		die("cannot read the tree of commit %s", hex);
+	}
+	return tree;
+}
+
+static git_tree_entry *read_path_entry(struct gitread *gr,
+				       const struct gitread_oid *commit,
+				       const char *path)
+{
+	char hex[GITREAD_OID_HEXSZ + 1];
+	git_tree_entry *entry = NULL;
+	git_tree *tree = commit_tree(gr, commit, hex);
+	int ret;
+
+	ret = git_tree_entry_bypath(&entry, tree, path);
+	git_tree_free(tree);
+	if (ret == GIT_ENOTFOUND)
+		return NULL;
+
+	if (ret) {
+		dbg_last_error("path lookup");
+		die("cannot look up %s in the tree of commit %s", path, hex);
+	}
+
+	return entry;
+}
+
+bool gitread_entry_by_path(struct gitread *gr, const struct gitread_oid *commit,
+			   const char *path, struct gitread_oid *id, u32 *mode)
+{
+	git_tree_entry *entry = read_path_entry(gr, commit, path);
+
+	if (!entry)
+		return false;
+
+	/*
+	 * A directory replacing this file has separate entries for its
+	 * contents.
+	 */
+	if (git_tree_entry_type(entry) == GIT_OBJECT_TREE) {
+		git_tree_entry_free(entry);
+		return false;
+	}
+
+	oid_from_libgit2(id, git_tree_entry_id(entry));
+	*mode = git_tree_entry_filemode_raw(entry);
+	git_tree_entry_free(entry);
+	return true;
+}
+
+bool gitread_blob_by_path(struct gitread *gr, const struct gitread_oid *commit,
+			  const char *path, struct iomem_buf *out, u32 *mode)
+{
+	char hex[GITREAD_OID_HEXSZ + 1];
+	git_tree_entry *entry = read_path_entry(gr, commit, path);
+	git_object_size_t size;
+	git_blob *blob = NULL;
+	int ret;
+
+	if (!entry)
+		return false;
+
+	gitread_oid_hex(commit, hex);
+
+	switch (git_tree_entry_type(entry)) {
+	case GIT_OBJECT_BLOB:
+		break;
+	case GIT_OBJECT_TREE:
+		die("%s in commit %s names a directory, not a file", path, hex);
+
+	case GIT_OBJECT_COMMIT:
+		die("%s in commit %s names a gitlink (a nested repository), not a file",
+		    path, hex);
+
+	default:
+		die("%s in commit %s carries an entry type no tree may hold",
+		    path, hex);
+	}
+
+	ret = git_blob_lookup(&blob, gr->repo, git_tree_entry_id(entry));
+	if (ret) {
+		dbg_last_error("blob lookup");
+		die("cannot read the blob %s names in commit %s", path, hex);
+	}
+
+	size = git_blob_rawsize(blob);
+	if (size > PAYLOAD_CEILING)
+		die("the blob at %s in commit %s carries %llu bytes, over the diff engine's %zu MiB per-image payload ceiling",
+		    path, hex, (unsigned long long)size, PAYLOAD_CEILING >> 20);
+
+	out->len = size;
+	out->cap = out->len;
+	out->base = memdup(git_blob_rawcontent(blob), out->len);
+	*mode = git_tree_entry_filemode_raw(entry);
+
+	git_blob_free(blob);
+	git_tree_entry_free(entry);
+	return true;
+}
+
+void gitread_blob_by_oid(struct gitread *gr, const struct gitread_oid *id,
+			 const char *path, struct iomem_buf *out)
+{
+	char hex[GITREAD_OID_HEXSZ + 1];
+	git_object_size_t size;
+	git_blob *blob = NULL;
+	git_oid oid;
+	int ret;
+
+	gitread_oid_hex(id, hex);
+	oid_to_libgit2(&oid, id);
+	ret = git_blob_lookup(&blob, gr->repo, &oid);
+	if (ret) {
+		dbg_last_error("blob lookup");
+		die("cannot read the blob %s at %s", hex, path);
+	}
+
+	size = git_blob_rawsize(blob);
+	if (size > PAYLOAD_CEILING)
+		die("the blob at %s carries %llu bytes, over the diff engine's %zu MiB per-image payload ceiling",
+		    path, (unsigned long long)size, PAYLOAD_CEILING >> 20);
+
+	out->len = size;
+	out->cap = out->len;
+	out->base = memdup(git_blob_rawcontent(blob), out->len);
+	git_blob_free(blob);
+}
+
+/* Grows the entry array geometrically; a walk cannot know its count ahead */
+static void tree_push(struct gitread_tree *out, size_t *cap, const char *dir,
+		      const char *name, const git_oid *oid, u32 mode)
+{
+	struct gitread_tree_entry *entry;
+
+	if (out->n == *cap) {
+		*cap = *cap ? *cap * 2 : 64;
+		out->entries =
+			xrealloc_array(out->entries, *cap, sizeof(*entry));
+	}
+
+	entry = &out->entries[out->n++];
+	xasprintf(&entry->path, "%s%s", dir, name);
+	oid_from_libgit2(&entry->oid, oid);
+	entry->mode = mode;
+}
+
+static git_tree *lookup_subtree(struct gitread *gr, const git_tree_entry *entry,
+				const char *dir, const char *hex)
+{
+	git_tree *tree = NULL;
+	int ret;
+
+	ret = git_tree_lookup(&tree, gr->repo, git_tree_entry_id(entry));
+	if (ret) {
+		dbg_last_error("subtree lookup");
+		die("cannot read the tree at %s%s in commit %s", dir,
+		    git_tree_entry_name(entry), hex);
+	}
+	return tree;
+}
+
+DEFINE_FREE(git_tree, git_tree *, git_tree_free(_T))
+
+/*
+ * Collect this tree's differing non-directory entries. Equal ids and raw modes
+ * prune whole subtrees; a missing or non-directory peer prunes nothing. Entries
+ * found only in the peer need a separate walk with the sides swapped. Gitlinks
+ * contribute their ids without looking into another object store.
+ */
+static void tree_collect(struct gitread *gr, const git_tree *tree,
+			 const git_tree *other, const char *dir,
+			 const char *const hex[2], struct gitread_tree *out,
+			 size_t *cap)
+{
+	size_t count = git_tree_entrycount(tree);
+
+	for (size_t i = 0; i < count; i++) {
+		const git_tree_entry *entry = git_tree_entry_byindex(tree, i);
+		const char *name = git_tree_entry_name(entry);
+		const git_tree_entry *peer =
+			other ? git_tree_entry_byname(other, name) : NULL;
+		git_tree *peer_sub __free(git_tree) = NULL;
+		git_tree *sub __free(git_tree) = NULL;
+		char *subdir __free(free) = NULL;
+
+		if (peer &&
+		    git_oid_equal(git_tree_entry_id(entry),
+				  git_tree_entry_id(peer)) &&
+		    git_tree_entry_filemode_raw(entry) ==
+			    git_tree_entry_filemode_raw(peer))
+			continue;
+
+		if (git_tree_entry_type(entry) != GIT_OBJECT_TREE) {
+			tree_push(out, cap, dir, name, git_tree_entry_id(entry),
+				  git_tree_entry_filemode_raw(entry));
+			continue;
+		}
+
+		sub = lookup_subtree(gr, entry, dir, hex[0]);
+		if (peer && git_tree_entry_type(peer) == GIT_OBJECT_TREE)
+			peer_sub = lookup_subtree(gr, peer, dir, hex[1]);
+		xasprintf(&subdir, "%s%s/", dir, name);
+		tree_collect(gr, sub, peer_sub, subdir, hex, out, cap);
+	}
+}
+
+static int tree_entry_cmp(const void *a, const void *b)
+{
+	const struct gitread_tree_entry *ea = a;
+	const struct gitread_tree_entry *eb = b;
+
+	return strcmp(ea->path, eb->path);
+}
+
+void gitread_tree_read(struct gitread *gr, const struct gitread_oid *commit,
+		       const struct gitread_oid *other_commit,
+		       struct gitread_tree *out)
+{
+	char hex[2][GITREAD_OID_HEXSZ + 1] = {};
+	git_tree *tree __free(git_tree) = commit_tree(gr, commit, hex[0]);
+	git_tree *other __free(git_tree) =
+		commit_tree(gr, other_commit, hex[1]);
+	const char *labels[2] = { hex[0], hex[1] };
+	size_t cap = 0;
+
+	tree_collect(gr, tree, other, "", labels, out, &cap);
+	if (out->n > 1)
+		qsort(out->entries, out->n, sizeof(*out->entries),
+		      tree_entry_cmp);
+}
+
+void gitread_tree_free(struct gitread_tree *tree)
+{
+	for (size_t i = 0; i < tree->n; i++)
+		free(tree->entries[i].path);
+
+	free(tree->entries);
+	tree->entries = NULL;
+	tree->n = 0;
+}
+
 void gitread_oid_hex(const struct gitread_oid *oid,
 		     char hex[GITREAD_OID_HEXSZ + 1])
 {
