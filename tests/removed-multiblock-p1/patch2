@@ -1,0 +1,6 @@
+--- a/k.c
++++ b/k.c
+@@ -90,3 +90,2 @@ int outer_caller(void)
+ aaa
+-foo_v2();
+ bbb

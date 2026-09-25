@@ -1,0 +1,6 @@
+--- a/u.c
++++ b/u.c
+@@ -10,3 +10,1 @@ int outer_caller(void)
+ aaa
+-www_v1();
+-zzz_tail

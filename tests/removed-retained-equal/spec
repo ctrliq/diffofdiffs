@@ -1,0 +1,4 @@
+# Shared retained rows locate wholly different deleted source blocks.
+# Equal literal results settle both edits without inventing a DELTA.
+bin: DIFFOFDIFFS
+args: patch1 patch2

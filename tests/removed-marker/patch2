@@ -1,0 +1,7 @@
+--- a/u.c
++++ b/u.c
+@@ -50,3 +50,1 @@ int outer_caller(void)
+ aaa
+-www_v2();
+-zzz_tail
+\ No newline at end of file

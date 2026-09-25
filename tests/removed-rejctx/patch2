@@ -1,0 +1,11 @@
+--- a/o.c
++++ b/o.c
+@@ -50,3 +50,2 @@ int outer_caller(void)
+ aaa
+-foo_v2();
+ bbb
+@@ -53,3 +52,3 @@ int nearby(void)
+ sh1
+-shared_old();
++shared_new();
+ sh2

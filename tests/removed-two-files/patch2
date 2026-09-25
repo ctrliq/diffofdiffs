@@ -1,0 +1,12 @@
+--- a/q.c
++++ b/q.c
+@@ -50,3 +50,2 @@ int outer_caller(void)
+ aaa
+-foo_v2();
+ bbb
+--- a/r.c
++++ b/r.c
+@@ -50,3 +50,2 @@ int other(void)
+ ccc
+-bar_v2();
+ ddd

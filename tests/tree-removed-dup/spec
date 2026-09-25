@@ -1,0 +1,9 @@
+# In git tree mode, dup1 and dup2 each delete a four-line block from dup: dup
+# leg one block rows 1-4 at lines 11-14 and dup leg two block rows 1-4 at lines
+# 9-12. dup1's parent also has two preamble lines at the top and ends with a
+# copy of dup rows 06 to 11 whose last line has no final newline. The report
+# must pair the two deletions side by side with three lines of context, each
+# numbered by its own commit's file, and have no context section, since the tips
+# differ only farther from the deletions.
+bin: DIFFOFDIFFS
+args: --git-tree=repo dup1 dup2

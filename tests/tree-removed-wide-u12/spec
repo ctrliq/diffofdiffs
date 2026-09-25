@@ -1,0 +1,7 @@
+# The removed-code pair still consumes at -U12; changing display width does
+# not change that proof or its REMOVED CODE rendering. The preserved partner
+# also anchors CONTEXT. Patch2's real tip has two extra trailing rows, an echo
+# of wid rows 08 and 09, while patch1 ends at row 16. This nearby background
+# difference survives unchanged from the parents and must remain visible.
+bin: DIFFOFDIFFS
+args: -U12 --git-tree=repo wid1 wid2

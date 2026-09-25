@@ -1,0 +1,27 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         Commit 1: wid1         ┃         Commit 2: wid2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and after each
+commit.
+
+═════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                          *
+═════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with
+one number is an edit both patches make: a new number means both
+add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│wid                    ┃ old new│wid
+        │@@ wid row 06          ┃        │@@ wid row 06
+   6   6│wid row 06             ┃   6   6│wid row 06
+   7   7│wid row 07             ┃   7   7│wid row 07
+   8   8│wid row 08             ┃   8   8│wid row 08
+-  9    │wid leg one block row 1┃-  9    │wid leg two block row 1
+- 10    │wid leg one block row 2┃- 10    │wid leg two block row 2
+- 11    │wid leg one block row 3┃- 11    │wid leg two block row 3
+- 12    │wid leg one block row 4┃- 12    │wid leg two block row 4
+  13   9│wid row 09             ┃  13   9│wid row 09
+  14  10│wid row 10             ┃  14  10│wid row 10
+  15  11│wid row 11             ┃  15  11│wid row 11

@@ -1,0 +1,7 @@
+--- a/f.c
++++ b/f.c
+@@ -1,2 +1 @@ same(void)
+-AAA
+-BBB
++DONE
+\ No newline at end of file

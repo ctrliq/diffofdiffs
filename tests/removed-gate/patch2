@@ -1,0 +1,18 @@
+--- a/drivers/thing.c
++++ b/drivers/thing.c
+@@ -5,15 +5,6 @@
+ 	tick();
+ }
+ 
+-static void doomed(int n)
+-{
+-	struct sk_buff *skb;
+-
+-	if (n > 0)
+-		read_stamp(skb);
+-	complete(skb);
+-}
+-
+ static void after(void)
+ {
+ 	done();

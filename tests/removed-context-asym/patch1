@@ -1,0 +1,6 @@
+--- a/m.c
++++ b/m.c
+@@ -10,3 +10,1 @@ int outer_caller(void)
+ r
+-x
+-y

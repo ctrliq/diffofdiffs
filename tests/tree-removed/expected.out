@@ -1,0 +1,27 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         Commit 1: peq1         ┃         Commit 2: peq2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and after each
+commit.
+
+═════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                          *
+═════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with
+one number is an edit both patches make: a new number means both
+add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│sub/peq                ┃ old new│sub/peq
+        │@@ peq row 06          ┃        │@@ peq row 06
+   8   8│peq row 06             ┃   6   6│peq row 06
+   9   9│peq row 07             ┃   7   7│peq row 07
+  10  10│peq row 08             ┃   8   8│peq row 08
+- 11    │peq leg one block row 1┃-  9    │peq leg two block row 1
+- 12    │peq leg one block row 2┃- 10    │peq leg two block row 2
+- 13    │peq leg one block row 3┃- 11    │peq leg two block row 3
+- 14    │peq leg one block row 4┃- 12    │peq leg two block row 4
+  15  11│peq row 09             ┃  13   9│peq row 09
+  16  12│peq row 10             ┃  14  10│peq row 10
+  17  13│peq row 11             ┃  15  11│peq row 11

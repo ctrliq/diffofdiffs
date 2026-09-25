@@ -1,0 +1,10 @@
+--- a/s.c
++++ b/s.c
+@@ -10,3 +10,2 @@ int sig_x(void)
+ xa
+-xxx_v1();
+ xb
+@@ -50,3 +49,2 @@ int sig_y(void)
+ ya
+-yyy_v1();
+ yb

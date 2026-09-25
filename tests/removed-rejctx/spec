@@ -1,0 +1,5 @@
+# The upstream patch does not quote p1_gone at the backport edit. Keep the
+# unresolved original change without inventing a result restoration.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

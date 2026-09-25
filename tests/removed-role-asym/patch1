@@ -1,0 +1,6 @@
+--- a/n.c
++++ b/n.c
+@@ -10,3 +10,1 @@ int outer_caller(void)
+ a
+-z
+-w

@@ -1,0 +1,3 @@
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

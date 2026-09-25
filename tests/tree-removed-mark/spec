@@ -1,0 +1,10 @@
+# In git tree mode, mark1 and mark2 each replace the different old last lines of
+# brink, mark, and verge with the same new last line, and the new files differ
+# only in whether that line ends in a newline: in mark only mark2's lacks it, in
+# verge only mark1's does, and in brink neither commit's has one. The report
+# must show the removed lines side by side. In brink the shared new line must
+# show unsigned, with both no-newline markers, while in mark and verge the new
+# lines must stay signed as each patch's own, since they differ by the final
+# newline alone.
+bin: DIFFOFDIFFS
+args: --git-tree=repo mark1 mark2

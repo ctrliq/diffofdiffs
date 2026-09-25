@@ -1,0 +1,18 @@
+--- a/t.c
++++ b/t.c
+@@ -60,15 +60,2 @@ int outer_caller(void)
+ c1
+-d1
+-xxx_v2();
+-d2
+-d3
+-d4
+-d5
+-d6
+-d7
+-d8
+-d9
+-yyy_v2();
+-d10
+-d11
+ c2

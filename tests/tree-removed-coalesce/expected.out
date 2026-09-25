@@ -1,0 +1,100 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                 Commit 1: merge                  ┃                   Commit 2: up
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and after each commit.
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                               *
+═════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches
+make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│alpha                                    ┃ old new│alpha
+        │@@ alpha row 01                          ┃        │@@ alpha row 01
+   1   1│alpha row 01                             ┃   1   1│alpha row 01
+   2   2│alpha row 02                             ┃   2   2│alpha row 02
+   3   3│alpha row 03                             ┃   3   3│alpha row 03
+   4   4│alpha row 04                             ┃   4   4│alpha row 04
+   5   5│alpha row 05                             ┃   5   5│alpha row 05
+   6   6│alpha row 06                             ┃   6   6│alpha row 06
+   7   7│alpha row 07                             ┃   7   7│alpha row 07
+   8   8│alpha row 08                             ┃   8   8│alpha row 08
+   9   9│alpha row 09                             ┃   9   9│alpha row 09
+  10  10│alpha row 10                             ┃  10  10│alpha row 10
+  11  11│alpha row 11                             ┃  11  11│alpha row 11
+- 12    │alpha row 12 reworked by the backport    ┃- 12    │alpha row 12
+      12│alpha row 12 reworked by upstream        ┃      12│alpha row 12 reworked by upstream
+  13  13│alpha row 13                             ┃  13  13│alpha row 13
+  14  14│alpha row 14                             ┃  14  14│alpha row 14
+  15  15│alpha row 15                             ┃  15  15│alpha row 15
+  16  16│alpha row 16                             ┃  16  16│alpha row 16
+  17  17│alpha row 17                             ┃  17  17│alpha row 17
+  18  18│alpha row 18                             ┃  18  18│alpha row 18
+  19  19│alpha row 19                             ┃  19  19│alpha row 19
+  20  20│alpha row 20                             ┃  20  20│alpha row 20
+  21  21│alpha row 21                             ┃  21  21│alpha row 21
+  22  22│alpha row 22                             ┃  22  22│alpha row 22
+  23  23│alpha row 23                             ┃  23  23│alpha row 23
+  24  24│alpha row 24                             ┃  24  24│alpha row 24
+  25  25│alpha row 25                             ┃  25  25│alpha row 25
+  26  26│alpha row 26                             ┃  26  26│alpha row 26
+  27  27│alpha row 27                             ┃  27  27│alpha row 27
+  28  28│alpha row 28                             ┃  28  28│alpha row 28
+  29  29│alpha row 29                             ┃  29  29│alpha row 29
+  30  30│alpha row 30                             ┃  30  30│alpha row 30
+  31  31│alpha row 31                             ┃  31  31│alpha row 31
+  32  32│alpha row 32                             ┃  32  32│alpha row 32
+  33  33│alpha row 33                             ┃  33  33│alpha row 33
+- 34    │alpha row 34 touched only by the backport┃        │
++     34│alpha row 34                             ┃  34  34│alpha row 34
+  35  35│alpha row 35                             ┃  35  35│alpha row 35
+  36  36│alpha row 36                             ┃  36  36│alpha row 36
+  37  37│alpha row 37                             ┃  37  37│alpha row 37
+  38  38│alpha row 38                             ┃  38  38│alpha row 38
+  39  39│alpha row 39                             ┃  39  39│alpha row 39
+  40  40│alpha row 40                             ┃  40  40│alpha row 40
+  41  41│alpha row 41                             ┃  41  41│alpha row 41
+  42  42│alpha row 42                             ┃  42  42│alpha row 42
+  43  43│alpha row 43                             ┃  43  43│alpha row 43
+  44  44│alpha row 44                             ┃  44  44│alpha row 44
+  45  45│alpha row 45                             ┃  45  45│alpha row 45
+  46  46│alpha row 46                             ┃  46  46│alpha row 46
+  47  47│alpha row 47                             ┃  47  47│alpha row 47
+- 48    │alpha backport block row 1               ┃        │
+- 49    │alpha backport block row 2               ┃        │
+- 50    │alpha backport block row 3               ┃        │
+- 51    │alpha backport block row 4               ┃        │
+- 52    │alpha backport block row 5               ┃        │
+- 53    │alpha backport block row 6               ┃        │
+- 54    │alpha backport block row 7               ┃        │
+- 55    │alpha backport block row 8               ┃        │
+- 56    │alpha backport block row 9               ┃        │
+- 57    │alpha backport block row 10              ┃        │
++     48│alpha row 48                             ┃  48  48│alpha row 48
++     49│alpha row 49                             ┃  49  49│alpha row 49
++     50│alpha row 50                             ┃  50  50│alpha row 50
++     51│alpha row 51                             ┃  51  51│alpha row 51
++     52│alpha row 52                             ┃  52  52│alpha row 52
++     53│alpha row 53                             ┃  53  53│alpha row 53
++     54│alpha row 54                             ┃  54  54│alpha row 54
+        │                                         ┃- 55    │alpha row 55
+      55│alpha row 55 adjusted by upstream        ┃      55│alpha row 55 adjusted by upstream
++     56│alpha row 56                             ┃  56  56│alpha row 56
++     57│alpha row 57                             ┃  57  57│alpha row 57
++     58│alpha row 58                             ┃  58  58│alpha row 58
++     59│alpha row 59                             ┃  59  59│alpha row 59
++     60│alpha row 60                             ┃  60  60│alpha row 60
++     61│alpha row 61                             ┃  61  61│alpha row 61
++     62│alpha row 62                             ┃  62  62│alpha row 62
+  58  63│alpha row 63                             ┃  63  63│alpha row 63
+  59  64│alpha row 64                             ┃  64  64│alpha row 64
+  60  65│alpha row 65                             ┃  65  65│alpha row 65
+  61  66│alpha row 66                             ┃  66  66│alpha row 66
+  62  67│alpha row 67                             ┃  67  67│alpha row 67
+  63  68│alpha row 68                             ┃  68  68│alpha row 68
+  64  69│alpha row 69                             ┃  69  69│alpha row 69
+  65  70│alpha row 70                             ┃  70  70│alpha row 70
+  66  71│alpha row 71                             ┃  71  71│alpha row 71
+  67  72│alpha row 72                             ┃  72  72│alpha row 72

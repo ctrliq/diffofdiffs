@@ -1,0 +1,8 @@
+# In git tree mode, wid1 and wid2 each delete a four-line block at lines 9 to 12
+# of wid, wid leg one block rows against wid leg two block rows. wid2's parent
+# also ends with two extra lines, copies of wid rows 08 and 09, after wid row
+# 16. With -U8, the report must pair the two deletions with eight lines of
+# context on each side, reaching wid row 16, and have no context section, since
+# the extra lines start just past that window.
+bin: DIFFOFDIFFS
+args: -U8 --git-tree=repo wid1 wid2

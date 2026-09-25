@@ -1,0 +1,44 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Commit 1: mark1          ┃          Commit 2: mark2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and after each commit.
+
+═══════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches *
+═══════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one
+number is an edit both patches make: a new number means both add it, an
+old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│brink                     ┃ old new│brink
+        │@@ brink row 03           ┃        │@@ brink row 03
+   3   3│brink row 03              ┃   3   3│brink row 03
+   4   4│brink row 04              ┃   4   4│brink row 04
+   5   5│brink row 05              ┃   5   5│brink row 05
+-  6    │brink old finale leg one  ┃-  6    │brink old finale leg two
+       6│brink new finale          ┃       6│brink new finale
+\       │No newline at end of file ┃\       │No newline at end of file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│mark                      ┃ old new│mark
+        │@@ mark row 03            ┃        │@@ mark row 03
+   3   3│mark row 03               ┃   3   3│mark row 03
+   4   4│mark row 04               ┃   4   4│mark row 04
+   5   5│mark row 05               ┃   5   5│mark row 05
+-  6    │mark old finale leg one a ┃-  6    │mark old finale leg two a
+-  7    │mark old finale leg one b ┃-  7    │mark old finale leg two b
++      6│mark new finale           ┃+      6│mark new finale
+        │                          ┃\       │No newline at end of file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│verge                     ┃ old new│verge
+        │@@ verge row 03           ┃        │@@ verge row 03
+   3   3│verge row 03              ┃   3   3│verge row 03
+   4   4│verge row 04              ┃   4   4│verge row 04
+   5   5│verge row 05              ┃   5   5│verge row 05
+-  6    │verge old finale leg one a┃-  6    │verge old finale leg two a
+-  7    │verge old finale leg one b┃-  7    │verge old finale leg two b
++      6│verge new finale          ┃+      6│verge new finale
+\       │No newline at end of file ┃        │

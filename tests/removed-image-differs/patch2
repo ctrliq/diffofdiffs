@@ -1,0 +1,6 @@
+--- a/j.c
++++ b/j.c
+@@ -50,3 +50,2 @@ int outer_caller(void)
+ aaa
+-foo_v2();
+ ccc

@@ -1,0 +1,5 @@
+# Independent parent/result files verify both original patch applications.
+# Patch1 removes the additional old row XXX, which must remain visible
+# even when both final files agree.
+# The added DONE lines also differ in their final newline and stay visible.
+args: patch1 patch2

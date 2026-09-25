@@ -1,0 +1,7 @@
+--- a/n.c
++++ b/n.c
+@@ -50,3 +50,1 @@ int outer_caller(void)
+-a
++a
+-z
+-q

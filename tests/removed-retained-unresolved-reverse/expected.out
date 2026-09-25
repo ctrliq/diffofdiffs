@@ -1,0 +1,29 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      Patch 1: patch1       ┃      Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted
+in the patches.
+
+═════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                  *
+═════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less
+line with one number is an edit both patches make: a new
+number means both add it, an old number means both remove
+it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f                  ┃ old new│f
+        │@@ prefix17        ┃        │@@ prefix17
+  18  18│prefix17           ┃  18  18│prefix17
+  19  19│prefix18           ┃  19  19│prefix18
+  20  20│prefix19           ┃  20  20│prefix19
+- 21    │upstream_removed0  ┃- 21    │backport_removed0
+- 22    │upstream_removed1  ┃- 22    │backport_removed1
+- 23    │upstream_removed2  ┃- 23    │backport_removed2
+- 24    │upstream_removed3  ┃        │
++     21│new_upstream_result┃        │
+  25  22│suffix00           ┃  24  21│suffix00
+  26  23│suffix01           ┃  25  22│suffix01
+  27  24│suffix02           ┃  26  23│suffix02

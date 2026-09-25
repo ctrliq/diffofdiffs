@@ -1,0 +1,12 @@
+--- a/f
++++ b/f
+@@ -18,9 +18,6 @@
+ prefix17
+ prefix18
+ prefix19
+-backport_removed0
+-backport_removed1
+-backport_removed2
+ suffix00
+ suffix01
+ suffix02

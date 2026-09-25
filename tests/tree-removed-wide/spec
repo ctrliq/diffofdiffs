@@ -1,0 +1,5 @@
+# The width control at the default -U3: the six-row image is unique in
+# both post blobs, so the pair consumes; the -U8 sibling flips on the
+# same store.
+bin: DIFFOFDIFFS
+args: --git-tree=repo wid1 wid2

@@ -1,0 +1,6 @@
+# removed-retained-unresolved with the two patches swapped. The report must be
+# the same with its sides exchanged. The source and result files hold f before
+# and after each patch, and the runner checks that each patch turns its source
+# into its result with no fuzz.
+bin: DIFFOFDIFFS
+args: patch1 patch2

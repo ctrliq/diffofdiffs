@@ -1,0 +1,10 @@
+# In git tree mode with -U11, merge is a merge commit whose tree matches up's,
+# so its change against its first parent, bp, undoes bp's rewrites of rows 12
+# and 34 and bp's backport block, and applies up's changes. up makes those same
+# changes against the original alpha. The report must show the new rows 12 and
+# 55, which both commits add, unsigned, merge's removals of bp's lines on its
+# side, and up's removals of the original rows 12 and 55 on the other, all in
+# one hunk at this width, and leave out the gamma, notail, and runme changes
+# both commits make identically.
+bin: DIFFOFDIFFS
+args: -U11 --git-tree=repo merge up

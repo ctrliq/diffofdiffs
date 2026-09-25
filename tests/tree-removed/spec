@@ -1,0 +1,7 @@
+# In git tree mode, peq1 and peq2 each delete a four-line block from sub/peq, a
+# file in a subdirectory: peq leg one block rows at lines 11-14 and peq leg two
+# block rows at lines 9-12. peq1's parent also has two preamble lines at the
+# top, which puts its line numbers two ahead of peq2's. The report must pair the
+# two deletions side by side, each numbered by its own commit's file.
+bin: DIFFOFDIFFS
+args: --git-tree=repo peq1 peq2

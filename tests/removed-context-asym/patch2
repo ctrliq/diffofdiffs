@@ -1,0 +1,6 @@
+--- a/m.c
++++ b/m.c
+@@ -50,2 +50,1 @@ int outer_caller(void)
++r
+-x
+-z

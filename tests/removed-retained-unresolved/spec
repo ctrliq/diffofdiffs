@@ -1,0 +1,10 @@
+# Patch1 and patch2 start from versions of f with different lines between
+# prefix19 and suffix00. Patch1 removes its three, backport_removed0 to
+# backport_removed2. Patch2 removes its four, upstream_removed0 to
+# upstream_removed3, and adds new_upstream_result in their place. The report
+# must show the two blocks of removals side by side and new_upstream_result on
+# patch2's side. The source and result files hold f before and after each patch,
+# and the runner checks that each patch turns its source into its result with no
+# fuzz.
+bin: DIFFOFDIFFS
+args: patch1 patch2

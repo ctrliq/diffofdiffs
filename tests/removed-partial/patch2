@@ -1,0 +1,16 @@
+--- a/g.c
++++ b/g.c
+@@ -60,9 +60,2 @@ int outer_caller(void)
+ ctx_top
+-static int helper(void)
+-{
+-	int x = 1;
+-	int y = 2;
+-	int z = 3;
+-	return do_thing_v2(x);
+-}
+ ctx_bot
+@@ -90,3 +90,2 @@ int lone(void)
+ c1
+-orphan_v2();
+ c2

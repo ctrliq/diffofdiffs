@@ -1,0 +1,12 @@
+--- a/l.c
++++ b/l.c
+@@ -50,3 +50,2 @@ int outer_caller(void)
+ aaa
+-foo_v2();
+ bbb
+--- a/l.c
++++ b/l.c
+@@ -90,3 +90,2 @@ int second(void)
+ y1
+-old_v2();
+ y2
