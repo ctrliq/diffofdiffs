@@ -82,6 +82,34 @@ static size_t layout_mate(const struct comparison *review, int leg, int stage,
 			   row);
 }
 
+DEFINE_FREE(udiff_matches, struct udiff_matches, udiff_matches_free(&_T))
+
+static void match_interval(const struct udiff_image *images,
+			   struct udiff_matches *matches, const size_t *first,
+			   const size_t *end)
+{
+	struct udiff_matches part __free(udiff_matches) = {};
+	struct udiff_image window[2];
+
+	if (first[0] == end[0] || first[1] == end[1])
+		return;
+
+	for (int leg = 0; leg < 2; leg++) {
+		window[leg] =
+			(typeof(window[0])){ .lines = images[leg].lines +
+						      first[leg],
+					     .nlines = end[leg] - first[leg] };
+	}
+	udiff_match(&window[0], &window[1], &part);
+	for (int leg = 0; leg < 2; leg++) {
+		for (size_t i = 0; i < window[leg].nlines; i++) {
+			if (part.side[leg][i] != SIZE_MAX)
+				matches->side[leg][first[leg] + i] =
+					first[!leg] + part.side[leg][i];
+		}
+	}
+}
+
 struct line_occurrence {
 	struct udiff_line text;
 	size_t count[2];
@@ -171,6 +199,125 @@ static bool line_is_unique_in_both(const struct line_occurrence *keys,
 	found = bsearch(&key, keys, count, sizeof(*keys),
 			line_occurrence_order);
 	return found && found->count[0] == 1 && found->count[1] == 1;
+}
+
+static bool line_has_word(const struct udiff_line *line)
+{
+	for (size_t i = 0; i < line->len; i++) {
+		if (isalnum(line->ptr[i]) || line->ptr[i] == '_')
+			return true;
+	}
+	return false;
+}
+
+static bool same_blank_context(const struct udiff_image *images,
+			       const struct udiff_matches *matches,
+			       const size_t *first, const size_t *end,
+			       const size_t *at)
+{
+	for (int direction = -1; direction <= 1; direction += 2) {
+		size_t neighbor[2];
+
+		for (int leg = 0; leg < 2; leg++) {
+			/* Punctuation cannot identify a neighboring site */
+			for (neighbor[leg] = at[leg] + direction;;
+			     neighbor[leg] += direction) {
+				if (neighbor[leg] < first[leg] ||
+				    neighbor[leg] >= end[leg]) {
+					neighbor[leg] = SIZE_MAX;
+					break;
+				}
+				if (line_has_word(
+					    &images[leg].lines[neighbor[leg]]))
+					break;
+			}
+		}
+		if (neighbor[0] == SIZE_MAX || neighbor[1] == SIZE_MAX) {
+			if (neighbor[0] == neighbor[1])
+				return true;
+		} else if (matches->side[0][neighbor[0]] == neighbor[1]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/*
+ * A line repeated elsewhere in the file can still identify a site inside one
+ * function. Recover missing unique lines before matching the remaining source.
+ * Keep the original match when no such anchor was lost.
+ */
+static void match_function_interval(const struct udiff_image *images,
+				    struct udiff_matches *matches,
+				    const size_t *first, const size_t *end)
+{
+	struct udiff_matches candidates __free(udiff_matches) = {};
+	size_t cursor[2] = { first[0], first[1] }, count = 0;
+	struct line_occurrence *keys __free(free) = NULL;
+	struct udiff_image window[2];
+	bool missing = false;
+
+	match_interval(images, matches, first, end);
+	if (first[0] == end[0] || first[1] == end[1])
+		return;
+
+	for (int leg = 0; leg < 2; leg++) {
+		window[leg] =
+			(typeof(window[0])){ .lines = images[leg].lines +
+						      first[leg],
+					     .nlines = end[leg] - first[leg] };
+	}
+	udiff_match_unique(&window[0], &window[1], &candidates);
+	keys = collect_line_occurrences(window, &window[0], candidates.side[0],
+					&count);
+	for (size_t i = 0; i < window[0].nlines; i++) {
+		size_t mate;
+
+		mate = candidates.side[0][i];
+		if (mate == SIZE_MAX || !line_has_word(&window[0].lines[i]) ||
+		    !line_is_unique_in_both(keys, count, &window[0].lines[i])) {
+			candidates.side[0][i] = SIZE_MAX;
+			continue;
+		}
+		missing |= matches->side[0][first[0] + i] != first[1] + mate;
+	}
+	if (!missing)
+		return;
+
+	/* Rebuild both directions around the recovered unique anchors */
+	for (int leg = 0; leg < 2; leg++) {
+		for (size_t i = first[leg]; i < end[leg]; i++)
+			matches->side[leg][i] = SIZE_MAX;
+	}
+	for (size_t i = 0; i < window[0].nlines; i++) {
+		size_t boundary[2], mate;
+
+		mate = candidates.side[0][i];
+		if (mate == SIZE_MAX)
+			continue;
+
+		boundary[0] = first[0] + i;
+		boundary[1] = first[1] + mate;
+		match_interval(images, matches, cursor, boundary);
+		for (int leg = 0; leg < 2; leg++) {
+			matches->side[leg][boundary[leg]] = boundary[!leg];
+			cursor[leg] = boundary[leg] + 1;
+		}
+	}
+	match_interval(images, matches, cursor, end);
+
+	/* Equal blank bytes can still belong to different parts of the body */
+	for (size_t i = first[0]; i < end[0]; i++) {
+		size_t at[2] = { i, matches->side[0][i] };
+
+		if (at[1] == SIZE_MAX ||
+		    line_has_content(&images[0].lines[i]) ||
+		    same_blank_context(images, matches, first, end, at))
+			continue;
+
+		matches->side[0][i] = SIZE_MAX;
+		matches->side[1][at[1]] = SIZE_MAX;
+	}
 }
 
 /* A split-file edit can have its shared counterpart in another file pair */
@@ -297,6 +444,37 @@ static void match_changes(struct comparison *review)
 	}
 }
 
+/* Retained parent boundaries prevent an edit from moving to another site */
+static void match_result_interval(const struct udiff_image *images,
+				  struct udiff_matches *matches,
+				  const struct udiff_matches *anchors,
+				  const size_t *first, const size_t *end,
+				  bool unique)
+{
+	size_t cursor[2] = { first[0], first[1] };
+
+	for (size_t i = first[0]; anchors->side[0] && i < end[0]; i++) {
+		size_t boundary[2] = { i, anchors->side[0][i] };
+
+		if (boundary[1] < cursor[1] || boundary[1] >= end[1])
+			continue;
+
+		if (unique)
+			match_function_interval(images, matches, cursor,
+						boundary);
+		else
+			match_interval(images, matches, cursor, boundary);
+		matches->side[0][i] = boundary[1];
+		matches->side[1][boundary[1]] = i;
+		for (int leg = 0; leg < 2; leg++)
+			cursor[leg] = boundary[leg] + 1;
+	}
+	if (unique)
+		match_function_interval(images, matches, cursor, end);
+	else
+		match_interval(images, matches, cursor, end);
+}
+
 struct scope_link {
 	size_t owner[2];
 };
@@ -321,6 +499,65 @@ struct scope_pairing {
 	struct scope_link *links;
 	size_t nlinks;
 };
+
+/*
+ * Unique retained parent rows keep their identity at the tips. Other matches
+ * remain flexible around insertions and deletions. Hunk grouping contributes no
+ * evidence: changing the amount of quoted context cannot move an edit.
+ */
+static void match_results(struct comparison *review,
+			  const struct udiff_image *parents,
+			  const struct udiff_image *images)
+{
+	const struct source_view *parent = &review->source[0].view[0];
+	struct udiff_matches anchors __free(udiff_matches) = {};
+	struct udiff_matches *matches = &review->matches[1];
+	struct line_occurrence *keys __free(free) = NULL;
+	size_t first[2] = {}, end[2], count = 0;
+
+	keys = collect_line_occurrences(parents, &parents[0],
+					review->matches[0].side[0], &count);
+	init_unmatched_lines(images, matches);
+	for (size_t i = 0; i < parent->count; i++) {
+		size_t indexes[2], mate;
+		bool survives = true;
+
+		mate = review->matches[0].side[0][i];
+		if (mate == SIZE_MAX ||
+		    !line_is_unique_in_both(keys, count, &parents[0].lines[i]))
+			continue;
+
+		indexes[0] = parent->rows[i];
+		indexes[1] = review->source[1].view[0].rows[mate];
+
+		/* Only rows retained by both patches can anchor results */
+		for (int leg = 0; leg < 2; leg++) {
+			const struct patch_source *source =
+				&review->source[leg];
+			size_t at = indexes[leg];
+
+			survives &= source->rows[at].sign == ' ';
+		}
+		if (!survives)
+			continue;
+
+		/* Translate surviving source rows into result-view positions */
+		for (int leg = 0; leg < 2; leg++)
+			end[leg] =
+				review->source[leg].view[1].index[indexes[leg]];
+
+		/* Added rows cannot cross these surviving parent identities */
+		match_result_interval(images, matches, &anchors, first, end,
+				      false);
+		matches->side[0][end[0]] = end[1];
+		matches->side[1][end[1]] = end[0];
+		for (int leg = 0; leg < 2; leg++)
+			first[leg] = end[leg] + 1;
+	}
+	end[0] = images[0].nlines;
+	end[1] = images[1].nlines;
+	match_result_interval(images, matches, &anchors, first, end, false);
+}
 
 /*
  * Matching ties must not depend on which operand the command lists first. Order
@@ -409,7 +646,7 @@ static void compare_ordered(struct comparison *review)
 	}
 
 	udiff_match(&images[0][0], &images[0][1], &review->matches[0]);
-	udiff_match(&images[1][0], &images[1][1], &review->matches[1]);
+	match_results(review, images[0], images[1]);
 	match_changes(review);
 }
 
@@ -715,6 +952,237 @@ static void select_pairs(const struct comparison *review,
 	}
 }
 
+static bool row_in_scope(const struct comparison *review, int leg, size_t i)
+{
+	const struct patch_source *source = &review->source[leg];
+	const struct patch_row *row = &source->rows[i];
+	const struct patch_move *focus = review->focus[leg];
+	const struct patch_file *file = source->file;
+
+	if (!focus)
+		return !patch_row_partner(source, i);
+
+	if (row->move == focus)
+		return true;
+
+	if (row->sign != ' ' || row->hunk == SIZE_MAX)
+		return false;
+
+	return row->hunk >= file->rows[focus->first].hunk &&
+	       row->hunk <= file->rows[focus->first + focus->count - 1].hunk;
+}
+
+/* Quoted source stays in scope even when the requested margin is zero */
+static void context_scope(const struct comparison *review, int leg,
+			  unsigned int context, bool *near)
+{
+	const struct patch_source *source = &review->source[leg];
+	size_t at = 0, marked = 0, count = source->view[1].count;
+
+	for (size_t i = 0; i < source->nrows; i++) {
+		const struct patch_row *row = &source->rows[i];
+		bool active = row_in_scope(review, leg, i);
+
+		if ((row->sign == '-' || row->sign == '+') && active) {
+			size_t width = (size_t)context + (row->sign == '+');
+			size_t first = at > context ? at - context : 0;
+			size_t end = at + MIN(width, count - at);
+
+			for (size_t j = MAX(first, marked); j < end; j++)
+				near[j] = true;
+			marked = MAX(marked, end);
+		}
+		if (source->view[1].index[i] != SIZE_MAX) {
+			if (row->hunk != SIZE_MAX && active)
+				near[at] = true;
+			at++;
+		}
+	}
+}
+
+/*
+ * Grow from the original selections only. A differing row exposed by a margin
+ * belongs to that excerpt; it does not seed another expansion. A patch margin
+ * stops at a region whose correspondence requires unknown source.
+ */
+static void grow_context_margins(const struct patch_source *source,
+				 const struct paired_rows *pairs,
+				 bool *selected, unsigned int context, int leg)
+{
+	for (size_t i = 0; i < source->view[1].count; i++)
+		selected[i] = false;
+
+	/* Separate passes preserve seeds while growing both margins */
+	for (int direction = 0; direction < 2; direction++) {
+		size_t remaining = 0;
+
+		for (size_t n = 0; n < pairs->count; n++) {
+			size_t i = direction ? pairs->count - 1 - n : n;
+			const struct row_pair *pair = &pairs->rows[i];
+			size_t at = pair->side[leg];
+
+			/* Unquoted source cannot connect two known excerpts */
+			if (!pair->equal && !pair->known) {
+				remaining = 0;
+				continue;
+			}
+
+			/* A missing counterpart seeds a margin without a row */
+			if (at == SIZE_MAX) {
+				if (pair->gap_seed[leg])
+					remaining = context;
+				continue;
+			}
+
+			if (source->rows[at].sign == '?')
+				remaining = 0;
+			else if (pair->selected[leg])
+				remaining = (size_t)context + 1;
+			if (remaining) {
+				size_t pos = source->view[1].index[at];
+
+				selected[pos] = true;
+				remaining--;
+			}
+		}
+	}
+}
+
+static void context_margins(const struct comparison *review,
+			    struct paired_rows *pairs, bool *selected[2],
+			    unsigned int context)
+{
+	for (int leg = 0; leg < 2; leg++) {
+		grow_context_margins(&review->source[leg], pairs, selected[leg],
+				     context, leg);
+	}
+
+	/* Publish after both passes so a grown margin cannot seed another */
+	for (size_t i = 0; i < pairs->count; i++) {
+		struct row_pair *pair = &pairs->rows[i];
+
+		for (int leg = 0; leg < 2; leg++) {
+			const struct source_view *view =
+				&review->source[leg].view[1];
+			size_t at = pair->side[leg];
+
+			pair->selected[leg] = at != SIZE_MAX &&
+					      selected[leg][view->index[at]];
+		}
+	}
+}
+
+/* Unequal correspondences can bound known text beside an unquoted gap */
+static void mark_known_context(const struct comparison *review,
+			       struct paired_rows *pairs)
+{
+	bool unknown = false;
+	size_t first = 0;
+
+	for (size_t i = 0; i <= pairs->count; i++) {
+		if (i < pairs->count) {
+			struct row_pair *pair = &pairs->rows[i];
+
+			for (int leg = 0; leg < 2; leg++) {
+				const struct patch_source *source =
+					&review->source[leg];
+				size_t at = pair->side[leg];
+
+				unknown |= at != SIZE_MAX &&
+					   source->rows[at].sign == '?';
+			}
+			if (pair->side[0] == SIZE_MAX ||
+			    pair->side[1] == SIZE_MAX ||
+			    layout_mate(review, 0, 1, pair->side[0]) !=
+				    pair->side[1])
+				continue;
+
+			pair->known = true;
+		}
+		if (!unknown) {
+			for (size_t j = first; j < i; j++)
+				pairs->rows[j].known = true;
+		}
+		first = i + 1;
+		unknown = false;
+	}
+}
+
+/* Full-source matches identify differences; patch regions select excerpts */
+static void select_context(const struct comparison *review,
+			   struct paired_rows *pairs, unsigned int context)
+{
+	bool *right __free(free) = NULL;
+	bool *left __free(free) = NULL;
+	bool *near[2];
+
+	if (review->source[0].ambiguous || review->source[1].ambiguous)
+		return;
+
+	left = xzalloc_array(review->source[0].view[1].count, sizeof(*left));
+	right = xzalloc_array(review->source[1].view[1].count, sizeof(*right));
+	near[0] = left;
+	near[1] = right;
+	context_scope(review, 0, context, left);
+	context_scope(review, 1, context, right);
+	mark_known_context(review, pairs);
+
+	/* Context needs retained source; edits alone belong to delta */
+	for (size_t i = 0; i < pairs->count;) {
+		bool present[2] = {};
+		bool retained = false;
+		size_t first = i;
+
+		if (pairs->rows[i].equal || !pairs->rows[i].known) {
+			i++;
+			continue;
+		}
+
+		for (; i < pairs->count && !pairs->rows[i].equal &&
+		       pairs->rows[i].known;
+		     i++) {
+			for (int leg = 0; leg < 2; leg++) {
+				const struct patch_source *source =
+					&review->source[leg];
+				size_t at;
+
+				at = pairs->rows[i].side[leg];
+				if (at == SIZE_MAX)
+					continue;
+
+				present[leg] = true;
+				retained |=
+					source->rows[at].sign == ' ' &&
+					near[leg][source->view[1].index[at]];
+			}
+		}
+		if (!retained)
+			continue;
+
+		/* Keep only the difference near the original patch */
+		for (size_t j = first; j < i; j++) {
+			for (int leg = 0; leg < 2; leg++) {
+				const struct source_view *view =
+					&review->source[leg].view[1];
+				size_t at = pairs->rows[j].side[leg];
+
+				pairs->rows[j].selected[leg] =
+					at != SIZE_MAX &&
+					near[leg][view->index[at]];
+			}
+		}
+
+		/* An empty side still has a source gap needing context */
+		for (int leg = 0; leg < 2; leg++) {
+			if (!present[leg])
+				pairs->rows[first].gap_seed[leg] = true;
+		}
+	}
+
+	/* Reuse the proximity maps for the final selection and its margins */
+	context_margins(review, pairs, near, context);
+}
+
 static char *source_name(const struct patch_source *source,
 			 const struct patch_file *other, size_t first,
 			 bool result)
@@ -980,11 +1448,14 @@ static void review_file_build(struct review_file *file,
 			  same_blob(&a->story.index_pre, &b->story.index_pre);
 	select_delta(&review, max_context, shared_deletion);
 
-	for (int section = 0; section < 1; section++) {
+	for (int section = 0; section < 2; section++) {
 		struct paired_rows pairs __free(paired_rows) = {};
 
 		pair_rows(&review, &pairs, section);
-		select_pairs(&review, &pairs);
+		if (section)
+			select_context(&review, &pairs, max_context);
+		else
+			select_pairs(&review, &pairs);
 		save_section(&review, &pairs, &file->section[section], section);
 	}
 	for (int leg = 0; leg < 2; leg++) {
