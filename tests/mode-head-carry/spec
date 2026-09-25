@@ -1,0 +1,7 @@
+# A run of mode lines opens patch2 ahead of its first git opener. The run
+# belongs to the first block in the only reading available, so it rides
+# into that block's mode collection and the pair's comparison still prints
+# the note, while no latch ever arms outside an open git block.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

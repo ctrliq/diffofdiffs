@@ -1,0 +1,7 @@
+# The content section claims patch2's f.c before the trailing mode-only
+# block. Complete paired names establish that a/f.c and b/f.c identify
+# the same file at depth zero, so the mode difference compares beside
+# the content delta instead of being labeled as a file with no counterpart.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

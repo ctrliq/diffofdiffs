@@ -1,0 +1,6 @@
+# A mode-only record precedes content edits for the same path. Preserve
+# the mode change and compare the two content records together; their
+# common deletion remains shared. The x.c records match without stripping.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

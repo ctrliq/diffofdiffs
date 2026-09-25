@@ -1,0 +1,10 @@
+diff --git a/g.c b/g.c
+old mode 100644
+new mode 100755
+index 1..2
+--- a/g.c
++++ b/g.c
+@@ -1,2 +1,2 @@
+ ctx
+-g1
++g2

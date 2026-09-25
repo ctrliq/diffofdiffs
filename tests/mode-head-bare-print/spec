@@ -1,0 +1,6 @@
+# A plain operand opens with mode lines ahead of a section that has no
+# git opener anywhere. The one-sided print keeps the authored bytes whole
+# and bare: fabricating an opener would claim bytes nobody wrote.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

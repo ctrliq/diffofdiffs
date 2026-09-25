@@ -1,0 +1,8 @@
+# Patch2 opens with a bare old mode/new mode pair above a pure rename of old.c
+# to new.c, followed by an f.c change; patch1 changes f.c differently. The
+# leading mode lines must attach to the rename block, so new.c shows patch2's
+# mode and rename notes on its own, while the f.c section pairs the two content
+# changes with no mode note.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

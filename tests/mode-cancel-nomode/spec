@@ -1,0 +1,6 @@
+# Control for the mode-cancel pair: both sections self-cancel and neither
+# carries a mode lead, so the whole run prints nothing and exits 0 (empty
+# output means no differences).
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

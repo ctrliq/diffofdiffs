@@ -1,0 +1,8 @@
+# Patch1 opens with a bare old mode/new mode pair ahead of its first diff --git
+# line, followed by the same y.c change patch2 makes. The leading mode lines
+# carry into the y.c block, so the report must show a mode note for y.c on
+# patch1's side, while the identical content change is left out. mode-head-carry
+# is the same case with the operands swapped.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

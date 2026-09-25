@@ -1,0 +1,7 @@
+# Patch1 carries a mode-only block for h.c, with no --- line, directly followed
+# by a k.c block with a hunk; patch2 edits only f.c. The report must show h.c's
+# mode change and k.c's edit on patch1's side and f.c's edit on patch2's side,
+# with the mode-only block ending where k.c's diff --git line starts.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

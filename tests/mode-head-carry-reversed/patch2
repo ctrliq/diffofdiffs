@@ -1,0 +1,6 @@
+diff --git a/y.c b/y.c
+--- a/y.c
++++ b/y.c
+@@ -1 +1 @@
+-y1
++y2

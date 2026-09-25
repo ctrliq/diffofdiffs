@@ -1,0 +1,12 @@
+diff --git a/x.c b/x.c
+--- a/x.c
++++ b/x.c
+@@ -1 +1 @@
+-x1
++x2
+diff --git a/f.c b/f.c
+--- a/f.c
++++ b/f.c
+@@ -1 +1 @@
+-f1
++f9

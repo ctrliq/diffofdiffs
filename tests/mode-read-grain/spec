@@ -1,0 +1,6 @@
+# Patch2's mode pair sits below a junk line inside an armed block; the mode
+# read keeps its per-line grain, so the pair still notes and the junk line
+# changes nothing.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

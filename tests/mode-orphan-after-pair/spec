@@ -1,0 +1,8 @@
+# Patch2's a.c block carries a hunk, then stray old mode/new mode lines and a
+# second header pair for b.c without a new diff --git line. Mode lines after a
+# completed header pair belong to no file, so they must not produce a mode note
+# for a.c or b.c. The b.c change is identical in both patches and left out, so
+# only patch2's a.c edit shows.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

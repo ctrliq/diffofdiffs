@@ -1,0 +1,7 @@
+# Patch1 names f.c and g.c in one opener but supplies only mode lines,
+# so its record cannot establish which a/ or b/ bytes are display prefixes.
+# Patch2 proves its rename-to-g.c identity with complete metadata. Keep both
+# original blocks visible without inventing a same-file mode comparison.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

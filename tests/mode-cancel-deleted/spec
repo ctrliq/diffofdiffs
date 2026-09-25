@@ -1,0 +1,8 @@
+# Patch1's c.c block says `deleted file mode 100644` but carries a hunk whose
+# removed and added lines are identical; patch2 edits only f.c. The report must
+# show c.c's delete-file note and old mode on patch1's side with nothing for the
+# empty hunk, and patch2's f.c edit on its side alone. mode-cancel-deleted-u4
+# checks the same input at -U4.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

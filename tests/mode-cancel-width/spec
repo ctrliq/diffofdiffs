@@ -1,0 +1,7 @@
+# Patch1 changes c.c's mode from 100644 to 100755, and its only hunk removes the
+# line same and adds it back unchanged. Patch2 edits f.c. With -U4, the report
+# must show c.c's mode change on patch1's side, with nothing for the hunk that
+# changes nothing, and patch2's f.c edit on its side alone.
+bin: DIFFOFDIFFS
+args: -U4 patch1 patch2
+exit: 0

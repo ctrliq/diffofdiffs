@@ -1,0 +1,7 @@
+# The -U path re-authors everything it emits, so the one-sided block's
+# collected lead keeps the mode lines alone with regenerated line endings
+# (the authored carriage returns drop, and the opener and index line
+# never print) above the regenerated header pair and hunk.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

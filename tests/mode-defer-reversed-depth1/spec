@@ -1,0 +1,8 @@
+# Patch1 changes f.c's content in one git block and its mode in a second block
+# for the same path. Patch2 changes the same line with different text in a plain
+# diff whose paths carry old/ and new/ prefixes, one directory level to strip.
+# The content changes must pair despite the different prefixes, and patch1's
+# mode change must show as its own note after them.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,14 @@
+old mode 100644
+new mode 100755
+diff --git a/old.c b/new.c
+similarity index 100%
+rename from old.c
+rename to new.c
+diff --git a/f.c b/f.c
+--- a/f.c
++++ b/f.c
+@@ -1,3 +1,3 @@
+ line1
+-old
++new2
+ line3

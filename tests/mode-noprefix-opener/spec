@@ -1,0 +1,6 @@
+# Equal complete opener names identify a real --no-prefix mode-only x.c
+# block. Keep that independent change visible after y.c's content delta,
+# without attributing x.c's mode to the next file.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
