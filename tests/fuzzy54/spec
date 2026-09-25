@@ -1,0 +1,7 @@
+# An unterminated quoted context row is accepted without a final newline. The
+# shared q change stays silent, while CONTEXT shows the real tail newline
+# difference. This checks accepted input handling, not a canonical GNU patch
+# recipe.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

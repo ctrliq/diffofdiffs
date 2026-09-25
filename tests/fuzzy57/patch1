@@ -1,0 +1,12 @@
+--- a/h.c
++++ b/h.c
+@@ -1,7 +1,6 @@
+ h1
+-h2_old
++h2_p1
+ h3
+ p1_only
+ h5
+ h6
+-h7
+\ No newline at end of file

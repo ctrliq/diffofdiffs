@@ -1,0 +1,21 @@
+--- a/f.c
++++ b/f.c
+@@ -10,7 +10,7 @@
+ ctx_a
+ ctx_b
+-old_one
++new_one
+ ctx_c
+ p1_only
+ ctx_d
+ ctx_tail
+\ No newline at end of file
+--- a/k.c
++++ b/k.c
+@@ -10,5 +10,5 @@
+ k_a
+-k_old
++k_new
+ k_b
+ k_p1_only
+ k_c

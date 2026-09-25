@@ -1,0 +1,6 @@
+--- a/only2.c
++++ b/only2.c
+@@ -1,2 +1,2 @@
+ keep
+-alpha
++omega

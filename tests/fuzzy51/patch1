@@ -1,0 +1,17 @@
+--- a/f.c
++++ b/f.c
+@@ -10,5 +10,5 @@
+ p1only_a
+ p1only_b
+-guard(old_limit);
++guard(new_limit);
+ inner_shared
+ tail_shared
+\ No newline at end of file
+--- a/k.c
++++ b/k.c
+@@ -50,3 +50,3 @@
+ k_far_a
+-k_far_old
++k_far_new
+ k_far_b

@@ -1,0 +1,17 @@
+--- a/g.c
++++ b/g.c
+@@ -1,3 +1,3 @@
+ g_one
+ g_two
+-mode = OLD;
++mode = FIRST;
+--- a/f.c
++++ b/f.c
+@@ -10,5 +10,5 @@
+ p1only_a
+ p1only_b
+-guard(old_limit);
++guard(new_limit);
+ inner_shared
+ tail_shared
+\ No newline at end of file

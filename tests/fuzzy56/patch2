@@ -1,0 +1,13 @@
+--- a/g.c
++++ b/g.c
+@@ -1,6 +1,7 @@
+ c1
+ c2
+ c3
+-a_old
++a_p2
+ c4
+-b_old
+\ No newline at end of file
++b_new
++b_extra
