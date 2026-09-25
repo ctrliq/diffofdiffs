@@ -1,0 +1,8 @@
+# Patch1 changes L10 and L22 of foo.c; patch2 changes L02, L12, and L14, and
+# neither makes the other's edits. With 3 lines of context, patch2's first hunk
+# ends at L05 and patch1's first hunk starts at L07. The report must show every
+# change on its own patch's side, and it must not line up patch1's L07 and L08
+# beside patch2's L04 and L05 as if both patches quoted the same lines there.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

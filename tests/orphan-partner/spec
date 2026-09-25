@@ -1,0 +1,9 @@
+# Patch1 changes delta at line 4 in a hunk quoting lines 1-11; patch2 changes
+# hotel at line 8 in a hunk quoting lines 5-11, and the two disagree about line
+# 5 (echo in patch1, ECHO in patch2). The report must show each patch's change
+# on its own side, and the context section must show hotel against HOTEL in the
+# two results without claiming that patch2's file lacks alpha, bravo, and
+# charlie, lines patch2 never quotes.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

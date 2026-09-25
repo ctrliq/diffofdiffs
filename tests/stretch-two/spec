@@ -1,0 +1,7 @@
+# Patch1 deletes delta at line 4 and delta2 at line 8 of foo.c, keeping echo and
+# echo2 below them; patch2 deletes all four lines. The report must show the two
+# shared deletions unsigned and echo and echo2 on patch2's side alone, in two
+# separate hunks, with patch1's side numbering echo at 4 and echo2 at 7.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

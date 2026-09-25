@@ -1,0 +1,6 @@
+# squashsign-g1-u3's edits diffed with 1 line of context instead of 3. The
+# report must again show every change on its own patch's side, with patch1's L09
+# kept apart from patch2's L03.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

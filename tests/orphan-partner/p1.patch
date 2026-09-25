@@ -1,0 +1,15 @@
+--- a/foo.c
++++ b/foo.c
+@@ -1,11 +1,11 @@
+ alpha
+ bravo
+ charlie
+-delta
++DELTA
+ echo
+ foxtrot
+ golf
+ hotel
+ india
+ juliet
+ kilo

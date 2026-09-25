@@ -1,0 +1,13 @@
+--- a/foo.c
++++ b/foo.c
+@@ -1,5 +1,3 @@
+ alpha
+-bravo
+ charlie
+-delta
+ echo
+@@ -9,3 +9,3 @@
+ INDIA
+-juliet
++JULIET
+ kilo

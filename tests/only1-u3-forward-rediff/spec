@@ -1,0 +1,8 @@
+# Patch1 changes only f, with a hunk whose removed lines interleave with
+# repeated context lines (b, a, a, a, c, b, a, c, a), and patch2 changes only g.
+# Each file must show on its own patch's side exactly as that patch wrote it;
+# the report must not re-diff patch1's hunk into a different but equivalent set
+# of edits. fuzzy181-u3 covers a one-line change.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

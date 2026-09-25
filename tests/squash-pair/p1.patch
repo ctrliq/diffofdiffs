@@ -1,0 +1,10 @@
+--- a/foo.c
++++ b/foo.c
+@@ -4,2 +4 @@
+-delta
+ echo
+@@ -9,3 +9,3 @@
+ india
+-juliet
++JULIET
+ kilo

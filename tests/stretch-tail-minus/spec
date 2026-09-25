@@ -1,0 +1,10 @@
+# Both patches delete delta at line 4 and hotel at line 8 of foo.c; patch2 also
+# deletes echo and india, the lines below them, which patch1 keeps. Patch1 alone
+# adds P1NEW after line 11 and deletes november at line 14. Both replace papa at
+# line 16, patch1 with PAPA1 and patch2 with PAPA2. The report must show the
+# shared deletions unsigned, echo and india on patch2's side alone, P1NEW and
+# november on patch1's side alone, and the two papa replacements side by side,
+# each numbered by its own patch's result.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,9 @@
+# Both patches delete delta at line 4 of foo.c and replace juliet at line 10,
+# but only patch2 also deletes echo at line 5, and neither quotes any other
+# line. Patch1's replacement therefore lands at line 9 and patch2's at line 8.
+# The report must show delta's deletion as a shared edit, echo's deletion on
+# patch2's side alone, and the two replacements side by side, each numbered by
+# its own patch's result.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

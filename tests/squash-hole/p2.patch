@@ -1,0 +1,8 @@
+--- a/foo.c
++++ b/foo.c
+@@ -4,2 +4,0 @@
+-delta
+-echo
+@@ -10 +8 @@
+-juliet
++JULIET2

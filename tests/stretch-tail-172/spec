@@ -1,0 +1,7 @@
+# Patch1 quotes only its changed rows. Patch2 explicitly retains t17e, which
+# identifies the T17Ex reversal. Its unquoted insertion locations and the
+# earlier backport changes remain visible as unresolved original changes;
+# N01c, N18a, and t04h must not disappear.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

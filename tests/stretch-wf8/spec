@@ -1,0 +1,5 @@
+# The upstream patch deletes the original delta and echo rows. The known
+# source supports removing the backport XA result.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

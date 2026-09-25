@@ -1,0 +1,47 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: p1.patch┃Patch 2: p2.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only
+the source lines quoted in the
+patches.
+
+═══════════════════════════════════
+*    DELTA DIFFERENCES            *
+═══════════════════════════════════
+Signs mark edits made by only that
+patch. A sign-less line with one
+number is an edit both patches
+make: a new number means both add
+it, an old number means both remove
+it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f       ┃ old new│f
+        │@@ a01  ┃        │@@
+   1   1│a01     ┃        │
+   2   2│a02     ┃        │
+   3   3│a03     ┃        │
+-  4    │alpha_v0┃        │
++      4│alpha_p1┃        │
+   5   5│a05     ┃        │
+   6   6│a06     ┃        │
+   7   7│a07     ┃        │
+        │────────╂────────┼────────
+        │@@ c41  ┃        │@@ q71
+  41  41│c41     ┃        │
+  42  42│c42     ┃        │
+  43  43│c43     ┃        │
+- 44    │gamma_v0┃        │
++     44│gamma_p1┃        │
+  45  45│c45     ┃        │
+  46  46│c46     ┃        │
+  47  47│c47     ┃        │
+        │        ┃  71  71│q71
+        │        ┃  72  72│q72
+        │        ┃  73  73│q73
+        │        ┃- 74    │alpha_v0
+        │        ┃+     74│alpha_p1
+        │        ┃  75  75│q75
+        │        ┃  76  76│q76
+        │        ┃  77  77│q77

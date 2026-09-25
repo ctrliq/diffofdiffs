@@ -1,0 +1,15 @@
+--- a/foo.c
++++ b/foo.c
+@@ -4,2 +4 @@
+-delta
+ echo
+@@ -8,2 +7 @@
+-hotel
+ india
+@@ -11,0 +10 @@
++P1NEW
+@@ -14 +12,0 @@
+-november
+@@ -16 +14 @@
+-papa
++PAPA1

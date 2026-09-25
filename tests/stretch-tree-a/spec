@@ -1,0 +1,8 @@
+# In git tree mode, with the repository built from repo.gen, commits t1 and t2
+# start from the same file solo, which holds the single line a. t1 adds X below
+# a, and t2 deletes a, leaving solo empty. The report must show t2's deletion of
+# a and t1's addition of X each on its own side, and the context section must
+# show a and X as lines only t1's result holds.
+bin: DIFFOFDIFFS
+args: --git-tree=repo t1 t2
+exit: 0

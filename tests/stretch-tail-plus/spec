@@ -1,0 +1,6 @@
+# An extra upstream hunk does not establish a one-sided remainder while an
+# original backport change is still unresolved. Preserve the unresolved
+# original content.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

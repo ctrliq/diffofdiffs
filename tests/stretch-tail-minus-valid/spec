@@ -1,0 +1,13 @@
+# Patch1 and patch2 edit the same 16-line foo.c with hunks that quote at most
+# one line of context. Both remove delta at line 4 and hotel at line 8 and
+# replace papa at line 16, patch1 with PAPA1 and patch2 with PAPA2. Patch2 also
+# removes echo and india, the lines after delta and hotel, which patch1 quotes
+# as context. Patch1 also adds P1NEW after kilo and removes november. The report
+# must show the removals of delta, hotel, and papa as edits both patches make,
+# the removals of echo and india on patch2's side beside patch1's context, P1NEW
+# and the removal of november on patch1's side, and PAPA1 beside PAPA2. The
+# source and result files hold foo.c before and after each patch, and the runner
+# checks that each patch turns its source into its result with no fuzz.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

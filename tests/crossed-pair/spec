@@ -1,0 +1,9 @@
+# Patch1 changes alpha_v0, beta_v0, and gamma_v0 to their _p1 forms at lines 4,
+# 24, and 44 of f. Patch2 makes only the beta and alpha changes, in that order,
+# at lines 64 and 74, with different lines around them. Since the two changes
+# come in opposite orders, only one of them can pair: the report must leave out
+# the beta change, which both patches make, and show each patch's alpha change
+# on its own side, along with patch1's gamma change.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

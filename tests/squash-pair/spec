@@ -1,0 +1,9 @@
+# Both patches delete delta at line 4 of foo.c and change juliet to JULIET at
+# line 10. Patch2 also deletes bravo at line 2, quoting alpha, charlie, and echo
+# around it, and quotes line 9 as INDIA where patch1 quotes india. Patch1 quotes
+# nothing above line 4. The report must show bravo's deletion on patch2's side
+# alone next to the shared delta deletion, and nothing for the juliet change,
+# which both patches make identically.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

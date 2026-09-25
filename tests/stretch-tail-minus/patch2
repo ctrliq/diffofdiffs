@@ -1,0 +1,11 @@
+--- a/foo.c
++++ b/foo.c
+@@ -4,2 +4,0 @@
+-delta
+-echo
+@@ -8,2 +6,0 @@
+-hotel
+-india
+@@ -16 +12 @@
+-papa
++PAPA2
