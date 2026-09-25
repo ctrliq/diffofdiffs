@@ -1,0 +1,4 @@
+# An extra trailing addition is compared with balanced output context.
+bin: DIFFOFDIFFS
+args: -U5 patch1 patch2
+exit: 0

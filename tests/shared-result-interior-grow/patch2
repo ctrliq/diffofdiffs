@@ -1,0 +1,41 @@
+--- a/f
++++ b/f
+@@ -12,24 +12,38 @@
+ prefix11
+ prefix12
+ prefix13
+ prefix14
+ prefix15
+ prefix16
+ prefix17
+ prefix18
+ prefix19
+ remote_before0
+ remote_before1
+ remote_before2
++hold_shared_lock();
++remote_update0();
++remote_update1();
++remote_update2();
++remote_update3();
++remote_update4();
++remote_update5();
++remote_update6();
++remote_update7();
++remote_update8();
++remote_update9();
++remote_update10();
++remote_update11();
++drop_shared_lock();
+ joint_end_marker
+ remote_after0
+ remote_after1
+ remote_after2
+ suffix00
+ suffix01
+ suffix02
+ suffix03
+ suffix04
+ suffix05
+ suffix06
+ suffix07

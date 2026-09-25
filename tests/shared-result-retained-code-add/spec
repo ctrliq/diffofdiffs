@@ -1,0 +1,5 @@
+# A retained statement can separate the original addition from a result
+# insertion.
+bin: DIFFOFDIFFS
+args: -U5 patch1 patch2
+exit: 0

@@ -1,0 +1,26 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         Patch 1: patch1         ┃         Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the
+patches.
+
+═══════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                            *
+═══════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one
+number is an edit both patches make: a new number means both add
+it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f                       ┃ old new│f
+        │@@ local_before1        ┃        │@@ remote_before2
+  22  22│local_before1           ┃        │
+  23  23│local_before2           ┃  23  23│remote_before2
+  24  24│joint_begin_marker      ┃  24  24│joint_begin_marker
++     25│local_head();           ┃        │
++     26│maintain_shared_state();┃  25  25│maintain_shared_state();
+      27│hold_shared_lock();     ┃      26│hold_shared_lock();
+  25  28│joint_end_marker        ┃  26  27│joint_end_marker
+  26  29│local_after0            ┃  27  28│remote_after0
+  27  30│local_after1            ┃  28  29│remote_after1

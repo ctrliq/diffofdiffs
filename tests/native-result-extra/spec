@@ -1,0 +1,10 @@
+# Both patches replace old1, old2, and old3 in f with shared1, shared2, and
+# tail. Patch1 also removes extra and puts shared1 and shared2 above the blank
+# line, while patch2 puts them below it and adds native_extra after them. The
+# report must show the removal of extra and the addition of native_extra each on
+# its own patch's side, native_extra only once, and the other removals and
+# additions as edits both patches make, and the context section must show where
+# the blank line sits in each result.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

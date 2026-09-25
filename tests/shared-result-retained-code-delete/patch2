@@ -1,0 +1,10 @@
+--- a/f
++++ b/f
+@@ -22,6 +22,7 @@
+ remote_before1
+ remote_before2
+ joint_begin_marker
++hold_shared_lock();
+ maintain_shared_state();
+ joint_end_marker
+ remote_after0

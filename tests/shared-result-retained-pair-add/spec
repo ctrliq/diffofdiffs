@@ -1,0 +1,4 @@
+# Several retained rows preserve the same original source gap relationship.
+bin: DIFFOFDIFFS
+args: -U12 patch1 patch2
+exit: 0

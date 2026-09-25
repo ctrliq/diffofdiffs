@@ -1,0 +1,5 @@
+# A wider context request does not change the accounting of different
+# additions on opposite sides of a retained source blank.
+bin: DIFFOFDIFFS
+args: -U12 patch1 patch2
+exit: 0

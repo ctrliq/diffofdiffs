@@ -1,0 +1,12 @@
+--- a/f
++++ b/f
+@@ -1,6 +1,6 @@
+ start
+-old1
+-old2
+ 
+-old3
++native1
++native2
++tail
+ end

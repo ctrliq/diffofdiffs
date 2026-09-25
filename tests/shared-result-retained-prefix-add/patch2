@@ -1,0 +1,12 @@
+--- a/f
++++ b/f
+@@ -22,6 +22,9 @@
+ local_before1
+ local_before2
+ joint_begin_marker
++local_head();
++maintain_shared_state();
++hold_shared_lock();
+ joint_end_marker
+ local_after0
+ local_after1

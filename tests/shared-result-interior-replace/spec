@@ -1,0 +1,4 @@
+# Shared original additions establish an interior replacement.
+bin: DIFFOFDIFFS
+args: -U5 patch1 patch2
+exit: 0

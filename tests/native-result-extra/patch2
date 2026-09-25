@@ -1,0 +1,13 @@
+--- a/f
++++ b/f
+@@ -1,6 +1,7 @@
+ start
+-old1
+-old2
+ 
+-old3
++shared1
++shared2
++native_extra
++tail
+ end

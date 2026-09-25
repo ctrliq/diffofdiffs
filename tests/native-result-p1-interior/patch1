@@ -1,0 +1,14 @@
+--- a/f
++++ b/f
+@@ -1,7 +1,7 @@
+ start
+-old1
+-extra
+-old2
++shared1
++p1_extra
++shared2
+ 
+-old3
++tail
+ end

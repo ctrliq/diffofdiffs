@@ -1,0 +1,79 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         Patch 1: patch1         ┃         Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the
+patches.
+
+═══════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                            *
+═══════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one
+number is an edit both patches make: a new number means both add
+it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f                       ┃ old new│f
+        │@@ prefix13             ┃        │@@ prefix13
+  14  14│prefix13                ┃  14  14│prefix13
+  15  15│prefix14                ┃  15  15│prefix14
+  16  16│prefix15                ┃  16  16│prefix15
+  17  17│prefix16                ┃  17  17│prefix16
+  18  18│prefix17                ┃  18  18│prefix17
+  19  19│prefix18                ┃  19  19│prefix18
+  20  20│prefix19                ┃  20  20│prefix19
+  21  21│remote_before0          ┃  21  21│local_before0
+  22  22│remote_before1          ┃  22  22│local_before1
+  23  23│remote_before2          ┃  23  23│local_before2
+  24  24│joint_begin_marker      ┃  24  24│joint_begin_marker
+      25│hold_shared_lock();     ┃      25│hold_shared_lock();
+  25  26│read_shared_state();    ┃+     26│read_shared_state();
+  26  27│maintain_shared_state();┃+     27│maintain_shared_state();
+        │                        ┃+     28│local_tail();
+  27  28│joint_end_marker        ┃  25  29│joint_end_marker
+  28  29│remote_after0           ┃  26  30│local_after0
+  29  30│remote_after1           ┃  27  31│local_after1
+  30  31│remote_after2           ┃  28  32│local_after2
+  31  32│suffix00                ┃  29  33│suffix00
+  32  33│suffix01                ┃  30  34│suffix01
+  33  34│suffix02                ┃  31  35│suffix02
+  34  35│suffix03                ┃  32  36│suffix03
+  35  36│suffix04                ┃  33  37│suffix04
+  36  37│suffix05                ┃  34  38│suffix05
+        │                        ┃  35  39│suffix06
+        │                        ┃  36  40│suffix07
+
+═══════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                                          *
+═══════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f                       ┃     new│f
+        │@@ prefix12             ┃        │@@ prefix12
+      13│prefix12                ┃      13│prefix12
+      14│prefix13                ┃      14│prefix13
+      15│prefix14                ┃      15│prefix14
+      16│prefix15                ┃      16│prefix15
+      17│prefix16                ┃      17│prefix16
+      18│prefix17                ┃      18│prefix17
+      19│prefix18                ┃      19│prefix18
+      20│prefix19                ┃      20│prefix19
+-     21│remote_before0          ┃+     21│local_before0
+-     22│remote_before1          ┃+     22│local_before1
+-     23│remote_before2          ┃+     23│local_before2
+      24│joint_begin_marker      ┃      24│joint_begin_marker
+      25│hold_shared_lock();     ┃      25│hold_shared_lock();
+      26│read_shared_state();    ┃      26│read_shared_state();
+      27│maintain_shared_state();┃      27│maintain_shared_state();
+        │                        ┃+     28│local_tail();
+      28│joint_end_marker        ┃      29│joint_end_marker
+-     29│remote_after0           ┃+     30│local_after0
+-     30│remote_after1           ┃+     31│local_after1
+-     31│remote_after2           ┃+     32│local_after2
+      32│suffix00                ┃      33│suffix00
+      33│suffix01                ┃      34│suffix01
+      34│suffix02                ┃      35│suffix02
+      35│suffix03                ┃      36│suffix03
+      36│suffix04                ┃      37│suffix04
+      37│suffix05                ┃      38│suffix05

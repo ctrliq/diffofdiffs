@@ -1,0 +1,8 @@
+# native-result-extra without native_extra: patch2 replaces old3 with just
+# shared1, shared2, and tail. The report must show the removal of extra on
+# patch1's side alone and the other removals and additions as edits both patches
+# make, and the context section must show where the blank line sits in each
+# result.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

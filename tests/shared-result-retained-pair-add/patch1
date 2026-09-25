@@ -1,0 +1,28 @@
+--- a/f
++++ b/f
+@@ -13,24 +13,25 @@
+ prefix12
+ prefix13
+ prefix14
+ prefix15
+ prefix16
+ prefix17
+ prefix18
+ prefix19
+ remote_before0
+ remote_before1
+ remote_before2
+ joint_begin_marker
++hold_shared_lock();
+ read_shared_state();
+ maintain_shared_state();
+ joint_end_marker
+ remote_after0
+ remote_after1
+ remote_after2
+ suffix00
+ suffix01
+ suffix02
+ suffix03
+ suffix04
+ suffix05

@@ -1,0 +1,12 @@
+--- a/f
++++ b/f
+@@ -21,6 +21,9 @@
+ local_before0
+ local_before1
+ local_before2
++hold_shared_lock();
++
++local_tail();
+ joint_end_marker
+ local_after0
+ local_after1

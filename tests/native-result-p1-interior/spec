@@ -1,0 +1,5 @@
+# Both patches add shared1, shared2, and tail. Only patch1's deletion of
+# extra and addition of p1_extra differ. Keep original source order and signs.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

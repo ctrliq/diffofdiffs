@@ -1,0 +1,6 @@
+# Removing the original old1/old2 source does not account for the different
+# added results on opposite sides of a retained blank. Compare the actual
+# backport and upstream additions.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

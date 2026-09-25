@@ -1,0 +1,30 @@
+--- a/f
++++ b/f
+@@ -12,24 +12,27 @@
+ prefix11
+ prefix12
+ prefix13
+ prefix14
+ prefix15
+ prefix16
+ prefix17
+ prefix18
+ prefix19
+ local_before0
+ local_before1
+ local_before2
++hold_shared_lock();
++local_update();
++drop_shared_lock();
+ joint_end_marker
+ local_after0
+ local_after1
+ local_after2
+ suffix00
+ suffix01
+ suffix02
+ suffix03
+ suffix04
+ suffix05
+ suffix06
+ suffix07
