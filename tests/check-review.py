@@ -34,6 +34,7 @@ ENV = dict(os.environ, TMPDIR=str(WORK),
            LSAN_OPTIONS='', UBSAN_OPTIONS='halt_on_error=1', LD_PRELOAD='')
 CHECKS = 0
 
+
 def patch(before, after, path='f.c'):
     """Write the final-newline markers difflib itself does not provide."""
     result = bytearray()
@@ -44,6 +45,7 @@ def patch(before, after, path='f.c'):
         if not line.endswith(b'\n'):
             result.extend(b'\n\\ No newline at end of file\n')
     return bytes(result)
+
 
 def run_case(name, a, b, expected=None, width=3, columns=100):
     global CHECKS
@@ -76,12 +78,14 @@ def run_case(name, a, b, expected=None, width=3, columns=100):
     CHECKS += 1
     return paths, result.stdout, report
 
+
 def expected(a, b):
     inventories = [Counter((row.sign, row.text)
                             for file in parse_patch(p) for row in file.rows
                             if row.sign in '+-' and not row.neutral)
                    for p in (a, b)]
     return [inventories[0] - inventories[1], inventories[1] - inventories[0]]
+
 
 def expanded_terminal_source(source, tab_width):
     """Expand escaped source independently, counting Unicode display columns."""
@@ -96,6 +100,7 @@ def expanded_terminal_source(source, tab_width):
             result.append(char)
             column = 0 if char == '\n' else column + display_width(char)
     return ''.join(result).encode('utf-8', 'surrogateescape')
+
 
 def check_terminal_source(reference, output, tab_width=8):
     """Audit presentation against rows already checked against original patches.
@@ -117,6 +122,7 @@ def check_terminal_source(reference, output, tab_width=8):
             'TTY changed expanded source or final newline', after, expanded)
     return printed
 
+
 def column_text(output):
     """Recover wrapped cell text for assertions about file notes."""
     physical = re.sub(r'\x1b\[[0-9;]*m', '', output.decode()).splitlines()
@@ -134,6 +140,7 @@ def column_text(output):
             if len(cell) >= gutter and cell[gutter-1] in ('\u2502', '|'):
                 result[leg] += cell[gutter:] + ' ' * (cell_width - display_width(cell))
     return '\n'.join(result).encode()
+
 
 def oracle_negative_cases():
     """Prove that independent source checks reject plausible bad reports."""
@@ -194,6 +201,7 @@ def oracle_negative_cases():
         else:
             raise AssertionError(('relationship oracle accepted bad rows', name))
 
+
     before = [f'row {i}\n'.encode() for i in range(101)]
     after = before.copy()
     after[50] = b'changed\n'
@@ -208,6 +216,23 @@ def oracle_negative_cases():
         CHECKS += 1
     else:
         raise AssertionError('scope oracle accepted an unrelated whole file')
+
+
+def neutral_move_oracle_cases():
+    """No-op rewrites cannot create or distinguish a transferred edit."""
+    global CHECKS
+    headers = [b'--- a/left.c\n+++ b/left.c\n',
+               b'--- a/right.c\n+++ b/right.c\n']
+    neutral = b'@@ -1,3 +1,3 @@\n-keep\n+keep\n anchor\n end\n'
+    with_edit = neutral.replace(b'+1,3', b'+1,4').replace(b' end\n', b'+added\n end\n')
+    retained = with_edit.replace(b'-keep\n+keep\n', b' keep\n')
+    for bodies, wanted in [([neutral, neutral], [{}, {}]),
+                           ([with_edit, retained], [{(0, 0): (0, 0)}, {(0, 0): (0, 0)}])]:
+        for order in (bodies, bodies[::-1]):
+            parsed = [parse_patch(header + body) for header, body in zip(headers, order)]
+            assert moved_hunks(parsed) == wanted, (order, moved_hunks(parsed))
+            CHECKS += 1
+
 
 def context_margin_cases():
     """Independently pin the exact context around additions and deletions."""
@@ -246,6 +271,7 @@ def context_margin_cases():
             for word in prefix + suffix:
                 assert word.rstrip(b'\n') in plain, ('plain view lost context', word)
             CHECKS += 1
+
 
 def wrapping_cases():
     """Wrapped source keeps its coordinates, bytes, and final newline."""
@@ -300,6 +326,7 @@ def wrapping_cases():
                             expected(a, b), columns=2)
     assert b'it, an old number means\n' in narrow
 
+
 def check_number_field_spacing(output, report, digits):
     gutter = 2 * digits + 3
     starts = {row.source_start for row in report['rows']}
@@ -318,6 +345,7 @@ def check_number_field_spacing(output, report, digits):
             assert cell[:-1] == expected, ('spread number fields', cell, expected)
             checked += 1
     assert checked, 'no source gutters were checked'
+
 
 def compact_tab_gutter_cases():
     """Keep literal tabs from adding any space to the number gutters."""
@@ -369,6 +397,7 @@ def compact_tab_gutter_cases():
             assert row.index(body) == start + columns, (
                 'mixed tab and space indentation changed width', leg, i)
 
+
 def terminal(args, columns=0, destination_tty=False):
     master, slave = pty.openpty()
     tty.setraw(slave)
@@ -396,6 +425,7 @@ def terminal(args, columns=0, destination_tty=False):
     assert process.returncode == 0, error
     assert not standard, ('TTY destination also wrote to stdout', standard)
     return b''.join(chunks)
+
 
 def terminal_layout_cases():
     """Keep tab stops source-relative while selecting width from the destination."""
@@ -485,6 +515,275 @@ def terminal_layout_cases():
         assert result.returncode and not result.stdout, (option, result)
         CHECKS += 1
 
+
+def tree_cases():
+    global CHECKS
+    generator = ROOT / 'tests/support/gitread-unit'
+    derive = ROOT / 'tests/support/derive-patch'
+    cases = json.loads((ROOT / 'tests/context-cases.json').read_text())
+    cases += json.loads((ROOT / 'tests/correspondence-trees.json').read_text())
+    background = [f'prefix{i}\n' for i in range(50)]
+    tail = [f'suffix{i}\n' for i in range(50)]
+    cases.append(dict(name='one-sided-context',
+                      before=['', ''.join(background + ['old\n'] + tail)],
+                      after=['', ''.join(background + ['new\n'] + tail)]))
+    prefix = '/* before0 */\n/* before1 */\n/* before2 */\n'
+    body = ('{\n\tstruct env *env;\n\tstruct item *head;\n\tint ret;\n\n'
+            '\treturn head;\n}\n')
+    before = [prefix + signature + body for signature in (
+        'static struct item *\ntarget(int arg)\n',
+        'static struct item *target(long arg)\n')]
+    cases.append(dict(name='split-function-declaration', before=before,
+                      after=[s.replace('*head;', '*head, *next;') for s in before]))
+    prefix = [f'prefix{i}\n' for i in range(20)] + ['anchor\n']
+    suffix = ['boundary\n'] + [f'suffix{i}\n' for i in range(5)]
+    before = [prefix + ['join\n', 'left tail\n'] + suffix,
+              prefix + [f'inherited{i}\n' for i in range(10)] +
+              ['join\n', 'right tail\n'] + suffix]
+    after = [side.copy() for side in before]
+    after[0][5] = after[1][5] = 'shared edit\n'
+    after[1][25] = 'changed inherited row\n'
+    cases.append(dict(name='gap-context-margin',
+                      before=[''.join(side) for side in before],
+                      after=[''.join(side) for side in after]))
+    prefix = ('static int previous(void)\n{\n#ifdef WHICH\n\tif (a) {\n'
+              '#else\n\tif (b) {\n#endif\n\t\treturn 1;\n\t}\n'
+              '\treturn 0;\n}\nEXPORT_SYMBOL_GPL(previous);\n\n')
+    before = prefix + 'static int\ntarget(int value)\n{\n\treturn value;\n}\n'
+    for name, old, replacements in (
+            ('signature', 'target(int value)', ('target(long value)', 'target(unsigned value)')),
+            ('return-type', 'static int\ntarget', ('static short\ntarget', 'static long\ntarget'))):
+        cases.append(dict(name='label-' + name, before=[before, before],
+                          after=[before.replace(old, replacement) for replacement in replacements],
+                          context=False,
+                          labels=list(replacements) if name == 'signature' else ['target(int value)'] * 2))
+    repeated = '    repeated();\n' * 9
+    guard = '    if (unlisted) {\n        first();\n        second();\n        third();\n        return;\n    }\n'
+    before = ['start\nleft\n' + repeated + 'finish\n',
+              'start\n' + repeated + 'right\nfinish\n']
+    after = [before[0].replace('left\n', 'left\n' + guard),
+             before[1].replace('right\n', 'right\n' + guard)]
+    cases.append(dict(name='edit-before-background', before=before, after=after,
+                      shared_positions=[(2 + i, 11 + i) for i in range(6)]))
+    cases.append(dict(cases[-1], name='edit-before-background-files', moved=True))
+    before = 'site_one\nretained_one\nend_one\n' + ''.join(
+        f'between_{i}\n' for i in range(20)) + 'site_two\nretained_two\nend_two\n'
+    cases.append(dict(name='different-insertion-sites', before=[before, before],
+                      after=[before.replace('site_one\n', 'site_one\nidentical addition\n'),
+                             before.replace('site_two\n', 'site_two\nidentical addition\n')],
+                      context=False, distinct_positions=[1, 24]))
+    for case in cases:
+        directory = WORK / ('tree-' + case['name'])
+        directory.mkdir(exist_ok=True)
+        shutil.rmtree(directory / 'repo', ignore_errors=True)
+        for leg in (0, 1):
+            (directory / f'p{leg + 1}-source').write_bytes(case['before'][leg].encode())
+            (directory / f'p{leg + 1}-result').write_bytes(case['after'][leg].encode())
+        family = 'recipe-moved' if case.get('moved') else 'recipe-c'
+        paths = ['f.c', 'g.c' if case.get('moved') else 'f.c']
+        subprocess.run([generator, 'build-store', family, directory / 'repo'],
+                       env=ENV, cwd=directory, check=True, capture_output=True)
+        patches = [subprocess.check_output([derive, directory / 'repo', revision], env=ENV)
+                   for revision in ('bp', 'up')]
+        sources = [{paths[leg]: [dict(enumerate(lines(case['before'][leg].encode()))),
+                            dict(enumerate(lines(case['after'][leg].encode())))]}
+                   for leg in (0, 1)]
+        for leg in (0, 1):
+            for path in paths:
+                sources[leg].setdefault(path, [{}, {}])
+        delta_rows = None
+        for width in (0, 1, 3, 8, 12):
+            result = subprocess.run([BINARY, '--color=never', f'-U{width}',
+                                     f'--git-tree={directory}/repo', 'bp', 'up'],
+                                    env=ENV, capture_output=True, timeout=20)
+            (directory / f'review-U{width}.txt').write_bytes(result.stdout)
+            assert result.returncode == 0, (case['name'], result.stderr)
+            diagnostic = b"diffofdiffs: bp doesn't contain a patch\n" if case['name'] == 'one-sided-context' else b''
+            assert result.stderr == diagnostic, (case['name'], result.stderr)
+            report = check_review(patches, result.stdout, sources, context=width)
+            if result.stdout:
+                check_report_titles(result.stdout, ['Commit 1: bp', 'Commit 2: up'])
+            delta = sorted((row.leg, row.sign, row.pos[row.sign == '+'])
+                           for row in report['rows'] if row.section == 'delta' and row.sign in '+-' and not row.shared)
+            if delta_rows is None:
+                delta_rows = delta
+            assert delta_rows == delta, ('display width changed the edits', case['name'], width)
+            context = [row for row in report['rows'] if row.section == 'context' and row.sign in '+-']
+            boundary = case['name'] in ('beginning-of-file', 'end-of-file')
+            assert bool(context) == case.get('context', not boundary or width >= 12), (
+                'surrounding source extent', case['name'], width, context)
+            if case['name'] == 'moved-neighborhood' and width == 3:
+                assert sum(b'prefix' in row.text for row in context) == 2
+                assert not any(b'shared' in row.text for row in report['rows']
+                               if row.section == 'delta' and row.sign in '+-' and not row.shared)
+            if case['name'] == 'long-context-difference' and width == 3:
+                assert not any(b'new_tail19' in row.text for row in context)
+                assert not any(row.text.strip() == b'end' for row in context)
+                assert {r.pos[1] for r in context if r.leg == 0} == {1, 2}
+                assert {r.pos[1] for r in context if r.leg == 1} == set(range(1, 8))
+            if case['name'] == 'one-sided-context':
+                extent = max(3, width) + width
+                assert {r.pos[1] for r in context if r.leg == 1} == set(range(50 - extent, 51 + extent)), 'wrong bounded source margin'
+                assert not any(r.leg == 0 for r in context), 'invented counterpart source'
+            if case['name'] == 'repeated-text':
+                assert any(b'init' in row.text for row in context)
+            if case['name'] == 'split-function-declaration' and width == 3:
+                assert {r.pos[1] for r in context if r.leg == 0} >= {3, 4}, 'return type was clipped'
+                assert any(r.leg == 1 and r.pos[1] == 3 for r in context)
+            if case['name'] == 'gap-context-margin' and width == 3:
+                for leg, wanted in enumerate((range(18, 24), range(19, 32))):
+                    positions = {r.pos[1] for r in report['rows']
+                                 if r.section == 'context' and r.leg == leg}
+                    assert positions == set(wanted), ('wrong gap source margin', leg, positions)
+            if 'labels' in case and width == 0:
+                for label in case['labels']:
+                    assert ('@@ ' + label).encode() in column_text(result.stdout), ('wrong declaration label', case['name'], result.stdout)
+                assert b'@@ EXPORT_SYMBOL' not in result.stdout
+            if 'shared_positions' in case:
+                assert not delta, ('shared edit was moved into background', case['name'], delta)
+                if width == 3:
+                    pairs = {}
+                    for row in report['rows']:
+                        if row.section == 'context':
+                            pairs.setdefault(row.pair, {})[row.leg] = row
+                    equal = {(p[0].pos[1], p[1].pos[1]) for p in pairs.values()
+                             if len(p) == 2 and p[0].sign == p[1].sign == ' '}
+                    assert set(case['shared_positions']) <= equal, 'shared block lost its original location'
+            if 'distinct_positions' in case:
+                assert delta == [(leg, '+', pos) for leg, pos in enumerate(case['distinct_positions'])], 'identical text at different sites is not a shared edit'
+            if 'expected_delta_rows' in case:
+                assert delta == [tuple(row) for row in case['expected_delta_rows']], (case['name'], delta)
+            if width == 3 and 'equal_context' in case:
+                pairs = {}
+                for row in report['rows']:
+                    if row.section == 'context':
+                        pairs.setdefault((row.paths, row.pair), {})[row.leg] = row
+                equal = {(p[0].pos[1], p[1].pos[1]) for p in pairs.values()
+                         if len(p) == 2 and p[0].sign == p[1].sign == ' '}
+                assert set(map(tuple, case['equal_context'])) <= equal, (case['name'], equal)
+                forbidden = set(map(tuple, case.get('unpaired_context', [])))
+                assert not any((leg, pair[leg]) in forbidden for pair in equal for leg in (0, 1)), 'unrelated functions share a context row'
+            if 'expected_delta_text' in case:
+                expected_edits = Counter((1, sign, text.encode() + b'\n')
+                                         for sign in '-+' for text in case['expected_delta_text'])
+                actual_edits = Counter((r.leg, r.sign, r.source) for r in report['rows']
+                                       if r.section == 'delta' and r.sign in '+-' and not r.shared)
+                assert actual_edits == expected_edits, 'a shared removal block was split into exclusive edits'
+            if any(k in case for k in ('shared_positions', 'distinct_positions', 'expected_delta_text', 'expected_delta_rows')):
+                reverse = subprocess.run([BINARY, '--color=never', f'-U{width}',
+                                          f'--git-tree={directory}/repo', 'up', 'bp'],
+                                         env=ENV, capture_output=True, timeout=20)
+                assert reverse.returncode == 0 and not reverse.stderr, reverse.stderr
+                (directory / f'reverse-U{width}.txt').write_bytes(reverse.stdout)
+                reversed_report = check_review(patches[::-1], reverse.stdout,
+                                               sources[::-1], context=width)
+                assert paired_cells(report['rows']) == paired_cells(
+                    reversed_report['rows'], reverse=True), 'operand order changed native correspondence'
+                CHECKS += 1
+            CHECKS += 1
+
+
+def create_git_store(name):
+    """Build a disposable object store with deterministic commit identities."""
+    directory = WORK / name
+    directory.mkdir(exist_ok=True)
+    repo = directory / 'repo'
+    shutil.rmtree(repo, ignore_errors=True)
+    env = dict(ENV, GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL=os.devnull,
+               GIT_DEFAULT_HASH='sha1', GIT_AUTHOR_NAME='Example',
+               GIT_AUTHOR_EMAIL='example@example.com',
+               GIT_COMMITTER_NAME='Example', GIT_COMMITTER_EMAIL='example@example.com',
+               GIT_AUTHOR_DATE='2000-01-01T00:00:00Z',
+               GIT_COMMITTER_DATE='2000-01-01T00:00:00Z')
+    subprocess.run(['git', 'init', '--bare', '--quiet', repo], env=env,
+                   check=True, capture_output=True)
+
+    def git(*args, data=None):
+        return subprocess.check_output(['git', '-C', repo, *args], input=data, env=env)
+
+    return repo, git
+
+
+def gitlink_cases():
+    """Gitlink IDs describe submodule commits, not blobs in the parent store."""
+    global CHECKS
+    repo, git = create_git_store('gitlinks')
+
+    def commit(oid, parent=None):
+        entry = f'160000 commit {oid}\tmodule\n'.encode() if oid else b''
+        tree = git('mktree', '--missing', data=entry).strip().decode()
+        parents = ['-p', parent] if parent else []
+        return git('commit-tree', tree, *parents, data=b'Update submodule\n').strip().decode()
+
+    def source(oid):
+        return [f'Subproject commit {oid}\n'.encode()] if oid else []
+
+    for name, old, changed in (('modify', '1' * 40, ['2' * 40, '3' * 40]),
+                               ('create', None, ['2' * 40, '3' * 40]),
+                               ('delete', '1' * 40, [None, None])):
+        base = commit(old)
+        revisions = [commit(oid, base) for oid in changed]
+        patches = [git('diff', '--binary', '--submodule=short', base, rev) for rev in revisions]
+        sources = [{'module': [dict(enumerate(source(old))),
+                               dict(enumerate(source(oid)))]} for oid in changed]
+        for reverse in (False, True):
+            order = [1, 0] if reverse else [0, 1]
+            for width in (0, 3):
+                output = subprocess.check_output(
+                    [BINARY, '--color=never', f'-U{width}', f'--git-tree={repo}',
+                     *(revisions[leg] for leg in order)], env=ENV)
+                report = check_review([patches[leg] for leg in order], output,
+                                      [sources[leg] for leg in order], context=width)
+                delta = [Counter((row.sign, row.text) for row in side)
+                         for side in report['edits']]
+                wanted = [Counter(('+', line) for line in source(changed[leg]))
+                          for leg in order]
+                assert delta == wanted, (name, reverse, width, delta, wanted)
+                CHECKS += 1
+
+
+def directory_transition_cases():
+    """A directory at a former file path contributes no file source there."""
+    global CHECKS
+    repo, git = create_git_store('directory-transitions')
+    paths = ['node', 'node/item']
+
+    def commit(directory, text, parent=None):
+        blob = git('hash-object', '-w', '--stdin', data=text).strip().decode()
+        if directory:
+            child = git('mktree', data=f'100644 blob {blob}\titem\n'.encode()).strip().decode()
+            entry = f'040000 tree {child}\tnode\n'
+        else:
+            entry = f'100644 blob {blob}\tnode\n'
+        tree = git('mktree', data=entry.encode()).strip().decode()
+        parents = ['-p', parent] if parent else []
+        return git('commit-tree', tree, *parents, data=b'Change path type\n').strip().decode()
+
+    before = b'head\nold\nend\n'
+    changed = [b'head\nleft\nend\n', b'head\nright\nend\n']
+    for old_directory in (False, True):
+        base = commit(old_directory, before)
+        for new_directories in ([not old_directory, old_directory],
+                                [not old_directory, not old_directory]):
+            revisions = [commit(directory, text, base)
+                         for directory, text in zip(new_directories, changed)]
+            patches = [git('diff', '--no-renames', base, rev) for rev in revisions]
+            sources = [{path: [dict(enumerate(lines(before))) if i == old_directory else {},
+                               dict(enumerate(lines(changed[leg]))) if i == directory else {}]
+                        for i, path in enumerate(paths)}
+                       for leg, directory in enumerate(new_directories)]
+            for order in ([0, 1], [1, 0]):
+                for width in (0, 3):
+                    output = subprocess.check_output(
+                        [BINARY, '--color=never', f'-U{width}', f'--git-tree={repo}',
+                         *(revisions[leg] for leg in order)], env=ENV)
+                    inputs = [patches[leg] for leg in order]
+                    report = check_review(inputs, output, [sources[leg] for leg in order], context=width)
+                    delta = [Counter((row.sign, row.text) for row in side) for side in report['edits']]
+                    assert delta == expected(*inputs), (old_directory, new_directories, order, width, delta)
+                    CHECKS += 1
+
+
 def repeated_edit_cases():
     """Equal interior runs remain shared without hiding distinct edits."""
     suffix = b' xxxxxxxxxxxxxxxxxxxxxxxx\n'
@@ -503,6 +802,7 @@ def repeated_edit_cases():
                 patches = inputs[::-1] if reverse else inputs
                 wanted = changes[::-1] if reverse else changes
                 run_case(f'original-{name}-{reverse}-U{width}', *patches, wanted, width=width)
+
 
 def sparse_context_cases():
     cases = json.loads((ROOT / 'tests/context-quotes.json').read_text())
@@ -544,6 +844,7 @@ def sparse_context_cases():
                 assert actual == list(enumerate(wanted)), 'a margin promoted an unanchored edge to a context difference'
                 assert b'uncertain edge' not in output, 'context crossed its outer anchor into unknown source'
 
+
 def group_members(report, reverse=False):
     groups = {}
     for row in report['rows']:
@@ -551,6 +852,7 @@ def group_members(report, reverse=False):
             (row.leg ^ reverse, row.paths[row.leg], row.sign, row.pos,
              row.shared, row.source))
     return Counter(tuple(sorted(group)) for group in groups.values())
+
 
 def unknown_pairing_cases():
     # Missing source between hunks cannot justify positional row pairing
@@ -698,6 +1000,7 @@ def unknown_pairing_cases():
                     quoted, width, reverse, 'paired different function occurrences')
             assert reports[0] == reports[1], 'hunk pairing depended on order'
 
+
 def file_pairing_cases():
     before = [b'head\n', b'old\n', b'tail\n']
 
@@ -791,6 +1094,7 @@ def file_pairing_cases():
         reports.append(paired_cells(report['rows'], reverse=reverse))
     assert reports[0] == reports[1], 'tied path candidates depended on order'
 
+
 def metadata_pairing_cases():
     # Metadata for a path must leave its content counterpart available
     for name in ('rename-defer-content', 'mode-defer-depth0', 'mode-defer-depth1'):
@@ -814,6 +1118,7 @@ def metadata_pairing_cases():
             notes = column_text(output)
             assert b'Old mode:' in notes or b'Rename:' in notes, name
         assert reports[0] == reports[1], (name, 'operand order changed pairing')
+
 
 def metadata_cases():
     mode = b'diff --git a/f b/f\nold mode 100644\nnew mode 100755\n'
@@ -900,6 +1205,7 @@ def metadata_cases():
         assert notes.count(b'This patch deletes the whole file') == 2
         assert notes.count(b'The quoted binary patch data differs.') == 1
 
+
 def text_interface_cases():
     """Check the new options and the distinction between source and padding."""
     global CHECKS
@@ -937,6 +1243,206 @@ def text_interface_cases():
     html = subprocess.check_output([BINARY, '--html', *paths], env=ENV)
     assert terminal(['--html', *paths], columns=40) == html
     CHECKS += 1
+
+
+def hunk_header_cases():
+    """A missing closing delimiter does not permit junk in a coordinate."""
+    global CHECKS
+    inputs = [patch([b'old\n'], [line]) for line in (b'left\n', b'right\n')]
+    paths, _, _ = run_case('hunk-header-tail', *inputs)
+    header = b'@@ -1 +1 @@'
+    for tail in (b'@@ -1 +1', b'@@ -1 +1 @', b'@@ -1 +1 @@ heading'):
+        paths[0].write_bytes(inputs[0].replace(header, tail))
+        output = subprocess.check_output([BINARY, '--color=never', *paths], env=ENV)
+        check_review(inputs, output)
+        CHECKS += 1
+    for malformed in (b'@@ -1 +1junk @@', b'@@ -1,1 +1,1junk @@',
+                      b'@@ -1 +1,1  junk @@'):
+        paths[0].write_bytes(inputs[0].replace(header, malformed))
+        for order in (paths, paths[::-1]):
+            result = subprocess.run([BINARY, *order], env=ENV, capture_output=True)
+            assert result.returncode != 0 and b'malformed patch' in result.stderr, result.stderr
+            CHECKS += 1
+
+    # A stray file header cannot consume the next hunk's header during indexing
+    hunk = b'@@ -10 +10 @@\n-old again\n+new again\n'
+    for order in (paths, paths[::-1]):
+        paths[0].write_bytes(inputs[0] + hunk)
+        baseline = subprocess.check_output([BINARY, *order], env=ENV)
+        paths[0].write_bytes(inputs[0] + b'--- a/other\n' + hunk + b'+++ b/other\n')
+        output = subprocess.check_output([BINARY, *order], env=ENV)
+        assert output == baseline, 'stray header changed the following hunk'
+        CHECKS += 1
+
+    # A later +++ line cannot rescue an unsupported context-diff header across
+    # a hunk; validation must require adjacent file headers, as indexing does.
+    for trailing in (b'', b'+++ b/other\n'):
+        paths[0].write_bytes(inputs[0] + b'*** a/other\n--- a/other\n' + hunk + trailing)
+        for order in (paths, paths[::-1]):
+            result = subprocess.run([BINARY, *order], env=ENV, capture_output=True)
+            assert result.returncode != 0 and not result.stdout, result.stdout
+            assert b'malformed patch' in result.stderr and b'--- a/other' in result.stderr, result.stderr
+            CHECKS += 1
+
+
+def output_file_cases():
+    """The destination changes neither report content nor input handling."""
+    global CHECKS
+    before = [b'head\n', b'old\n', b'tail\n']
+    paths, _, _ = run_case('output-file',
+                           patch(before, [before[0], b'left\n', before[-1]]),
+                           patch(before, [before[0], b'right\n', before[-1]]))
+    destination = paths[0].parent / 'saved report'
+    for options in ([], ['--color=always'], ['--html']):
+        expected = subprocess.check_output([BINARY, *options, *paths], env=ENV)
+        for output in (['-o', destination], [f'--output={destination}']):
+            result = subprocess.run([BINARY, *options, *output, *paths],
+                                    env=ENV, capture_output=True, check=True)
+            assert result.stdout == b'' and result.stderr == b''
+            assert destination.read_bytes() == expected
+            CHECKS += 1
+
+        # A terminal on stdout must not color or narrow a report saved elsewhere
+        assert terminal([*options, '-o', destination, *paths], columns=40) == b''
+        assert destination.read_bytes() == expected
+        CHECKS += 1
+
+        destination.write_bytes(b'keep this file\n')
+        actual = subprocess.check_output([BINARY, *options, '-o', destination,
+                                          '-o', '-', *paths], env=ENV)
+        assert actual == expected and destination.read_bytes() == b'keep this file\n'
+        CHECKS += 1
+
+    # Parse and read failures must leave an existing destination intact
+    invalid = paths[0].parent / 'invalid.patch'
+    invalid.write_bytes(b'not a patch\n')
+    for options, inputs in product(
+            ([], ['--html']),
+            ([paths[0], invalid], [paths[0], invalid.with_suffix('.missing')])):
+        result = subprocess.run([BINARY, *options, '-o', destination, *inputs],
+                                env=ENV, capture_output=True)
+        assert result.returncode != 0 and result.stdout == b''
+        assert destination.read_bytes() == b'keep this file\n'
+        CHECKS += 1
+
+    missing = destination.parent / 'missing-directory' / 'report'
+    result = subprocess.run([BINARY, '-o', missing, *paths], env=ENV, capture_output=True)
+    assert result.returncode != 0 and os.fsencode(missing) in result.stderr
+    assert result.stdout == b''
+    CHECKS += 1
+
+    if Path('/dev/full').exists():
+        result = subprocess.run([BINARY, '-o', '/dev/full', *paths],
+                                env=ENV, capture_output=True)
+        assert result.returncode != 0 and b'write error on /dev/full' in result.stderr
+        assert result.stdout == b''
+        CHECKS += 1
+
+    # Both inputs are consumed before a destination that aliases one is opened
+    expected = subprocess.check_output([BINARY, *paths], env=ENV)
+    subprocess.run([BINARY, '-o', paths[0], *paths], env=ENV, check=True,
+                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    assert paths[0].read_bytes() == expected
+    CHECKS += 1
+
+
+def empty_output_cases():
+    """Empty comparisons emit no bytes but still open their destination."""
+    global CHECKS
+    shared = patch([b'old\n'], [b'new\n'])
+    paths, output, _ = run_case('empty-output', shared, shared,
+                                [Counter(), Counter()])
+    assert output == b''
+    repo, git = create_git_store('empty-output-tree')
+    tree = git('mktree', data=b'').strip().decode()
+    root = git('commit-tree', tree, data=b'Empty root\n').strip().decode()
+    empty = git('commit-tree', tree, '-p', root,
+                data=b'No file changes\n').strip().decode()
+    blob = git('hash-object', '-w', '--stdin', data=b'source\n').strip().decode()
+    tree = git('mktree', data=f'100644 blob {blob}\tf.c\n'.encode()).strip().decode()
+    changed = git('commit-tree', tree, '-p', root,
+                  data=b'Add source\n').strip().decode()
+    cases = (
+        ('patch', paths),
+        ('empty-tree', [f'--git-tree={repo}', root, empty]),
+        ('identical-tree', [f'--git-tree={repo}', changed, changed]))
+    for name, args in cases:
+        destination = paths[0].parent / f'{name}-report'
+        for options in ([], ['--html']):
+            for output_args in ([], ['-o', '-']):
+                result = subprocess.run([BINARY, *options, *output_args, *args],
+                                        env=ENV, capture_output=True)
+                assert (result.returncode, result.stdout, result.stderr) == (0, b'', b'')
+                CHECKS += 1
+
+            # A successful empty report must also replace a stale saved report
+            for previous in (None, b'previous report\n'):
+                if previous is None:
+                    destination.unlink(missing_ok=True)
+                else:
+                    destination.write_bytes(previous)
+                result = subprocess.run([BINARY, *options, '-o', destination, *args],
+                                        env=ENV, capture_output=True)
+                assert (result.returncode, result.stdout, result.stderr) == (0, b'', b'')
+                assert destination.is_file() and destination.read_bytes() == b''
+                CHECKS += 1
+
+            missing = destination.parent / 'missing-directory' / name
+            result = subprocess.run([BINARY, *options, '-o', missing, *args],
+                                    env=ENV, capture_output=True)
+            assert result.returncode == 1 and result.stdout == b''
+            assert b'cannot open' in result.stderr and os.fsencode(missing) in result.stderr
+            CHECKS += 1
+            if Path('/dev/full').exists():
+                result = subprocess.run([BINARY, *options, '-o', '/dev/full', *args],
+                                        env=ENV, capture_output=True)
+                assert (result.returncode, result.stdout, result.stderr) == (0, b'', b'')
+                CHECKS += 1
+
+    # Shared edits may leave context differences, while file actions need no rows
+    context = [patch([label, b'old\n'], [label, b'new\n'])
+               for label in (b'left context\n', b'right context\n')]
+    modes = [b'diff --git a/f.c b/f.c\nold mode 100644\nnew mode ' + mode + b'\n'
+             for mode in (b'100755', b'100600')]
+    for section, inputs in (('context', context), ('delta', modes)):
+        paths, output, _ = run_case(f'nonempty-{section}', *inputs)
+        assert output
+        result = subprocess.run([BINARY, '--html', *paths], env=ENV, capture_output=True)
+        assert result.returncode == 0 and result.stderr == b''
+        assert result.stdout.startswith(b'<!doctype html>')
+        assert f'<section id="{section}">'.encode() in result.stdout
+        CHECKS += 1
+
+
+def output_failure_cases():
+    """Failures must retain their full diagnostic and report lost output."""
+    global CHECKS
+    missing = WORK / ('a' * 180) / ('b' * 180) / 'missing.patch'
+    result = subprocess.run([BINARY, missing, missing], env=ENV, capture_output=True)
+    assert result.returncode != 0 and os.fsencode(missing) in result.stderr, result.stderr
+    CHECKS += 1
+
+    before = [b'old\n']
+    paths, _, _ = run_case('full-output-pipe',
+                           patch(before, [b'left\n']), patch(before, [b'right\n']))
+    read_fd, write_fd = os.pipe()
+    try:
+        os.set_blocking(write_fd, False)
+        while True:
+            try:
+                os.write(write_fd, b'x' * 4096)
+            except BlockingIOError:
+                break
+
+        # Keep the reader open without draining it: EAGAIN is not a closed reader
+        result = subprocess.run([BINARY, *paths], stdout=write_fd,
+                                stderr=subprocess.PIPE, env=ENV, timeout=10)
+        assert result.returncode != 0 and b'write error' in result.stderr, result.stderr
+        CHECKS += 1
+    finally:
+        os.close(write_fd)
+        os.close(read_fd)
+
 
 def framing_cases():
     """Exercise the compact grid independently of metadata length and color."""
@@ -1006,6 +1512,7 @@ def framing_cases():
     assert b'New mode: 100755' in column_text(output)
     CHECKS += 1
 
+
 def check_report_titles(output, labels):
     """Require one complete title block above provenance and file captions."""
     plain = re.sub(rb'\x1b\[[0-9;]*m', b'', output).decode()
@@ -1054,6 +1561,7 @@ def check_report_titles(output, labels):
     for row, count in Counter(titles).items():
         assert physical.count(row) == count, 'title repeated below its initial block'
     return sections
+
 
 def open_title_operand(resources, path, kind, descriptor_directory):
     """Keep stream inputs alive until the report has consumed them."""
@@ -1112,6 +1620,7 @@ def open_title_operand(resources, path, kind, descriptor_directory):
         options['cwd'] = directory
     return name, None, options
 
+
 def stream_title_cases():
     """Name real files, but leave stream and descriptor titles role-only."""
     global CHECKS
@@ -1164,6 +1673,7 @@ def stream_title_cases():
         check_report_titles(result.stdout, labels)
         check_review([inputs[leg] for leg in order], result.stdout, context=3)
         CHECKS += 1
+
 
 def title_cases():
     """Keep one title block across sections, files, and one-sided entries."""
@@ -1220,6 +1730,7 @@ def title_cases():
     assert subprocess.check_output([BINARY, '--color=always', *paths], env=ENV) == b''
     CHECKS += 1
 
+
 def grouping_cases():
     """Added context must not move an insertion to a different source location."""
     first = (ROOT / 'tests/source-priority-shared-insertion/patch1').read_bytes()
@@ -1241,6 +1752,24 @@ def grouping_cases():
                 actual = [[(row.sign, row.pos, row.text) for row in side] for side in report['edits']]
                 assert actual == expected_rows[::(-1 if reverse else 1)], ('hunk grouping moved an edit', name, actual)
 
+
+def correspondence_cases():
+    for case in json.loads((ROOT / 'tests/correspondence-quotes.json').read_text()):
+        patches = [p.encode() for p in case['patches']]
+        widths = (0, 3, 12) if 'required_edits' in case or 'expected_edits' in case else (3,)
+        for width in widths:
+            reports = [run_case(f"{case['name']}{suffix}-U{width}", *operands, width=width)[2]
+                       for suffix, operands in (('-forward', patches), ('-reverse', patches[::-1]))]
+            identities = [[Counter((row.sign, row.pos, row.text) for row in rows)
+                           for rows in report['edits']] for report in reports]
+            assert identities[0] == identities[1][::-1], case['name']
+            edits = {(leg, row.sign, row.pos[row.sign == '+'])
+                     for leg, rows in enumerate(reports[0]['edits']) for row in rows}
+            assert set(map(tuple, case.get('required_edits', []))) <= edits, (case['name'], edits)
+            if 'expected_edits' in case:
+                assert edits == set(map(tuple, case['expected_edits'])), (case['name'], edits)
+
+
 def unknown_island_cases():
     # Reversal cannot move an unpaired quotation across a report separator
     for name in ('crossed-pair', 'source-conflicting-positive',
@@ -1261,6 +1790,7 @@ def unknown_island_cases():
                 reports.append(group_members(report, reverse))
             assert reports[0] == reports[1], (name, width,
                                              'quotation changed groups')
+
 
 def known_suffix_cases():
     # A quoted suffix pairs similar rows before falling back to its anchor
@@ -1303,6 +1833,62 @@ def known_suffix_cases():
         zero = rows[not reverse, b'right zero\n']
         assert all(pair != zero for (leg, _), pair in rows.items()
                    if leg == reverse), 'excess suffix row gained a partner'
+
+
+def corpus_cases():
+    global CHECKS
+    directory = WORK / 'corpus-assertions'
+    if directory.exists():
+        shutil.rmtree(directory)
+    (directory / 'patches').mkdir(parents=True)
+    case = dict(name='replacement', bp='left', up='right')
+    for leg, value in (('bp', b'left\n'), ('up', b'right\n')):
+        (directory / 'patches' / f'{leg}-{case[leg]}.patch').write_bytes(
+            patch([b'old\n'], [value]))
+    (directory / 'repro.json').write_text(json.dumps([case]))
+    wanted = dict(case, edits=[[0, 'f.c', '+', 1], [1, 'f.c', '+', 1]])
+    assertions = directory / 'locations.json'
+    for name, edits in (('correct', wanted['edits']),
+                        ('wrong-line', [[0, 'f.c', '+', 2], [1, 'f.c', '+', 1]]),
+                        ('optional', None)):
+        assertions.write_text(json.dumps([dict(wanted, edits=edits)]))
+        output = directory / name
+        command = [sys.executable, ROOT / 'tests/check-corpus.py', '--mode=patch',
+                   '--reverse', '--jobs=1', '--binary', BINARY,
+                   '--corpus', directory, '--output', output]
+        if edits is not None:
+            command += ['--expectations', assertions]
+        result = subprocess.run(command, env=ENV, capture_output=True, timeout=60)
+        summary = json.loads((output / 'summary.json').read_text())
+        assert result.returncode == (1 if name == 'wrong-line' else 0), result.stderr
+        assert summary['passed'] == (name != 'wrong-line'), summary
+        assert json.loads((output / 'expectations.json').read_text()) == (
+            [dict(wanted, edits=edits)] if edits is not None else [])
+        CHECKS += 1
+
+    # Paired coordinates alone do not verify excerpt signs or completeness
+    check = runpy.run_path(str(ROOT / 'tests/check-corpus.py'))['check_expectations']
+    rows = [PrintedRow('context', ('f.c', 'f.c'), 0, leg, ' ', b'anchor\n',
+                       (4, 4), pair=0) for leg in (0, 1)]
+    wanted = dict(case, edits=[], equal_context=[[['f.c', 'f.c'], 5, 5]],
+                  context_rows=[[0, 'f.c', ' ', 5]],
+                  context_exact=[dict(leg=0, path='f.c', sign=' ', between=[4, 6], lines=[5])])
+    check(case, dict(rows=rows), 'tree', [wanted])
+    corruptions = [
+        [replace(rows[0], pos=(5, 5)), rows[1]],
+        [rows[0], replace(rows[1], pair=1)],
+        [replace(rows[0], sign='-'), rows[1]],
+        rows + [replace(rows[0], pos=(5, 5), pair=1)],
+        [replace(rows[0], paths=('other.c', 'f.c')), rows[1]],
+    ]
+    for broken in corruptions:
+        try:
+            check(case, dict(rows=broken), 'tree', [wanted])
+        except AssertionError:
+            CHECKS += 1
+        else:
+            raise AssertionError(('corpus assertion accepted corrupt context', broken))
+
 
 def main():
     global CHECKS
@@ -1398,6 +1984,7 @@ def main():
     assert b'\x1b[32m' in line_colors and b'\x1b[31m' not in line_colors
     CHECKS += 5
     oracle_negative_cases()
+    neutral_move_oracle_cases()
     context_margin_cases()
     repeated_edit_cases()
     wrapping_cases()
@@ -1410,13 +1997,23 @@ def main():
     file_pairing_cases()
     metadata_pairing_cases()
     metadata_cases()
+    correspondence_cases()
     grouping_cases()
     text_interface_cases()
+    hunk_header_cases()
+    output_file_cases()
+    empty_output_cases()
+    output_failure_cases()
     framing_cases()
     title_cases()
     stream_title_cases()
+    tree_cases()
+    gitlink_cases()
+    directory_transition_cases()
+    corpus_cases()
     CHECKS += check_reindentation_cases(BINARY, WORK, ENV)
     print(f'PASS {CHECKS} original-source, ownership, layout, and terminal checks ({BINARY.name})')
+
 
 if __name__ == '__main__':
     main()

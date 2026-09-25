@@ -1,0 +1,87 @@
+[
+  {
+    "name": "pr1324-4b4e2d3d49e-02a0a04676fa",
+    "patches": [
+      "diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h\nindex 73f21bb7018e8..0dc4d2eb2e55f 100644\n--- a/arch/arm64/include/asm/cputype.h\n+++ b/arch/arm64/include/asm/cputype.h\n@@ -83,6 +83,7 @@\n #define ARM_CPU_PART_CORTEX_A510\t0xD46\n #define ARM_CPU_PART_CORTEX_A520\t0xD80\n #define ARM_CPU_PART_CORTEX_A720\t0xD81\n+#define ARM_CPU_PART_CORTEX_X4\t\t0xD82\n #define ARM_CPU_PART_CORTEX_A710\t0xD47\n #define ARM_CPU_PART_CORTEX_A715\t0xD4D\n #define ARM_CPU_PART_CORTEX_X2\t\t0xD48\n@@ -166,6 +167,7 @@\n #define MIDR_CORTEX_X3 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X3)\n #define MIDR_NEOVERSE_V2 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_V2)\n #define MIDR_CORTEX_A720 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A720)\n+#define MIDR_CORTEX_X4 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X4)\n #define MIDR_THUNDERX\tMIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX)\n #define MIDR_THUNDERX_81XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_81XX)\n #define MIDR_THUNDERX_83XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_83XX)\n",
+      "diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h\nindex 52f076afeb960..2989c023c6f34 100644\n--- a/arch/arm64/include/asm/cputype.h\n+++ b/arch/arm64/include/asm/cputype.h\n@@ -86,6 +86,7 @@\n #define ARM_CPU_PART_CORTEX_X2\t\t0xD48\n #define ARM_CPU_PART_NEOVERSE_N2\t0xD49\n #define ARM_CPU_PART_CORTEX_A78C\t0xD4B\n+#define ARM_CPU_PART_CORTEX_X4\t\t0xD82\n \n #define APM_CPU_PART_XGENE\t\t0x000\n #define APM_CPU_VAR_POTENZA\t\t0x00\n@@ -159,6 +160,7 @@\n #define MIDR_CORTEX_X2 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X2)\n #define MIDR_NEOVERSE_N2 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_N2)\n #define MIDR_CORTEX_A78C\tMIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A78C)\n+#define MIDR_CORTEX_X4 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X4)\n #define MIDR_THUNDERX\tMIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX)\n #define MIDR_THUNDERX_81XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_81XX)\n #define MIDR_THUNDERX_83XX MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX_83XX)\n"
+    ]
+  },
+  {
+    "name": "pr1325-26377f1e4b1-58d245e03c32",
+    "patches": [
+      "diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h\nindex 0327c0d3cb431..877950903fbfc 100644\n--- a/arch/arm64/include/asm/cputype.h\n+++ b/arch/arm64/include/asm/cputype.h\n@@ -79,6 +79,7 @@\n #define ARM_CPU_PART_CORTEX_A78\t\t0xD41\n #define ARM_CPU_PART_CORTEX_A78AE\t0xD42\n #define ARM_CPU_PART_CORTEX_X1\t\t0xD44\n+#define ARM_CPU_PART_CORTEX_X1C\t\t0xD4C\n #define ARM_CPU_PART_CORTEX_A510\t0xD46\n #define ARM_CPU_PART_CORTEX_A710\t0xD47\n #define ARM_CPU_PART_CORTEX_X2\t\t0xD48\n@@ -142,6 +143,7 @@\n #define MIDR_CORTEX_A78\tMIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A78)\n #define MIDR_CORTEX_A78AE\tMIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A78AE)\n #define MIDR_CORTEX_X1\tMIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X1)\n+#define MIDR_CORTEX_X1C MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X1C)\n #define MIDR_CORTEX_A510 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A510)\n #define MIDR_CORTEX_A710 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A710)\n #define MIDR_CORTEX_X2 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X2)\n",
+      "diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h\nindex 1cb0704c6163f..5dc68ace305e5 100644\n--- a/arch/arm64/include/asm/cputype.h\n+++ b/arch/arm64/include/asm/cputype.h\n@@ -86,6 +86,7 @@\n #define ARM_CPU_PART_CORTEX_X2\t\t0xD48\n #define ARM_CPU_PART_NEOVERSE_N2\t0xD49\n #define ARM_CPU_PART_CORTEX_A78C\t0xD4B\n+#define ARM_CPU_PART_CORTEX_X1C\t\t0xD4C\n #define ARM_CPU_PART_CORTEX_X3\t\t0xD4E\n #define ARM_CPU_PART_NEOVERSE_V2\t0xD4F\n #define ARM_CPU_PART_CORTEX_A720\t0xD81\n@@ -165,6 +166,7 @@\n #define MIDR_CORTEX_X2 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X2)\n #define MIDR_NEOVERSE_N2 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_N2)\n #define MIDR_CORTEX_A78C\tMIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A78C)\n+#define MIDR_CORTEX_X1C\tMIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X1C)\n #define MIDR_CORTEX_X3 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_X3)\n #define MIDR_NEOVERSE_V2 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_NEOVERSE_V2)\n #define MIDR_CORTEX_A720 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A720)\n"
+    ]
+  },
+  {
+    "name": "blank-additions-at-distinct-sites",
+    "patches": [
+      "--- a/mm/rmap.c\n+++ b/mm/rmap.c\n@@ -1488,13 +1488,16 @@\n \t\taddress = pvmw.address;\n \n \t\tif (PageHuge(page) && !PageAnon(page)) {\n+\t\t\tstruct mmu_gather tlb;\n+\n \t\t\t/*\n \t\t\t * To call huge_pmd_unshare, i_mmap_rwsem must be\n \t\t\t * held in write mode.  Caller needs to explicitly\n \t\t\t * do this outside rmap routines.\n \t\t\t */\n \t\t\tVM_BUG_ON(!(flags & TTU_RMAP_LOCKED));\n-\t\t\tif (huge_pmd_unshare(mm, vma, &address, pvmw.pte)) {\n+\t\t\ttlb_gather_mmu_vma(&tlb, vma, range.start, range.end);\n+\t\t\tif (huge_pmd_unshare(&tlb, vma, &address, pvmw.pte)) {\n \t\t\t\t/*\n \t\t\t\t * huge_pmd_unshare unmapped an entire PMD\n \t\t\t\t * page.  There is no way of knowing exactly\n",
+      "--- a/mm/rmap.c\n+++ b/mm/rmap.c\n@@ -2008,13 +2008,17 @@\n \t\t\t * if unsuccessful.\n \t\t\t */\n \t\t\tif (!anon) {\n+\t\t\t\tstruct mmu_gather tlb;\n+\n \t\t\t\tVM_BUG_ON(!(flags & TTU_RMAP_LOCKED));\n \t\t\t\tif (!hugetlb_vma_trylock_write(vma))\n \t\t\t\t\tgoto walk_abort;\n-\t\t\t\tif (huge_pmd_unshare(mm, vma, address, pvmw.pte)) {\n+\n+\t\t\t\ttlb_gather_mmu_vma(&tlb, vma);\n+\t\t\t\tif (huge_pmd_unshare(&tlb, vma, address, pvmw.pte)) {\n \t\t\t\t\thugetlb_vma_unlock_write(vma);\n-\t\t\t\t\tflush_tlb_range(vma,\n-\t\t\t\t\t\trange.start, range.end);\n+\t\t\t\t\thuge_pmd_unshare_flush(&tlb, vma);\n+\t\t\t\t\ttlb_finish_mmu(&tlb);\n \t\t\t\t\t/*\n \t\t\t\t\t * The PMD table was unmapped,\n \t\t\t\t\t * consequently unmapping the folio.\n"
+    ],
+    "required_edits": [
+      [
+        0,
+        "+",
+        1491
+      ],
+      [
+        1,
+        "+",
+        2015
+      ]
+    ]
+  },
+  {
+    "name": "partial-file-split-joined",
+    "patches": [
+      "--- a/drivers/iommu/iommufd/fault.c\n+++ b/drivers/iommu/iommufd/fault.c\n@@ -402,6 +402,7 @@\n \tspin_lock_init(&fault->lock);\n \tinit_waitqueue_head(&fault->wait_queue);\n \n+\t/* The filep is fput() by the core code during failure */\n \tfilep = anon_inode_getfile(\"[iommufd-pgfault]\", &iommufd_fault_fops,\n \t\t\t\t   fault, O_RDWR);\n \tif (IS_ERR(filep)) {\n",
+      "--- a/drivers/iommu/iommufd/eventq.c\n+++ b/drivers/iommu/iommufd/eventq.c\n@@ -393,12 +393,12 @@\n \t\t\t       const struct file_operations *fops)\n {\n \tstruct file *filep;\n-\tint fdno;\n \n \tspin_lock_init(&eventq->lock);\n \tINIT_LIST_HEAD(&eventq->deliver);\n \tinit_waitqueue_head(&eventq->wait_queue);\n \n+\t/* The filep is fput() by the core code during failure */\n \tfilep = anon_inode_getfile(name, fops, eventq, O_RDWR);\n \tif (IS_ERR(filep))\n \t\treturn PTR_ERR(filep);\n"
+    ],
+    "expected_edits": [
+      [
+        1,
+        "-",
+        395
+      ]
+    ]
+  },
+  {
+    "name": "partial-file-split-separate",
+    "patches": [
+      "--- a/drivers/iommu/iommufd/fault.c\n+++ b/drivers/iommu/iommufd/fault.c\n@@ -402,6 +402,7 @@\n \tspin_lock_init(&fault->lock);\n \tinit_waitqueue_head(&fault->wait_queue);\n \n+\t/* The filep is fput() by the core code during failure */\n \tfilep = anon_inode_getfile(\"[iommufd-pgfault]\", &iommufd_fault_fops,\n \t\t\t\t   fault, O_RDWR);\n \tif (IS_ERR(filep)) {\n",
+      "--- a/drivers/iommu/iommufd/eventq.c\n+++ b/drivers/iommu/iommufd/eventq.c\n@@ -393,6 +393,5 @@\n \t\t\t       const struct file_operations *fops)\n {\n \tstruct file *filep;\n-\tint fdno;\n \n \tspin_lock_init(&eventq->lock);\n@@ -399,6 +398,7 @@\n \tINIT_LIST_HEAD(&eventq->deliver);\n \tinit_waitqueue_head(&eventq->wait_queue);\n \n+\t/* The filep is fput() by the core code during failure */\n \tfilep = anon_inode_getfile(name, fops, eventq, O_RDWR);\n \tif (IS_ERR(filep))\n \t\treturn PTR_ERR(filep);\n"
+    ],
+    "expected_edits": [
+      [
+        1,
+        "-",
+        395
+      ]
+    ]
+  },
+  {
+    "name": "partial-file-split-unrelated-neighbors",
+    "patches": [
+      "--- a/left.c\n+++ b/left.c\n@@ -1,5 +1,6 @@\n void left(void)\n {\n \tprepare_left();\n+\t/* Report failure to the caller */\n \tcommit_left();\n }\n",
+      "--- a/right.c\n+++ b/right.c\n@@ -1,6 +1,6 @@\n void right(void)\n {\n-\tint unused;\n \tprepare_right();\n+\t/* Report failure to the caller */\n \tcommit_right();\n }\n"
+    ],
+    "expected_edits": [
+      [
+        0,
+        "+",
+        3
+      ],
+      [
+        1,
+        "+",
+        3
+      ],
+      [
+        1,
+        "-",
+        2
+      ]
+    ]
+  }
+]

@@ -1,0 +1,90 @@
+[
+  {
+    "name": "removed-surrounding-row",
+    "before": [
+      "alpha\nold_only\ncommon\nomega\n",
+      "alpha\ncommon\nomega\n"
+    ],
+    "after": [
+      "alpha\nold_only\ncommon\nshared\nbackport_only\nomega\n",
+      "alpha\ncommon\nshared\nupstream_only\nomega\n"
+    ]
+  },
+  {
+    "name": "repeated-text",
+    "before": [
+      "start\n\told\n\tseparator\n\tjoin\n\tend\n",
+      "start\n\tseparator\n\tinit\n\tjoin\n\tend\n"
+    ],
+    "after": [
+      "start\n\tshared_a\n\tseparator\n\tshared_b\n\tseparator\n\tjoin\n\tend\n",
+      "start\n\tshared_a\n\tseparator\n\tshared_b\n\tseparator\n\tinit\n\tjoin\n\tend\n"
+    ]
+  },
+  {
+    "name": "repeated-blank",
+    "before": [
+      "start\n\told\n\n\tjoin\n\tend\n",
+      "start\n\n\tinit\n\tjoin\n\tend\n"
+    ],
+    "after": [
+      "start\n\tshared_a\n\n\tshared_b\n\n\tjoin\n\tend\n",
+      "start\n\tshared_a\n\n\tshared_b\n\n\tinit\n\tjoin\n\tend\n"
+    ]
+  },
+  {
+    "name": "beginning-of-file",
+    "before": [
+      "wid row 16\nwid row 15\nwid row 14\nwid row 13\nwid row 12\nwid row 11\nwid row 10\nwid row 09\nwid leg one block row 4\nwid leg one block row 3\nwid leg one block row 2\nwid leg one block row 1\nwid row 08\nwid row 07\nwid row 06\nwid row 05\nwid row 04\nwid row 03\nwid row 02\nwid row 01\n",
+      "wid row 09\nwid row 08\nwid row 16\nwid row 15\nwid row 14\nwid row 13\nwid row 12\nwid row 11\nwid row 10\nwid row 09\nwid leg two block row 4\nwid leg two block row 3\nwid leg two block row 2\nwid leg two block row 1\nwid row 08\nwid row 07\nwid row 06\nwid row 05\nwid row 04\nwid row 03\nwid row 02\nwid row 01\n"
+    ],
+    "after": [
+      "wid row 16\nwid row 15\nwid row 14\nwid row 13\nwid row 12\nwid row 11\nwid row 10\nwid row 09\nwid row 08\nwid row 07\nwid row 06\nwid row 05\nwid row 04\nwid row 03\nwid row 02\nwid row 01\n",
+      "wid row 09\nwid row 08\nwid row 16\nwid row 15\nwid row 14\nwid row 13\nwid row 12\nwid row 11\nwid row 10\nwid row 09\nwid row 08\nwid row 07\nwid row 06\nwid row 05\nwid row 04\nwid row 03\nwid row 02\nwid row 01\n"
+    ]
+  },
+  {
+    "name": "end-of-file",
+    "before": [
+      "wid row 01\nwid row 02\nwid row 03\nwid row 04\nwid row 05\nwid row 06\nwid row 07\nwid row 08\nwid leg one block row 1\nwid leg one block row 2\nwid leg one block row 3\nwid leg one block row 4\nwid row 09\nwid row 10\nwid row 11\nwid row 12\nwid row 13\nwid row 14\nwid row 15\nwid row 16\n",
+      "wid row 01\nwid row 02\nwid row 03\nwid row 04\nwid row 05\nwid row 06\nwid row 07\nwid row 08\nwid leg two block row 1\nwid leg two block row 2\nwid leg two block row 3\nwid leg two block row 4\nwid row 09\nwid row 10\nwid row 11\nwid row 12\nwid row 13\nwid row 14\nwid row 15\nwid row 16\nwid row 08\nwid row 09\n"
+    ],
+    "after": [
+      "wid row 01\nwid row 02\nwid row 03\nwid row 04\nwid row 05\nwid row 06\nwid row 07\nwid row 08\nwid row 09\nwid row 10\nwid row 11\nwid row 12\nwid row 13\nwid row 14\nwid row 15\nwid row 16\n",
+      "wid row 01\nwid row 02\nwid row 03\nwid row 04\nwid row 05\nwid row 06\nwid row 07\nwid row 08\nwid row 09\nwid row 10\nwid row 11\nwid row 12\nwid row 13\nwid row 14\nwid row 15\nwid row 16\nwid row 08\nwid row 09\n"
+    ]
+  },
+  {
+    "name": "context-tail",
+    "before": [
+      "start\n\told\n\tjoin\n\tx\n\textra\n",
+      "start\n\told\n\tjoin\n\tcleanup\n\tend\n"
+    ],
+    "after": [
+      "start\n\tnew\n\tjoin\n\tcleanup\n\tend\n\textra\n",
+      "start\n\tnew\n\tjoin\n\tcleanup\n\tend\n"
+    ]
+  },
+  {
+    "name": "moved-neighborhood",
+    "before": [
+      "/* prefix0 */\n/* prefix1 */\n/* prefix2 */\n/* prefix3 */\n/* prefix4 */\n/* prefix5 */\n/* prefix6 */\n/* prefix7 */\nstart\n\told_a\n\told_b\n\tjoin\n\tfinish\nend\n",
+      "start\n\tnew_a\n\tnew_b\n\tjoin\n\tfinish\nend\n/* prefix0 */\n/* prefix1 */\n/* prefix2 */\n/* prefix3 */\n/* prefix4 */\n/* prefix5 */\n/* prefix6 */\n/* prefix7 */\n"
+    ],
+    "after": [
+      "/* prefix0 */\n/* prefix1 */\n/* prefix2 */\n/* prefix3 */\n/* prefix4 */\n/* prefix5 */\n/* prefix6 */\n/* prefix7 */\nstart\n\told_a\n\told_b\n\tshared\n\told_only\n\tjoin\n\tfinish\nend\n",
+      "start\n\tnew_a\n\tnew_b\n\tshared\n\tnew_only\n\tjoin\n\tfinish\nend\n/* prefix0 */\n/* prefix1 */\n/* prefix2 */\n/* prefix3 */\n/* prefix4 */\n/* prefix5 */\n/* prefix6 */\n/* prefix7 */\n"
+    ]
+  },
+  {
+    "name": "long-context-difference",
+    "before": [
+      "start\n\told_a\n\tseparator\n\told_tail\nend\n",
+      "start\n\tnew_a\n\tseparator\n\tnew_tail0\n\tnew_tail1\n\tnew_tail2\n\tnew_tail3\n\tnew_tail4\n\tnew_tail5\n\tnew_tail6\n\tnew_tail7\n\tnew_tail8\n\tnew_tail9\n\tnew_tail10\n\tnew_tail11\n\tnew_tail12\n\tnew_tail13\n\tnew_tail14\n\tnew_tail15\n\tnew_tail16\n\tnew_tail17\n\tnew_tail18\n\tnew_tail19\nend\n"
+    ],
+    "after": [
+      "start\n\told_a\n\told_tail\nend\n",
+      "start\n\tnew_a\n\tnew_tail0\n\tnew_tail1\n\tnew_tail2\n\tnew_tail3\n\tnew_tail4\n\tnew_tail5\n\tnew_tail6\n\tnew_tail7\n\tnew_tail8\n\tnew_tail9\n\tnew_tail10\n\tnew_tail11\n\tnew_tail12\n\tnew_tail13\n\tnew_tail14\n\tnew_tail15\n\tnew_tail16\n\tnew_tail17\n\tnew_tail18\n\tnew_tail19\nend\n"
+    ]
+  }
+]

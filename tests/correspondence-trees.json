@@ -1,0 +1,393 @@
+[
+  {
+    "name": "shared-removal-with-extra-row",
+    "origin": "Adapted from Linux rxe_srq.c: a shared removal with an extra upstream assignment",
+    "before": [
+      "\tq = rxe_queue_init(rxe, &srq->rq.max_wr,\n\t\t\tsrq_wqe_size, type);\n\tif (!q) {\n\t\tpr_warn(\"unable to allocate queue for srq\\n\");\n\t\treturn -ENOMEM;\n\t}\n\n\tsrq->rq.queue = q;\n\n\terr = do_mmap_info(rxe, uresp ? &uresp->mi : NULL, udata, q->buf,\n\t\t\t   q->buf_size, &q->ip);\n\tif (err) {\n\t\tvfree(q->buf);\n\t\tkfree(q);\n\t\treturn err;\n\t}\n\n\tif (uresp) {\n\t\tif (copy_to_user(&uresp->srq_num, &srq->srq_num,\n\t\t\t\t sizeof(uresp->srq_num))) {\n\t\t\trxe_queue_cleanup(q);\n\t\t\treturn -EFAULT;\n\t\t}\n\t}\n\n\treturn 0;\n}\n\nint rxe_srq_from_attr(struct rxe_dev *rxe, struct rxe_srq *srq,\n\t\t      struct ib_srq_attr *attr, enum ib_srq_attr_mask mask,\n\t\t      struct rxe_modify_srq_cmd *ucmd, struct ib_udata *udata)\n{\n\tint err;\n\tstruct rxe_queue *q = srq->rq.queue;\n",
+      "\terr = do_mmap_info(rxe, uresp ? &uresp->mi : NULL, udata, q->buf,\n\t\t\t   q->buf_size, &q->ip);\n\tif (err) {\n\t\trxe_dbg_srq(srq, \"Unable to init mmap info for caller\\n\");\n\t\tgoto err_free;\n\t}\n\n\tsrq->rq.queue = q;\n\tinit->attr.max_wr = srq->rq.max_wr;\n\n\tif (uresp) {\n\t\tif (copy_to_user(&uresp->srq_num, &srq->srq_num,\n\t\t\t\t sizeof(uresp->srq_num))) {\n\t\t\trxe_queue_cleanup(q);\n\t\t\treturn -EFAULT;\n\t\t}\n\t}\n\n\treturn 0;\n\nerr_free:\n\tvfree(q->buf);\n\tkfree(q);\nerr_out:\n\treturn err;\n}\n\nint rxe_srq_chk_attr(struct rxe_dev *rxe, struct rxe_srq *srq,\n\t\t     struct ib_srq_attr *attr, enum ib_srq_attr_mask mask)\n"
+    ],
+    "after": [
+      "\tq = rxe_queue_init(rxe, &srq->rq.max_wr,\n\t\t\tsrq_wqe_size, type);\n\tif (!q) {\n\t\tpr_warn(\"unable to allocate queue for srq\\n\");\n\t\treturn -ENOMEM;\n\t}\n\n\terr = do_mmap_info(rxe, uresp ? &uresp->mi : NULL, udata, q->buf,\n\t\t\t   q->buf_size, &q->ip);\n\tif (err) {\n\t\tvfree(q->buf);\n\t\tkfree(q);\n\t\treturn err;\n\t}\n\n\tif (uresp) {\n\t\tif (copy_to_user(&uresp->srq_num, &srq->srq_num,\n\t\t\t\t sizeof(uresp->srq_num))) {\n\t\t\trxe_queue_cleanup(q);\n\t\t\treturn -EFAULT;\n\t\t}\n\t}\n\n\tsrq->rq.queue = q;\n\n\treturn 0;\n}\n\nint rxe_srq_from_attr(struct rxe_dev *rxe, struct rxe_srq *srq,\n\t\t      struct ib_srq_attr *attr, enum ib_srq_attr_mask mask,\n\t\t      struct rxe_modify_srq_cmd *ucmd, struct ib_udata *udata)\n{\n\tint err;\n\tstruct rxe_queue *q = srq->rq.queue;\n",
+      "\terr = do_mmap_info(rxe, uresp ? &uresp->mi : NULL, udata, q->buf,\n\t\t\t   q->buf_size, &q->ip);\n\tif (err) {\n\t\trxe_dbg_srq(srq, \"Unable to init mmap info for caller\\n\");\n\t\tgoto err_free;\n\t}\n\n\tif (uresp) {\n\t\tif (copy_to_user(&uresp->srq_num, &srq->srq_num,\n\t\t\t\t sizeof(uresp->srq_num))) {\n\t\t\trxe_queue_cleanup(q);\n\t\t\treturn -EFAULT;\n\t\t}\n\t}\n\n\tsrq->rq.queue = q;\n\tinit->attr.max_wr = srq->rq.max_wr;\n\n\treturn 0;\n\nerr_free:\n\tvfree(q->buf);\n\tkfree(q);\nerr_out:\n\treturn err;\n}\n\nint rxe_srq_chk_attr(struct rxe_dev *rxe, struct rxe_srq *srq,\n\t\t     struct ib_srq_attr *attr, enum ib_srq_attr_mask mask)\n"
+    ],
+    "expected_delta_text": [
+      "\tinit->attr.max_wr = srq->rq.max_wr;"
+    ]
+  },
+  {
+    "name": "function-close-before-old-helper",
+    "before": [
+      "static void finish(struct task *task)\n{\n\tunlock(task);\n\tadjust(task);\n\tlock(task);\n}\n\nstatic void old_helper(struct task *task)\n{\n\told_adjust(task);\n}\n",
+      "static void finish(struct task_base *task)\n{\n\tunlock_irq(task);\n\tadjust(task, next);\n\tlock_irq(task);\n}\n"
+    ],
+    "after": [
+      "static void finish(struct task *task)\n{\n\tget_task(task);\n\tunlock(task);\n\tadjust(task);\n\tlock(task);\n}\n\nstatic void old_helper(struct task *task)\n{\n\told_adjust(task);\n}\n",
+      "static void finish(struct task_base *task)\n{\n\tget_task(task);\n\tunlock_irq(task);\n\tadjust(task, next);\n\tlock_irq(task);\n}\n"
+    ],
+    "expected_delta_rows": [],
+    "equal_context": [
+      [
+        6,
+        6
+      ]
+    ],
+    "unpaired_context": [
+      [
+        0,
+        11
+      ]
+    ]
+  },
+  {
+    "name": "extracted-function-keeps-shared-edit",
+    "before": [
+      "void gather(struct state *state)\n{\n\tstruct item *head;\n\thead = next_item();\n\tconsume(head);\n}\n",
+      "void __gather(struct state *state)\n{\n\tstruct item *head;\n\thead = next_item();\n\tconsume(head);\n}\n\nvoid gather(struct state *state)\n{\n\t__gather(state);\n\tfinish(state);\n}\n"
+    ],
+    "after": [
+      "void gather(struct state *state)\n{\n\tstruct item *head;\n\thead = next_item();\n\tconsume(head);\n\tstate->ready = 0;\n}\n",
+      "void __gather(struct state *state)\n{\n\tstruct item *head;\n\thead = next_item();\n\tconsume(head);\n\tstate->ready = 0;\n}\n\nvoid gather(struct state *state)\n{\n\t__gather(state);\n\tfinish(state);\n}\n"
+    ],
+    "expected_delta_rows": [],
+    "equal_context": [
+      [
+        5,
+        5
+      ],
+      [
+        6,
+        6
+      ]
+    ]
+  },
+  {
+    "name": "modified-file-split-partial-edit",
+    "before": [
+      "static int fault_alloc(struct fault *fault)\n{\n\tstruct file *filep;\n\n\tspin_lock_init(&fault->lock);\n\tinit_waitqueue_head(&fault->wait_queue);\n\n\tfilep = anon_inode_getfile(\"[fault]\", &ops, fault, O_RDWR);\n\tif (IS_ERR(filep)) {\n\t\treturn PTR_ERR(filep);\n\t}\n\treturn 0;\n}\n",
+      "static int eventq_init(struct eventq *eventq)\n{\n\tstruct file *filep;\n\tint fdno;\n\n\tspin_lock_init(&eventq->lock);\n\tINIT_LIST_HEAD(&eventq->deliver);\n\tinit_waitqueue_head(&eventq->wait_queue);\n\n\tfilep = anon_inode_getfile(name, fops, eventq, O_RDWR);\n\tif (IS_ERR(filep))\n\t\treturn PTR_ERR(filep);\n\treturn 0;\n}\n"
+    ],
+    "after": [
+      "static int fault_alloc(struct fault *fault)\n{\n\tstruct file *filep;\n\n\tspin_lock_init(&fault->lock);\n\tinit_waitqueue_head(&fault->wait_queue);\n\n\t/* The filep is fput() by the core code during failure */\n\tfilep = anon_inode_getfile(\"[fault]\", &ops, fault, O_RDWR);\n\tif (IS_ERR(filep)) {\n\t\treturn PTR_ERR(filep);\n\t}\n\treturn 0;\n}\n",
+      "static int eventq_init(struct eventq *eventq)\n{\n\tstruct file *filep;\n\n\tspin_lock_init(&eventq->lock);\n\tINIT_LIST_HEAD(&eventq->deliver);\n\tinit_waitqueue_head(&eventq->wait_queue);\n\n\t/* The filep is fput() by the core code during failure */\n\tfilep = anon_inode_getfile(name, fops, eventq, O_RDWR);\n\tif (IS_ERR(filep))\n\t\treturn PTR_ERR(filep);\n\treturn 0;\n}\n"
+    ],
+    "moved": true,
+    "expected_delta_rows": [
+      [
+        1,
+        "-",
+        3
+      ]
+    ],
+    "equal_context": [
+      [
+        7,
+        8
+      ]
+    ]
+  },
+  {
+    "name": "function-local-comment-anchor",
+    "before": [
+      "static void target(void)\n{\n\tif (left_target()) {\n\t\t/*\n\t\t * The mapped entries share this lock.\n\t\t * Hold it while walking the source table.\n\t\t * The caller releases it after the walk.\n\t\t */\n\t\tleft_old();\n\t}\n\tif (left_0()) {\n\t\t/*\n\t\t * left operation 0\n\t\t */\n\t\tleft_work_0();\n\t}\n\tif (left_1()) {\n\t\t/*\n\t\t * left operation 1\n\t\t */\n\t\tleft_work_1();\n\t}\n\tif (left_2()) {\n\t\t/*\n\t\t * left operation 2\n\t\t */\n\t\tleft_work_2();\n\t}\n}\n\nstatic void helper(void)\n{\n\tif (helper_ready()) {\n\t\t/*\n\t\t * The mapped entries share this lock.\n\t\t * Hold it while walking the source table.\n\t\t * The caller releases it after the walk.\n\t\t */\n\t\thelper_work();\n\t}\n}\n",
+      "static void target(void)\n{\n\tif (right_0()) {\n\t\t/*\n\t\t * right operation 0\n\t\t */\n\t\tright_work_0();\n\t}\n\tif (right_1()) {\n\t\t/*\n\t\t * right operation 1\n\t\t */\n\t\tright_work_1();\n\t}\n\tif (right_2()) {\n\t\t/*\n\t\t * right operation 2\n\t\t */\n\t\tright_work_2();\n\t}\n\tif (right_target()) {\n\t\t/*\n\t\t * The mapped entries share this lock.\n\t\t * Hold it while walking the source table.\n\t\t * The caller releases it after the walk.\n\t\t */\n\t\tright_old();\n\t}\n}\n\nstatic void helper(void)\n{\n\tif (helper_ready()) {\n\t\t/*\n\t\t * The mapped entries share this lock.\n\t\t * Hold it while walking the source table.\n\t\t * The caller releases it after the walk.\n\t\t */\n\t\thelper_work();\n\t}\n}\n"
+    ],
+    "after": [
+      "static void target(void)\n{\n\tif (left_target()) {\n\t\t/*\n\t\t * The mapped entries share this lock.\n\t\t * Hold it while walking the source table.\n\t\t * The caller releases it after the walk.\n\t\t */\n\t\tleft_new();\n\t}\n\tif (left_0()) {\n\t\t/*\n\t\t * left operation 0\n\t\t */\n\t\tleft_work_0();\n\t}\n\tif (left_1()) {\n\t\t/*\n\t\t * left operation 1\n\t\t */\n\t\tleft_work_1();\n\t}\n\tif (left_2()) {\n\t\t/*\n\t\t * left operation 2\n\t\t */\n\t\tleft_work_2();\n\t}\n}\n\nstatic void helper(void)\n{\n\tif (helper_ready()) {\n\t\t/*\n\t\t * The mapped entries share this lock.\n\t\t * Hold it while walking the source table.\n\t\t * The caller releases it after the walk.\n\t\t */\n\t\thelper_work();\n\t}\n}\n",
+      "static void target(void)\n{\n\tif (right_0()) {\n\t\t/*\n\t\t * right operation 0\n\t\t */\n\t\tright_work_0();\n\t}\n\tif (right_1()) {\n\t\t/*\n\t\t * right operation 1\n\t\t */\n\t\tright_work_1();\n\t}\n\tif (right_2()) {\n\t\t/*\n\t\t * right operation 2\n\t\t */\n\t\tright_work_2();\n\t}\n\tif (right_target()) {\n\t\t/*\n\t\t * The mapped entries share this lock.\n\t\t * Hold it while walking the source table.\n\t\t * The caller releases it after the walk.\n\t\t */\n\t\tright_new();\n\t}\n}\n\nstatic void helper(void)\n{\n\tif (helper_ready()) {\n\t\t/*\n\t\t * The mapped entries share this lock.\n\t\t * Hold it while walking the source table.\n\t\t * The caller releases it after the walk.\n\t\t */\n\t\thelper_work();\n\t}\n}\n"
+    ],
+    "expected_delta_rows": [
+      [
+        0,
+        "+",
+        8
+      ],
+      [
+        0,
+        "-",
+        8
+      ],
+      [
+        1,
+        "+",
+        26
+      ],
+      [
+        1,
+        "-",
+        26
+      ]
+    ],
+    "equal_context": [
+      [
+        5,
+        23
+      ],
+      [
+        6,
+        24
+      ]
+    ]
+  },
+  {
+    "name": "added-copy-of-retained-line",
+    "before": [
+      "void work(void)\n{\n\ta();\n\tb();\n\tc();\n\tL();\n\td();\n}\n",
+      "void work(void)\n{\n\ta();\n\tb();\n\tc();\n\tL();\n\td();\n}\n"
+    ],
+    "after": [
+      "void work(void)\n{\n\tL();\n\ta();\n\tb();\n\tc();\n\tL();\n\td();\n}\n",
+      "void work(void)\n{\n\tL();\n\td();\n}\n"
+    ],
+    "context": true,
+    "expected_delta_rows": [
+      [
+        0,
+        "+",
+        2
+      ],
+      [
+        1,
+        "-",
+        2
+      ],
+      [
+        1,
+        "-",
+        3
+      ],
+      [
+        1,
+        "-",
+        4
+      ]
+    ],
+    "equal_context": [
+      [
+        6,
+        2
+      ],
+      [
+        7,
+        3
+      ]
+    ],
+    "unpaired_context": [
+      [
+        0,
+        2
+      ]
+    ]
+  },
+  {
+    "name": "unopened-scope-after-declaration",
+    "before": [
+      "extern \"C\" {\nint f(void)\n{\n\treturn 0;\n}\nDECLARE_THING(x)\n}\n",
+      "extern \"C\" {\nint f(void)\n{\n\treturn 0;\n}\nDECLARE_THING(x)\n}\n"
+    ],
+    "after": [
+      "extern \"C\" {\nint f(void)\n{\n\treturn 1;\n}\nDECLARE_THING(x)\n}\n",
+      "extern \"C\" {\nint f(void)\n{\n\treturn 2;\n}\nDECLARE_THING(x)\n}\n"
+    ],
+    "context": false,
+    "expected_delta_rows": [
+      [
+        0,
+        "+",
+        3
+      ],
+      [
+        1,
+        "+",
+        3
+      ]
+    ]
+  },
+  {
+    "name": "added-copies-at-different-sites",
+    "before": [
+      "void work(void)\n{\n\ta();\n\tb();\n\tc();\n\tL();\n\td();\n}\n",
+      "void work(void)\n{\n\ta();\n\tb();\n\tc();\n\tL();\n\td();\n}\n"
+    ],
+    "after": [
+      "void work(void)\n{\n\tL();\n\ta();\n\tb();\n\tc();\n\tL();\n\td();\n}\n",
+      "void work(void)\n{\n\tL();\n\td();\n\tL();\n}\n"
+    ],
+    "expected_delta_rows": [
+      [
+        0,
+        "+",
+        2
+      ],
+      [
+        1,
+        "+",
+        4
+      ],
+      [
+        1,
+        "-",
+        2
+      ],
+      [
+        1,
+        "-",
+        3
+      ],
+      [
+        1,
+        "-",
+        4
+      ]
+    ],
+    "equal_context": [
+      [
+        6,
+        2
+      ],
+      [
+        7,
+        3
+      ]
+    ],
+    "unpaired_context": [
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        4
+      ]
+    ],
+    "context": true
+  },
+  {
+    "name": "insertion-sites-in-one-function",
+    "before": [
+      "void work(void)\n{\n\tsite_one();\n\tretained_one();\n\tend_one();\n\tbetween_0();\n\tbetween_1();\n\tbetween_2();\n\tbetween_3();\n\tbetween_4();\n\tbetween_5();\n\tbetween_6();\n\tbetween_7();\n\tbetween_8();\n\tbetween_9();\n\tbetween_10();\n\tbetween_11();\n\tbetween_12();\n\tbetween_13();\n\tbetween_14();\n\tbetween_15();\n\tbetween_16();\n\tbetween_17();\n\tbetween_18();\n\tbetween_19();\n\tsite_two();\n\tretained_two();\n\tend_two();\n}\n",
+      "void work(void)\n{\n\tsite_one();\n\tretained_one();\n\tend_one();\n\tbetween_0();\n\tbetween_1();\n\tbetween_2();\n\tbetween_3();\n\tbetween_4();\n\tbetween_5();\n\tbetween_6();\n\tbetween_7();\n\tbetween_8();\n\tbetween_9();\n\tbetween_10();\n\tbetween_11();\n\tbetween_12();\n\tbetween_13();\n\tbetween_14();\n\tbetween_15();\n\tbetween_16();\n\tbetween_17();\n\tbetween_18();\n\tbetween_19();\n\tsite_two();\n\tretained_two();\n\tend_two();\n}\n"
+    ],
+    "after": [
+      "void work(void)\n{\n\tsite_one();\n\tidentical();\n\tretained_one();\n\tend_one();\n\tbetween_0();\n\tbetween_1();\n\tbetween_2();\n\tbetween_3();\n\tbetween_4();\n\tbetween_5();\n\tbetween_6();\n\tbetween_7();\n\tbetween_8();\n\tbetween_9();\n\tbetween_10();\n\tbetween_11();\n\tbetween_12();\n\tbetween_13();\n\tbetween_14();\n\tbetween_15();\n\tbetween_16();\n\tbetween_17();\n\tbetween_18();\n\tbetween_19();\n\tsite_two();\n\tretained_two();\n\tend_two();\n}\n",
+      "void work(void)\n{\n\tsite_one();\n\tretained_one();\n\tend_one();\n\tbetween_0();\n\tbetween_1();\n\tbetween_2();\n\tbetween_3();\n\tbetween_4();\n\tbetween_5();\n\tbetween_6();\n\tbetween_7();\n\tbetween_8();\n\tbetween_9();\n\tbetween_10();\n\tbetween_11();\n\tbetween_12();\n\tbetween_13();\n\tbetween_14();\n\tbetween_15();\n\tbetween_16();\n\tbetween_17();\n\tbetween_18();\n\tbetween_19();\n\tsite_two();\n\tidentical();\n\tretained_two();\n\tend_two();\n}\n"
+    ],
+    "expected_delta_rows": [
+      [
+        0,
+        "+",
+        3
+      ],
+      [
+        1,
+        "+",
+        26
+      ]
+    ],
+    "context": false
+  },
+  {
+    "name": "split-function-with-added-copy",
+    "before": [
+      "void work(void)\n{\n\ta();\n\tR();\n}\n",
+      "void work(void)\n{\n\ta();\n\tR();\n}\n"
+    ],
+    "after": [
+      "void work(void)\n{\n\tR();\n\ta();\n\thelper();\n}\n\nstatic void helper(void)\n{\n\tR();\n}\n",
+      "void work(void)\n{\n\tR();\n}\n"
+    ],
+    "expected_delta_rows": [
+      [
+        0,
+        "+",
+        2
+      ],
+      [
+        0,
+        "+",
+        4
+      ],
+      [
+        0,
+        "+",
+        5
+      ],
+      [
+        0,
+        "+",
+        6
+      ],
+      [
+        0,
+        "+",
+        7
+      ],
+      [
+        0,
+        "+",
+        8
+      ],
+      [
+        1,
+        "-",
+        2
+      ]
+    ],
+    "equal_context": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        9,
+        2
+      ],
+      [
+        10,
+        3
+      ]
+    ],
+    "unpaired_context": [
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        0,
+        8
+      ]
+    ],
+    "context": true
+  },
+  {
+    "name": "added-line-either-side-of-identity",
+    "before": [
+      "void work(void)\n{\n\tfirst();\n\tA();\n\tlast();\n}\n",
+      "void work(void)\n{\n\tfirst();\n\tA();\n\tlast();\n}\n"
+    ],
+    "after": [
+      "void work(void)\n{\n\tfirst();\n\tX();\n\tA();\n\tlast();\n}\n",
+      "void work(void)\n{\n\tfirst();\n\tA();\n\tX();\n\tlast();\n}\n"
+    ],
+    "context": false,
+    "expected_delta_rows": [
+      [
+        0,
+        "+",
+        3
+      ],
+      [
+        1,
+        "+",
+        4
+      ]
+    ]
+  }
+]
