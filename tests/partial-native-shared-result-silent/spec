@@ -1,0 +1,6 @@
+# Both patches add the same call and loop, which remain shared. Upstream
+# already retains the three guard rows that Backport adds. Those additions
+# must remain visible with their Backport signs even though the tips agree.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

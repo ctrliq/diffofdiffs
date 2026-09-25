@@ -1,0 +1,14 @@
+# Patch1 and patch2 start from versions of f that differ at lines 22-24:
+# patch1's holds legacy_guard, legacy_release, and legacy_error, and patch2's
+# already holds shared_guard1 to shared_guard3. Both replace old_call at line 21
+# with new_call1 and add shared_loop0 to shared_loop5 after the guards, and
+# patch1 also replaces its three legacy lines with the guards, so both results
+# match. With -U5, the report must show the old_call removal, new_call1, and the
+# loop lines as edits both patches make, the legacy removals and guard additions
+# on patch1's side beside the guards as context on patch2's, and only five of
+# the shared lines after the last difference. The source and result files hold f
+# before and after each patch, and the runner checks that each patch turns its
+# source into its result with no fuzz.
+bin: DIFFOFDIFFS
+args: -U5 patch1 patch2
+exit: 0

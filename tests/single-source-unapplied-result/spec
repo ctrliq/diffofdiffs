@@ -1,0 +1,5 @@
+# Shared added code does not justify replacing a call whose source edit
+# failed.
+bin: DIFFOFDIFFS
+args: -U5 patch1 patch2
+exit: 0

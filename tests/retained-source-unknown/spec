@@ -1,0 +1,7 @@
+# retained-source-known with patch2's first hunk ending at line 3, so patch2
+# quotes neither L04 nor L07. The report must show patch1's changes at lines 4
+# and 7 on its side with nothing beside them, patch2's changes at lines 1 and 13
+# on its side, and a context section in which the results differ at line 1.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

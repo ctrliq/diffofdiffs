@@ -1,0 +1,7 @@
+# Patch1 and patch2 start from versions of foo.c that differ between C1 and C2,
+# where only patch2's has ZZ. Patch1 adds p1ins between C1 and C2, and patch2
+# replaces ZZ with p2ins. The report must show the removal of ZZ on patch2's
+# side, and p1ins beside p2ins as different additions at line 2.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

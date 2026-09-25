@@ -1,0 +1,11 @@
+# Patch1 and patch2 edit two versions of f that share only the line a. Patch1
+# indents d at line 1 by two spaces and, in a second hunk with no context,
+# removes the four lines after a. Patch2 adds " zz" and a tab-indented f after
+# gap0, adds a tab-indented e before a, and changes the zz after a to d, also
+# without context. The report must show every edit on its own patch's side, with
+# none shown as shared. The source and result files hold f before and after each
+# patch, and the runner checks that each patch turns its source into its result
+# with no fuzz.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

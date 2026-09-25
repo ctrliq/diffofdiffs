@@ -1,0 +1,9 @@
+# partial-native-unreported-gap with patch1 as one hunk and both patches quoting
+# a as context. The report must line up the a both patches quote, line 2 in
+# patch1 and line 5 in patch2's source, as common context, and show every edit
+# on its own patch's side. The source and result files hold f before and after
+# each patch, and the runner checks that each patch turns its source into its
+# result with no fuzz.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

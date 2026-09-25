@@ -1,0 +1,10 @@
+# Patch1 and patch2 start from versions of foo.c that differ at line 2, B in
+# patch1's and bad in patch2's, and in the last line, D, which ends without a
+# newline in patch1's and with one in patch2's. Patch1 replaces D with X, also
+# without a final newline, and patch2 changes bad to new. The report must show
+# patch1's replacement of D, with a no-newline marker after both D and X, beside
+# patch2's D as context, the change of bad beside patch1's B, and a context
+# section in which the results differ at line 2.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

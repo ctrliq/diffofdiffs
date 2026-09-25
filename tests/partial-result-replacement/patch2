@@ -1,0 +1,20 @@
+--- a/f
++++ b/f
+@@ -18,10 +18,16 @@
+ prefix17
+ prefix18
+ prefix19
+-old_call
++new_call2
+ shared_guard1
+ shared_guard2
+ shared_guard3
++shared_loop0
++shared_loop1
++shared_loop2
++shared_loop3
++shared_loop4
++shared_loop5
+ suffix00
+ suffix01
+ suffix02

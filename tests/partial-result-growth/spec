@@ -1,0 +1,5 @@
+# A successful replacement can add several rows inside a partly resolved
+# change.
+bin: DIFFOFDIFFS
+args: -U5 patch1 patch2
+exit: 0

@@ -1,0 +1,8 @@
+# Patch1 changes L04 at line 4 of foo.c to XL04 and L07 to XL07. Patch2 changes
+# L01 to XL01, quotes L04 unchanged, and in a second hunk changes L13 to XL13.
+# The report must show patch1's changes at lines 4 and 7 on its side, the first
+# beside patch2's L04 as context, patch2's changes at lines 1 and 13 on its
+# side, and a context section in which the results differ at line 1.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

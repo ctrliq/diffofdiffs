@@ -1,0 +1,64 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: pat┃Patch 2: pat
+    ch1     ┃    ch2
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons
+use only the source lines
+quoted in the patches.
+
+═════════════════════════
+*    DELTA DIFFERENCES  *
+═════════════════════════
+Signs mark edits made by
+only that patch. A
+sign-less line with one
+number is an edit both
+patches make: a new
+number means both add it,
+an old number means both
+remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│foo┃ old new│foo
+        │.c ┃        │.c
+        │@@ ┃        │@@
+   1   1│A  ┃   1   1│A
+   2   2│B  ┃-  2    │bad
+        │   ┃+      2│new
+   3   3│C  ┃   3   3│C
+-  4    │D  ┃   4   4│D
+\       │No ┃        │
+        │new┃        │
+        │lin┃        │
+        │e a┃        │
+        │t e┃        │
+        │nd ┃        │
+        │of ┃        │
+        │fil┃        │
+        │e  ┃        │
++      4│X  ┃        │
+\       │No ┃        │
+        │new┃        │
+        │lin┃        │
+        │e a┃        │
+        │t e┃        │
+        │nd ┃        │
+        │of ┃        │
+        │fil┃        │
+        │e  ┃        │
+
+═════════════════════════
+*    CONTEXT DIFFERENCES*
+═════════════════════════
+Signs mark lines present
+in only one result: -
+patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│foo┃     new│foo
+        │.c ┃        │.c
+        │@@ ┃        │@@
+       1│A  ┃       1│A
+-      2│B  ┃+      2│new
+       3│C  ┃       3│C

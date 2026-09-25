@@ -1,0 +1,9 @@
+--- a/foo.c
++++ b/foo.c
+@@ -1,4 +1,4 @@
+ A
+-bad
++new
+ C
+ D
+\ No newline at end of file

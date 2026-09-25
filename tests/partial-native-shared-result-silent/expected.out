@@ -1,0 +1,27 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Patch 1: patch1    ┃   Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source
+lines quoted in the patches.
+
+═════════════════════════════════════════════
+*    DELTA DIFFERENCES                      *
+═════════════════════════════════════════════
+Signs mark edits made by only that patch. A
+sign-less line with one number is an edit
+both patches make: a new number means both
+add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f            ┃ old new│f
+        │@@ prefix19  ┃        │@@ prefix19
+  20  20│prefix19     ┃  20  20│prefix19
+  21    │old_call     ┃  21    │old_call
+      21│new_call1    ┃      21│new_call1
++     22│shared_guard1┃  22  22│shared_guard1
++     23│shared_guard2┃  23  23│shared_guard2
++     24│shared_guard3┃  24  24│shared_guard3
+      25│shared_loop0 ┃      25│shared_loop0
+      26│shared_loop1 ┃      26│shared_loop1
+      27│shared_loop2 ┃      27│shared_loop2
