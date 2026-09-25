@@ -1,0 +1,19 @@
+diff --git a/common/file.c b/common/file.c
+index 1111111..2222222 100644
+--- a/common/file.c
++++ b/common/file.c
+@@ -1,3 +1,4 @@
+ int a;
++int common_line;
+ int b;
+ int c;
+diff --git a/Documentation/arch/arm64/notes.rst b/Documentation/arch/arm64/notes.rst
+index 5555555..6666666 100644
+--- a/Documentation/arch/arm64/notes.rst
++++ b/Documentation/arch/arm64/notes.rst
+@@ -20,3 +20,5 @@ Errata
+ | Vendor A | 001 |
+ | Vendor B | 002 |
+ | Vendor C | 003 |
++| Vendor D | 004 |
++| Vendor F | 006 |

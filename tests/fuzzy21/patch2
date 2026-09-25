@@ -1,0 +1,26 @@
+--- a/f.h
++++ b/f.h
+@@ -10,6 +10,7 @@
+ xxx1
+ xxx2
+ xxx3
++ADDED
+ p2ctx1
+ p2ctx2
+ p2ctx3
+@@ -40,6 +41,7 @@
+ xxx1
+ xxx2
+ xxx3
++ADDED
+ p2ctx1
+ p2ctx2
+ p2ctx3
+@@ -70,6 +72,7 @@
+ xxx1
+ xxx2
+ xxx3
++ADDED
+ p2ctx1
+ p2ctx2
+ p2ctx3

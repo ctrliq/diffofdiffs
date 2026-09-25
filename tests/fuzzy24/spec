@@ -1,0 +1,6 @@
+# The same original condition is changed at two indentation depths. The added
+# condition, removed source, and actual surrounding code keep their literal
+# whitespace differences.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

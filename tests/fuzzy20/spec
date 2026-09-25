@@ -1,0 +1,9 @@
+# Both patches add the same static inline i40e_get_max_num_descriptors()
+# function to i40e.h, at different places. Patch1 adds a blank line above it
+# after the i40e_add_del_cloud_filter_big_buf() declaration, while patch2 adds
+# it below an existing blank line. The report must show the function as lines
+# both patches add and patch1's blank line on its side alone, beside patch2's
+# unchanged one.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

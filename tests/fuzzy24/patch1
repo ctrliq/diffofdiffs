@@ -1,0 +1,11 @@
+--- a/foo.c
++++ b/foo.c
+@@ -2,6 +2,7 @@
+ 	if (skb) {
+ 		struct priv *sp = priv(skb);
+ 
+-		if (cond_a() &&
++		if (type_ok() &&
++		    cond_a() &&
+ 		    skb_cloned(skb)) {
+ 			work(sp);

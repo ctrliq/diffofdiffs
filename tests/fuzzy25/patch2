@@ -1,0 +1,17 @@
+--- a/f
++++ b/f
+@@ -1,6 +1,7 @@
+ a1
+ a2
+-a3
++A3
++A3b
+ a4
+ a5
+ a6
+@@ -20,3 +21,3 @@
+ z1
+ z2
+-z3
++Z3
+\ No newline at end of file

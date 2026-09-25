@@ -1,0 +1,23 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      Patch 1: patch1      ┃      Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines
+quoted in the patches.
+
+═══════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                *
+═══════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less
+line with one number is an edit both patches make: a
+new number means both add it, an old number means both
+remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│Documentation/arm6┃ old new│Documentation/arch
+        │4/notes.rst       ┃        │/arm64/notes.rst
+        │@@ Errata         ┃        │@@ Errata
+  11  11│| Vendor B | 002 |┃  21  21│| Vendor B | 002 |
+  12  12│| Vendor C | 003 |┃  22  22│| Vendor C | 003 |
+      13│| Vendor D | 004 |┃      23│| Vendor D | 004 |
++     14│| Vendor E | 005 |┃+     24│| Vendor F | 006 |

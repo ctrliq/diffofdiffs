@@ -1,0 +1,22 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                  Patch 1: patch1                                  ┃                                  Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                                 *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both
+remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│i40e.h                                                                  ┃  old  new│i40e.h
+          │@@                                                                      ┃          │@@
+ 1271 1271│int i40e_add_del_cloud_filter_big_buf(struct i40e_vsi *vsi,             ┃          │
+ 1272 1272│				      struct i40e_cloud_filter *filter,    ┃ 1422 1422│	return (pf->lan_veb != I40E_NO_VEB) ? pf->veb[pf->lan_veb] : NULL;
+ 1273 1273│				      bool add);                           ┃ 1423 1423│}
++     1274│                                                                        ┃ 1424 1424│
+      1275│static inline u32 i40e_get_max_num_descriptors(const struct i40e_pf *pf)┃      1425│static inline u32 i40e_get_max_num_descriptors(const struct i40e_pf *pf)
+      1276│{                                                                       ┃      1426│{
+      1277│	const struct i40e_hw *hw = &pf->hw;                                ┃      1427│	const struct i40e_hw *hw = &pf->hw;

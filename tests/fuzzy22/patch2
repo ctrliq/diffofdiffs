@@ -1,0 +1,18 @@
+--- a/f.c
++++ b/f.c
+@@ -100,13 +100,13 @@
+ ctxA
+ ctxB
+ ctxC
+-oldX
++newX
+ gap1
+ gap2
+ gap3
+ gap4
+ gap5
+-oldY
++newY
+ tailA
+ tailB
+ tailC
