@@ -806,6 +806,16 @@ enum body_class classify_body_line(const char *base, size_t len,
 	return class;
 }
 
+/*
+ * printf precision takes an int even though input lengths use size_t.
+ */
+void malformed_patch_line(const char *base, size_t len)
+{
+	int show = len > INT_MAX ? INT_MAX : (int)len;
+
+	die("malformed patch: %.*s", show, base);
+}
+
 void check_hunk_chop(unsigned long old_left, unsigned long new_left)
 {
 	if (new_left > 3)
@@ -816,6 +826,86 @@ void check_hunk_chop(unsigned long old_left, unsigned long new_left)
 		    old_left, new_left);
 }
 
+/*
+ * Even a truncated hunk must contain an edit; a bare header is not a change.
+ */
+static void hunk_without_change(unsigned long hunkline, const char *which)
+{
+	die("hunk without '-' or '+' lines at line %lu of %s", hunkline, which);
+}
+
+/*
+ * Normalize CRLF per file section, not per operand, so adjacent CRLF and LF
+ * sections can coexist. The caller decides whether this line's CR is part of
+ * the patch framing or source content.
+ *
+ * Compaction moves bytes only toward the front. Unread input remains intact,
+ * and saved views of compacted headers remain valid. The buffer length must
+ * stay unchanged until the cursor finishes reading the original input.
+ */
+static void compact_line(struct iomem_buf *buf, struct iomem_line *line,
+			 size_t *at, bool drop_cr)
+{
+	size_t keep = line->len - drop_cr;
+
+	if (*at != line->offset)
+		memmove(buf->base + *at, line->base, keep);
+
+	line->base = buf->base + *at;
+	line->len = keep;
+	line->offset = *at;
+	*at += keep;
+	if (line->has_lf)
+		buf->base[(*at)++] = '\n';
+}
+
+/*
+ * Recognize operation-only input that has no text hunks. Require a Git opener
+ * so ordinary prose mentioning a rename or copy does not qualify by itself.
+ *
+ * A binary summary additionally needs a decoded filename; without one, the
+ * input cannot produce a file record and must not silently disappear.
+ */
+static bool git_fileop_patch(const struct iomem_buf *buf)
+{
+	struct iomem_cursor cur;
+	struct iomem_line line;
+	bool named = false;
+	bool armed = false;
+
+	iomem_cursor_init(&cur, buf);
+	while (iomem_cursor_next(&cur, &line)) {
+		if (line_starts(&line, "diff --git ")) {
+			struct patch_name *name __free(patch_name) =
+				git_block_name(buf, &line);
+
+			armed = true;
+			named = name != NULL;
+			continue;
+		}
+
+		if (!armed)
+			continue;
+
+		if (line_starts(&line, "--- ")) {
+			named = false;
+			continue;
+		}
+
+		if (line_starts(&line, "rename from ") ||
+		    line_starts(&line, "rename to ") ||
+		    line_starts(&line, "copy from ") ||
+		    line_starts(&line, "copy to ") ||
+		    line_starts(&line, "GIT binary patch"))
+			return true;
+
+		if (named && line_is_binary_word(line.base, line.len))
+			return true;
+	}
+
+	return false;
+}
+
 struct hunk_progress {
 	unsigned long old_left;
 	unsigned long new_left;
@@ -824,6 +914,261 @@ struct hunk_progress {
 	bool active;
 	bool changed;
 };
+
+/*
+ * Consume only the coordinates present on this row. Exceeding either declared
+ * count is malformed. A no-newline marker may follow the last row of a stage; a
+ * context row can finish both stages and therefore permit two markers.
+ */
+static void spend_body_line(struct hunk_progress *hunk, enum body_class class,
+			    const struct iomem_line *line)
+{
+	switch (class) {
+	case BODY_CONTEXT:
+		if (!hunk->old_left || !hunk->new_left)
+			break;
+
+		hunk->markers = (hunk->old_left == 1) + (hunk->new_left == 1);
+		hunk->old_left--;
+		hunk->new_left--;
+		return;
+
+	case BODY_REMOVED:
+		if (!hunk->old_left)
+			break;
+
+		hunk->markers = hunk->old_left == 1;
+		hunk->old_left--;
+		hunk->changed = true;
+		return;
+
+	case BODY_ADDED:
+		if (!hunk->new_left)
+			break;
+
+		hunk->markers = hunk->new_left == 1;
+		hunk->new_left--;
+		hunk->changed = true;
+		return;
+
+	case BODY_NO_NEWLINE:
+	case BODY_JUNK:
+		break;
+	}
+
+	malformed_patch_line(line->base, line->len);
+}
+
+static bool validate_hunk_body(struct hunk_progress *hunk,
+			       const struct iomem_line *line, const char *which)
+{
+	enum body_class class;
+
+	if (!hunk->active)
+		return false;
+
+	class = classify_body_line(line->base, line->len, NULL);
+
+	/* A final source row's EOF marker still belongs to this hunk */
+	if (class == BODY_NO_NEWLINE && hunk->markers) {
+		hunk->markers--;
+		return true;
+	}
+
+	if (hunk->old_left || hunk->new_left) {
+		spend_body_line(hunk, class, line);
+		return true;
+	}
+
+	/*
+	 * The first line outside the hunk must still reach the section parser.
+	 */
+	if (!hunk->changed)
+		hunk_without_change(hunk->header_line, which);
+	hunk->active = false;
+	return false;
+}
+
+static bool validate_hunk_header(struct hunk_progress *hunk,
+				 const struct iomem_line *line,
+				 unsigned long linenum)
+{
+	unsigned long old_count, new_count;
+	int ret;
+
+	ret = read_atatline_n(line->base, line->len, NULL, &old_count, NULL,
+			      &new_count);
+
+	/* A broken @@ header is an error; ordinary inter-hunk text is not */
+	if (ret == ATAT_MALFORMED)
+		malformed_patch_line(line->base, line->len);
+	if (ret)
+		return false;
+
+	*hunk = (typeof(*hunk)){ .old_left = old_count,
+				 .new_left = new_count,
+				 .header_line = linenum,
+				 .active = true };
+	return true;
+}
+
+/*
+ * Save the first unsupported context-diff header. Delay the diagnostic so a
+ * wholly foreign input gets the simpler "doesn't contain a patch" error, while
+ * a mixed input cannot silently lose its context-diff section.
+ */
+static void keep_foreign_half(struct iomem_line *foreign,
+			      const struct iomem_line *half, bool open,
+			      bool starred)
+{
+	if (open && starred && !foreign->base)
+		*foreign = *half;
+}
+
+/*
+ * Normalize line endings before any consumer saves offsets. Validate hunk
+ * counts only inside a file section introduced by adjacent ---/+++ headers.
+ * Text between hunks does not close the section, so later hunks are checked
+ * too.
+ *
+ * Metadata-only Git changes count as patches through the same block state used
+ * by indexing. Unrecognized preamble is ignored, but unsupported context diffs
+ * mixed with unified sections must be diagnosed rather than dropped.
+ */
+void validate_patch(struct iomem_buf *buf, const char *name, const char *which)
+{
+	bool star_here = false, star_above = false, half_star = false;
+	bool pre_minus = false, header_seen = false, strip_cr = false;
+	bool saw_hunk = false, saw_mode_only = false;
+	struct iomem_line half = {}, foreign = {};
+	struct hunk_progress hunk = {};
+	struct block_latch latch = {};
+	unsigned long linenum = 0;
+	struct iomem_cursor cur;
+	struct iomem_line line;
+	size_t write_at = 0;
+
+	iomem_cursor_init(&cur, buf);
+	while (iomem_cursor_next(&cur, &line)) {
+		struct patch_name *block_name __free(patch_name) = NULL;
+		bool raw_cr, body, opener;
+
+		/*
+		 * Body text resembling a header cannot change CRLF handling.
+		 * Outside a hunk, the Git opener and each file header set it
+		 * from their own ending before compaction removes that CR.
+		 */
+		raw_cr = line.len && line.base[line.len - 1] == '\r';
+		body = hunk.active &&
+		       (hunk.old_left || hunk.new_left ||
+			(hunk.markers && line.len && line.base[0] == '\\'));
+		opener = !body && line_starts(&line, "diff --git ");
+
+		/*
+		 * Read metadata before moving the opener. CRLF compaction can
+		 * leave stale bytes between it and the next unread line.
+		 */
+		if (opener)
+			block_name = git_block_name(buf, &line);
+
+		if (!body && (opener || line_starts(&line, "--- ") ||
+			      line_starts(&line, "+++ ")))
+			strip_cr = raw_cr;
+		compact_line(buf, &line, &write_at, strip_cr && raw_cr);
+
+		linenum++;
+
+		/* Only the line directly above a half can mark it foreign */
+		star_above = star_here;
+		star_here = line_starts(&line, "*** ");
+		if (validate_hunk_body(&hunk, &line, which))
+			continue;
+
+		if (header_seen &&
+		    validate_hunk_header(&hunk, &line, linenum)) {
+			/* File headers cannot pair across a hunk */
+			keep_foreign_half(&foreign, &half, pre_minus,
+					  half_star);
+			pre_minus = false;
+			saw_hunk = true;
+			continue;
+		}
+
+		/*
+		 * A metadata-only block must qualify under the same rules as
+		 * indexing. Partial metadata cannot validate a file record that
+		 * the index would omit.
+		 */
+		if (opener) {
+			/*
+			 * Finish the previous block before resetting its state.
+			 */
+			if (latch.armed && latch.complete)
+				saw_mode_only = true;
+
+			block_latch_opener(&latch, block_name != NULL);
+		} else {
+			block_latch_line(&latch, line.base, line.len);
+		}
+
+		if (line_starts(&line, "--- ")) {
+			/* This section names a file, so it isn't mode-only */
+			block_latch_opener(&latch, false);
+
+			/* A half this line displaces met no "+++ " line */
+			keep_foreign_half(&foreign, &half, pre_minus,
+					  half_star);
+			pre_minus = true;
+			half = line;
+			half_star = star_above;
+			continue;
+		}
+
+		if (pre_minus && line_starts(&line, "+++ ")) {
+			pre_minus = false;
+			header_seen = true;
+			continue;
+		}
+
+		keep_foreign_half(&foreign, &half, pre_minus, half_star);
+		pre_minus = false;
+	}
+
+	/* The cursor is done, so its original length is no longer needed */
+	buf->len = write_at;
+	buf->base[write_at] = '\0';
+
+	/* Check a pending --- header even when the input ends on it */
+	keep_foreign_half(&foreign, &half, pre_minus, half_star);
+
+	/* Only a small, equal context shortfall is allowed at EOF */
+	if (hunk.active) {
+		if (!hunk.changed)
+			hunk_without_change(hunk.header_line, which);
+
+		check_hunk_chop(hunk.old_left, hunk.new_left);
+	}
+
+	/* A mode-only block at the very end of the operand */
+	if (latch.armed && latch.complete)
+		saw_mode_only = true;
+
+	/* Mixed diff formats must not silently lose an unsupported section */
+	if (saw_hunk || saw_mode_only) {
+		if (foreign.base)
+			malformed_patch_line(foreign.base, foreign.len);
+		return;
+	}
+
+	/*
+	 * Empty input and recognized file operations may lack text hunks. Warn
+	 * for those cases; reject other input instead of comparing it as empty.
+	 */
+	if (buf->len && !git_fileop_patch(buf))
+		die("%s doesn't contain a patch", name);
+
+	error(0, 0, "%s doesn't contain a patch", name);
+}
 
 static struct patch_name *git_opener_pair(const struct iomem_line *line,
 					  size_t split)
