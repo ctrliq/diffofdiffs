@@ -1,0 +1,8 @@
+# The driver's --many loop runs the same pair through udiff_run() and
+# udiff_result_destroy() fifty times, printing the first stream and one final
+# status line. Output that stays byte-stable across the iterations covers the
+# reuse of result objects, and an ASAN build turns any use-after-destroy or
+# double free inside that loop into a hard failure.
+bin: UDIFF_DRIVER
+args: -U 3 --many 50 a b
+exit: 1

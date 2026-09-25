@@ -1,0 +1,7 @@
+# --concurrent takes exactly four operands (two pairs); any other count prints
+# the usage text and exits 2. The count check comes before any operand is
+# loaded, so the two names here never resolve and the fixture needs no input
+# files.
+bin: UDIFF_DRIVER
+args: -U 3 --concurrent a b
+exit: 2

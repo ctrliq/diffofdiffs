@@ -1,0 +1,10 @@
+# --concurrent runs one fixed two-pair lifecycle, so the driver refuses to
+# combine it with --many, --dump-lines, or --dp-cost rather than guess an
+# interleaving. This fixture covers --dp-cost; each combination has its own
+# fixture, so a refusal that quietly narrowed to one mode still fails somewhere.
+# The refusal comes before any operand is loaded, so the four names never
+# resolve and need no files; they only satisfy the operand count check that runs
+# first.
+bin: UDIFF_DRIVER
+args: -U 3 --concurrent --dp-cost a b c d
+exit: 2

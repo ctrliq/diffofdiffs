@@ -1,0 +1,5 @@
+usage: udiff_driver [-U N]
+                    [--loader getline|lineinfo] [--name-stub]
+                    [--dp-cost] [--validate]
+                    [--dump-lines] [--many N] [--concurrent]
+                    A B [C D]

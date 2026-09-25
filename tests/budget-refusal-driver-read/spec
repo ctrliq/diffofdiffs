@@ -1,0 +1,15 @@
+# The process-wide memory limit must refuse a driver input it cannot size.
+# /dev/zero never reaches end of file, so the driver's whole-file read keeps
+# doubling its buffer until a reallocation crosses the limit and fails. Plain
+# and ASAN builds fail in the same growth sequence, so stderr is the same single
+# line and stdout stays empty. The second operand is never read; it's there
+# because the usage takes two.
+#
+# The 3-second timeout is tighter than usual because it bounds memory growth if
+# the limit ever stops working, not run time: an unbounded read from /dev/zero
+# grows by gigabytes per second. A working run finishes in a fraction of a
+# second in both builds.
+bin: UDIFF_DRIVER
+args: -U 3 /dev/zero b
+timeout: 3
+exit: 1

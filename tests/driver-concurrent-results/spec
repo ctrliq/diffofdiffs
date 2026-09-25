@@ -1,0 +1,9 @@
+# The one mode where two diff results are live at once on purpose: the driver
+# runs two distinct operand pairs back to back and holds both results until both
+# streams and both status lines are out, so each result must own a fresh buffer
+# for its whole lifetime. Reusing a buffer across results corrupts the second
+# output in a plain build and fails outright under ASAN. Both pairs differ, so
+# both status lines report hunks and the run exits 1.
+bin: UDIFF_DRIVER
+args: -U 3 --concurrent a1 b1 a2 b2
+exit: 1

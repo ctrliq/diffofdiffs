@@ -1,0 +1,9 @@
+# The process-wide memory limit must refuse an input whose size alone exceeds
+# it. Intake sizes one allocation from fstat for a whole regular file, so the 2
+# GiB sparse file big fails at that allocation before any byte is read. The
+# single large request fails at the same place in plain and ASAN builds, so
+# stderr is one line and stdout stays empty. tiny.patch is never read; it's
+# there because the usage takes two.
+bin: DIFFOFDIFFS
+args: big tiny.patch
+exit: 1

@@ -1,0 +1,6 @@
+# The native diff driver refuses only inputs longer than 2097152 lines, so two
+# inputs of exactly 2097152 lines are accepted. The inputs are identical, so the
+# driver reports them equal with no hunks and no output.
+bin: UDIFF_DRIVER
+args: -U 3 a b
+exit: 0

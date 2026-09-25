@@ -1,0 +1,4 @@
+bin: UDIFF_DRIVER
+args: -U 3 a b
+exit: 1
+stdout-sha1: 7faf8eefdef406d5b82c22e98bea3290950327a3

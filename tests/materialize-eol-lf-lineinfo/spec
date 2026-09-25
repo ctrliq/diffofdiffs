@@ -1,0 +1,3 @@
+bin: UDIFF_DRIVER
+args: --dump-lines --loader lineinfo a b
+exit: 0

@@ -1,0 +1,15 @@
+# The process-wide memory limit must refuse an input intake can't size.
+# /dev/zero isn't a regular file, so intake skips the fstat size hint and keeps
+# doubling its buffer until a reallocation crosses the limit and fails. Plain
+# and ASAN builds fail in the same growth sequence, so stderr is the same single
+# line and stdout stays empty. The tool never reaches tiny.patch, which is only
+# there because the usage takes two.
+#
+# The 3-second timeout is tighter than usual because it bounds memory growth if
+# the limit ever stops working, not run time: an unbounded read from /dev/zero
+# grows by gigabytes per second. A working run finishes in a fraction of a
+# second in both builds.
+bin: DIFFOFDIFFS
+args: /dev/zero tiny.patch
+timeout: 3
+exit: 1
