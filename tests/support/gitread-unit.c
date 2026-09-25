@@ -1740,6 +1740,172 @@ static size_t tree4_alpha(enum tree4_alpha form, char *buf, size_t cap)
 }
 
 /*
+ * Renders one state of a removed-pair document: `preamble` preamble rows (leg
+ * one's peq asymmetry), numbered rows 01-08, a four-row block owned by `leg` in
+ * the base state alone (the tip drops it, which is the whole edit), rows 09-16,
+ * and an echo of rows `echo_from` through `echo_to` (0 for none). An
+ * unterminated echo drops the document's final LF, the one-byte difference the
+ * dup golden discriminates on.
+ */
+static size_t tree4_pair_doc(const char *pfx, const char *leg, bool tip,
+			     int preamble, int echo_from, int echo_to,
+			     bool echo_unterminated, char *buf, size_t cap)
+{
+	size_t off = 0;
+
+	for (int n = 1; n <= preamble; n++)
+		doc_row(buf, cap, &off, "%s preamble row %02d\n", pfx, n);
+
+	for (int n = 1; n <= 8; n++)
+		doc_row(buf, cap, &off, "%s row %02d\n", pfx, n);
+
+	if (!tip) {
+		for (int n = 1; n <= 4; n++) {
+			doc_row(buf, cap, &off, "%s leg %s block row %d\n", pfx,
+				leg, n);
+		}
+	}
+
+	for (int n = 9; n <= 16; n++)
+		doc_row(buf, cap, &off, "%s row %02d\n", pfx, n);
+
+	if (echo_from) {
+		for (int n = echo_from; n <= echo_to; n++)
+			doc_row(buf, cap, &off, "%s row %02d\n", pfx, n);
+	}
+
+	if (echo_unterminated)
+		off--;
+
+	return off;
+}
+
+/*
+ * Renders one state of a finale-file document: numbered rows 01-05, then the
+ * base state's two leg-owned finale rows or the tip's one-row replacement,
+ * which goes out unterminated when asked, since the terminator asymmetries are
+ * these files' entire point.
+ */
+static size_t tree4_tailpair_doc(const char *pfx, const char *leg, bool tip,
+				 bool tip_unterminated, char *buf, size_t cap)
+{
+	size_t off = 0;
+
+	for (int n = 1; n <= 5; n++)
+		doc_row(buf, cap, &off, "%s row %02d\n", pfx, n);
+
+	if (!tip) {
+		doc_row(buf, cap, &off, "%s old finale leg %s a\n", pfx, leg);
+		doc_row(buf, cap, &off, "%s old finale leg %s b\n", pfx, leg);
+	} else {
+		doc_row(buf, cap, &off, "%s new finale", pfx);
+		if (!tip_unterminated)
+			doc_row(buf, cap, &off, "\n");
+	}
+
+	return off;
+}
+
+/* The brink finale file: like tailpair, with the tip always unterminated */
+static size_t tree4_brink_doc(const char *leg, bool tip, char *buf, size_t cap)
+{
+	size_t off = 0;
+
+	for (int n = 1; n <= 5; n++)
+		doc_row(buf, cap, &off, "brink row %02d\n", n);
+
+	if (tip)
+		doc_row(buf, cap, &off, "brink new finale");
+	else
+		doc_row(buf, cap, &off, "brink old finale leg %s\n", leg);
+
+	return off;
+}
+
+/*
+ * One removed-pair leg: a parentless base commit and its tip child, the tip
+ * alone carrying a ref, so the operand reads like a real backport (it names the
+ * tip and derives against the tip's parent).
+ */
+static void tree4_leg(git_repository *repo, const char *name,
+		      const git_oid *base_tree, const git_oid *tip_tree)
+{
+	char ref[64], msg[64];
+	git_oid base;
+
+	snprintf(ref, sizeof(ref), "refs/heads/%s", name);
+	snprintf(msg, sizeof(msg), "%s base", name);
+	put_commit(repo, NULL, base_tree, NULL, msg, &base);
+	snprintf(msg, sizeof(msg), "%s tip", name);
+	put_commit(repo, ref, tip_tree, &base, msg, NULL);
+}
+
+/*
+ * One single-file removed-pair leg, both states rendered by tree4_pair_doc();
+ * peq nests its file under sub/ so the consumer's new-side lookup is exercised
+ * off the root.
+ */
+static void tree4_pair_leg(git_repository *repo, const char *name,
+			   const char *pfx, const char *leg, bool nested,
+			   int preamble, int echo_from, int echo_to,
+			   bool echo_unterminated)
+{
+	git_oid blob, file_tree, trees[2];
+	char buf[1024];
+	size_t len;
+
+	for (int tip = 0; tip <= 1; tip++) {
+		len = tree4_pair_doc(pfx, leg, tip, preamble, echo_from,
+				     echo_to, echo_unterminated, buf,
+				     sizeof(buf));
+		put_blob(repo, buf, len, &blob);
+		put_tree1(repo, pfx, GIT_FILEMODE_BLOB, &blob, &file_tree);
+		if (nested)
+			put_tree1(repo, "sub", GIT_FILEMODE_TREE, &file_tree,
+				  &trees[tip]);
+		else
+			trees[tip] = file_tree;
+	}
+
+	tree4_leg(repo, name, &trees[0], &trees[1]);
+}
+
+/*
+ * The finale-file removed-pair leg: three files whose tips replace the leg's
+ * finale rows, with the terminator falling per file and leg (mark's tip is
+ * unterminated on leg two, verge's on leg one, brink's on both).
+ */
+static void tree4_mark_leg(git_repository *repo, const char *name,
+			   const char *leg, bool mark_untermd,
+			   bool verge_untermd)
+{
+	git_oid mark, verge, brink, trees[2];
+	char buf[1024];
+	size_t len;
+
+	for (int tip = 0; tip <= 1; tip++) {
+		const struct tree_spec ents[] = {
+			{ "brink", GIT_FILEMODE_BLOB, &brink },
+			{ "mark", GIT_FILEMODE_BLOB, &mark },
+			{ "verge", GIT_FILEMODE_BLOB, &verge }
+		};
+
+		len = tree4_tailpair_doc("mark", leg, tip, mark_untermd, buf,
+					 sizeof(buf));
+		put_blob(repo, buf, len, &mark);
+		len = tree4_tailpair_doc("verge", leg, tip, verge_untermd, buf,
+					 sizeof(buf));
+		put_blob(repo, buf, len, &verge);
+		len = tree4_brink_doc(leg, tip, buf, sizeof(buf));
+		put_blob(repo, buf, len, &brink);
+
+		put_tree(repo, ents, ARRAY_SIZE(ents), &trees[tip]);
+	}
+
+	tree4_leg(repo, name, &trees[0], &trees[1]);
+}
+
+/*
  * Builds independent commit histories for tree comparisons without relying on
  * an external repository. The initial branches cover content, creation, mode
  * changes, missing final newlines, empty commits, and first-parent selection.
@@ -1850,6 +2016,14 @@ static void build_tree4(const char *target)
 	git_commit_free(pup);
 	git_commit_free(pbp);
 
+	tree4_pair_leg(repo, "peq1", "peq", "one", true, 2, 0, 0, false);
+	tree4_pair_leg(repo, "peq2", "peq", "two", true, 0, 0, 0, false);
+	tree4_pair_leg(repo, "dup1", "dup", "one", false, 2, 6, 11, true);
+	tree4_pair_leg(repo, "dup2", "dup", "two", false, 0, 0, 0, false);
+	tree4_mark_leg(repo, "mark1", "one", false, true);
+	tree4_mark_leg(repo, "mark2", "two", true, false);
+	tree4_pair_leg(repo, "wid1", "wid", "one", false, 0, 0, 0, false);
+	tree4_pair_leg(repo, "wid2", "wid", "two", false, 0, 8, 9, false);
 	if (git_repository_set_head(repo, "refs/heads/bp"))
 		die("cannot point HEAD at refs/heads/bp");
 
