@@ -1,0 +1,9 @@
+# Patch1 and patch2 start from versions of f that end differently: patch1's is
+# x, a, and b, and patch2's has nope before b. In both, b has no final newline.
+# Patch1 changes x to x2 and removes b. Patch2 changes x to x3 in a hunk of its
+# own and removes nope and b. The report must show b's removal, with its
+# no-newline marker, as an edit both patches make, x2 beside x3, and nope's
+# removal on patch2's side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

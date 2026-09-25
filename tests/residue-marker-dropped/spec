@@ -1,0 +1,7 @@
+# Both patches remove the unterminated b. Keep that shared removal
+# out of DELTA while comparing the differing results and removed
+# source. Only the removed-source comparison quotes b and therefore
+# carries its missing-newline marker.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

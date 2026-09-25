@@ -1,0 +1,7 @@
+# Both patches replace the unterminated q with an unterminated X.
+# Keep shared X and its ending in the result comparison while showing
+# the differing additions. Compare the removed source separately,
+# preserving q's missing final newline there as well.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

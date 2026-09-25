@@ -1,0 +1,6 @@
+# residue-marker-dropped-applied with patch1 replacing b with c, also without a
+# final newline, and patch2 removing K where it removed nope. The report must
+# show c and its no-newline marker on patch1's side alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

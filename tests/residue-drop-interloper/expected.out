@@ -1,0 +1,55 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                           Patch 1: patch1                                           ┃                                           Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                                                                     *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│arch/arm64/kvm/nested.c                                                                     ┃ old new│arch/arm64/kvm/nested.c
+        │@@ int kvm_vcpu_init_nested(struct kvm_vcpu *vcpu)                                          ┃        │@@ int kvm_vcpu_init_nested(struct kvm_vcpu *vcpu)
+  62  62│	 */                                                                                  ┃  90  90│	 */
+  63  63│	num_mmus = atomic_read(&kvm->online_vcpus) * S2_MMU_PER_VCPU;                        ┃  91  91│	num_mmus = atomic_read(&kvm->online_vcpus) * S2_MMU_PER_VCPU;
+  64    │	tmp = kvrealloc(kvm->arch.nested_mmus,                                               ┃  92    │	tmp = kvrealloc(kvm->arch.nested_mmus,
+- 65    │			size_mul(sizeof(*kvm->arch.nested_mmus), kvm->arch.nested_mmus_size),┃        │
+  66    │			size_mul(sizeof(*kvm->arch.nested_mmus), num_mmus),                  ┃  93    │			size_mul(sizeof(*kvm->arch.nested_mmus), num_mmus),
+  67    │			GFP_KERNEL_ACCOUNT | __GFP_ZERO);                                    ┃  94    │			GFP_KERNEL_ACCOUNT | __GFP_ZERO);
+  68    │	if (!tmp)                                                                            ┃  95    │	if (!tmp)
+        │────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ int kvm_vcpu_init_nested(struct kvm_vcpu *vcpu)                                          ┃        │@@ int kvm_vcpu_init_nested(struct kvm_vcpu *vcpu)
+  70  68│                                                                                            ┃  99  97│
+  71    │	swap(kvm->arch.nested_mmus, tmp);                                                    ┃        │
+        │────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ int kvm_vcpu_init_nested(struct kvm_vcpu *vcpu)                                          ┃        │@@ int kvm_vcpu_init_nested(struct kvm_vcpu *vcpu)
+        │                                                                                            ┃ 105    │		for (int i = 0; i < kvm->arch.nested_mmus_size; i++)
+        │                                                                                            ┃ 106    │			kvm->arch.nested_mmus[i].pgt->mmu = &kvm->arch.nested_mmus[i];
+      69│		write_lock(&kvm->mmu_lock);                                                  ┃      98│		write_lock(&kvm->mmu_lock);
+  72  70│                                                                                            ┃+     99│
+  73    │	/*                                                                                   ┃        │
+  74    │	 * If we went through a realocation, adjust the MMU back-pointers in                 ┃        │
+  75    │	 * the previously initialised kvm_pgtable structures.                                ┃        │
+        │────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ int kvm_vcpu_init_nested(struct kvm_vcpu *vcpu)                                          ┃        │@@ int kvm_vcpu_init_nested(struct kvm_vcpu *vcpu)
+      71│		if (kvm->arch.nested_mmus_size) {                                            ┃     100│		if (kvm->arch.nested_mmus_size) {
+      72│			memcpy(tmp, kvm->arch.nested_mmus,                                   ┃     101│			memcpy(tmp, kvm->arch.nested_mmus,
+      73│			       size_mul(sizeof(*tmp), kvm->arch.nested_mmus_size));          ┃     102│			       size_mul(sizeof(*tmp), kvm->arch.nested_mmus_size));
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                                                                               *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│arch/arm64/kvm/nested.c                                                                     ┃     new│arch/arm64/kvm/nested.c
+        │@@ int kvm_vcpu_init_nested(struct kvm_vcpu *vcpu)                                          ┃        │@@ int kvm_vcpu_init_nested(struct kvm_vcpu *vcpu)
+      61│	 * again, and there is no reason to affect the whole VM for this.                    ┃      89│	 * again, and there is no reason to affect the whole VM for this.
+      62│	 */                                                                                  ┃      90│	 */
+      63│	num_mmus = atomic_read(&kvm->online_vcpus) * S2_MMU_PER_VCPU;                        ┃      91│	num_mmus = atomic_read(&kvm->online_vcpus) * S2_MMU_PER_VCPU;
+        │                                                                                            ┃+     92│
+      64│	if (num_mmus > kvm->arch.nested_mmus_size) {                                         ┃      93│	if (num_mmus > kvm->arch.nested_mmus_size) {
+      65│		tmp = kvcalloc(num_mmus, sizeof(*tmp), GFP_KERNEL_ACCOUNT);                  ┃      94│		tmp = kvcalloc(num_mmus, sizeof(*tmp), GFP_KERNEL_ACCOUNT);
+      66│		if (!tmp)                                                                    ┃      95│		if (!tmp)

@@ -1,0 +1,6 @@
+# Both patches replace q with the same LF-terminated X. The upstream Y
+# insertion and w2/w3 difference remain visible, while the unmatched K removal
+# stays unresolved.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

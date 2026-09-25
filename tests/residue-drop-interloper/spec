@@ -1,0 +1,5 @@
+# The extra size_mul(oldsize) parameter removed by the backport is absent from
+# the upstream source. Do not reintroduce it into the result comparison.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

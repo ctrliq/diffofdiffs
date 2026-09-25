@@ -1,0 +1,6 @@
+# residue-marker-add-newline with the final newline the other way round:
+# patch1's X ends with a newline and patch2's doesn't. The report must put the
+# no-newline marker after patch2's X only, so the two X additions still differ.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

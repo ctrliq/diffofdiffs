@@ -1,0 +1,11 @@
+# Patch1 and patch2 start from versions of f that end differently: patch1's is
+# w, z, and q, and patch2's has K before q. In both, q has no final newline.
+# Patch1 changes w to w2 and replaces q with X, still without a final newline.
+# Patch2 changes w to w3 in a hunk of its own, removes K and q, and adds Y and
+# then X with a final newline. The report must show the removals of w and of q,
+# with q's no-newline marker, as edits both patches make, w2 beside w3, K's
+# removal and Y on patch2's side, and the two X additions as different lines,
+# with the marker after patch1's X only.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

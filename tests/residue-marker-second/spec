@@ -1,0 +1,7 @@
+# Both patches remove the unterminated b, but only patch1 adds the
+# unterminated c. DELTA must remove c with its own newline marker.
+# The separate removed-source comparison quotes b with its marker;
+# neither marker may be transferred to the other row.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

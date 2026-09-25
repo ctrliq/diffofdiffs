@@ -1,0 +1,9 @@
+# residue-marker-add-newline with both patches changing w to w2, which leaves
+# K's removal, Y, and X's final newline as the only differences. The report must
+# show the change of w as an edit both patches make and the rest as in
+# residue-marker-add-newline. The source and result files hold f before and
+# after each patch, and the runner checks that each patch turns its source into
+# its result with no fuzz.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,7 @@
+# Both patches add X, with z and zz as their respective source rows.
+# Keep X shared and show the real surrounding difference in CONTEXT.
+# patch1's separate w -> w2 edit remains unresolved and visible in its
+# original hunk; a failed application cannot justify removing X.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,10 @@
+--- a/f
++++ b/f
+@@ -1 +1 @@
+-x
++x3
+@@ -2,3 +2,1 @@
+ a
+-K
+-b
+\ No newline at end of file

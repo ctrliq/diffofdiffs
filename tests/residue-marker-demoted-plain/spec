@@ -1,0 +1,7 @@
+# Both patches replace the unterminated q with a terminated X.
+# The shared result row needs no newline marker. The removed-source
+# comparison still quotes unterminated q, so its marker stays there.
+# Real differences beside X must remain visible in DELTA.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,9 @@
+# Patch1 and patch2 start from versions of f that differ at line 2: z in
+# patch1's and zz in patch2's. Patch1 changes w at line 1 to w2 and adds X after
+# z. Patch2 changes w to w3 and, in a second hunk, adds X after zz. The report
+# must show the removal of w and the addition of X as edits both patches make,
+# w2 beside w3, and a context section in which the results differ at lines 1 and
+# 2.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
