@@ -1,0 +1,6 @@
+# Both operands carry the hunk header @@ -1,1junk +1,1 @@, with junk after the
+# old line count. The reader must refuse the first operand as malformed at
+# exit 1, quoting the header.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

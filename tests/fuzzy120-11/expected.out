@@ -1,0 +1,37 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: mfi┃Patch 2: mfi
+     n1     ┃     n2
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons
+use only the source lines
+quoted in the patches.
+
+═════════════════════════
+*    DELTA DIFFERENCES  *
+═════════════════════════
+Signs mark edits made by
+only that patch. A
+sign-less line with one
+number is an edit both
+patches make: a new
+number means both add it,
+an old number means both
+remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f  ┃ old new│f
+        │@@ ┃        │@@
+        │ctx┃        │ctx
+   1   1│ctx┃   1   1│ctx
+   2    │old┃   2    │old
++      2│new┃+      2│NEW
+\       │No ┃\       │No
+        │new┃        │new
+        │lin┃        │lin
+        │e a┃        │e a
+        │t e┃        │t e
+        │nd ┃        │nd
+        │of ┃        │of
+        │fil┃        │fil
+        │e  ┃        │e

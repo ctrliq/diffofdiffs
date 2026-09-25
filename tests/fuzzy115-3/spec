@@ -1,0 +1,6 @@
+# patch3's hunk header claims zero old lines (@@ -5,0 +5,1 @@) while its body
+# carries a context line, so the reader must refuse the patch as malformed,
+# quoting the stray context line, before printing anything.
+bin: DIFFOFDIFFS
+args: patch3 patch4
+exit: 1

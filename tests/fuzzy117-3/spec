@@ -1,0 +1,6 @@
+# The second operand's hunk header has junk after the old line count (@@
+# -1,1junk +1,1 @@). The reader must refuse it as malformed at exit 1 even
+# though the first operand is well formed. fuzzy117-4 swaps the operands.
+bin: DIFFOFDIFFS
+args: good junk
+exit: 1

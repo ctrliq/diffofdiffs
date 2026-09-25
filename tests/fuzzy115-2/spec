@@ -1,0 +1,7 @@
+# Both patches change line 100000000 of f, to different text. Coordinates
+# describe quoted source intervals without allocating the missing lines, so a
+# comparison this far into a file must still produce a review, showing the
+# shared removal of old and the two replacements side by side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

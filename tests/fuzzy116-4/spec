@@ -1,0 +1,6 @@
+# Both operands carry the hunk header @@ --1,0 +1,1 @@, whose old range has a
+# doubled minus sign. The reader must refuse the first operand as malformed at
+# exit 1, quoting the header.
+bin: DIFFOFDIFFS
+args: patch3 patch4
+exit: 1

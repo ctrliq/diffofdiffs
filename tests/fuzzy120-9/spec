@@ -1,0 +1,3 @@
+bin: DIFFOFDIFFS
+args: eof1 eof2
+exit: 0

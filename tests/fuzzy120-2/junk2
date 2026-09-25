@@ -1,0 +1,11 @@
+--- a/f
++++ b/f
+@@ -1,2 +1,2 @@
+-old
++other
+diff --git a/g b/g
+--- a/g
++++ b/g
+@@ -1,1 +1,1 @@
+-ggg
++hhh

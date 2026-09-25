@@ -1,0 +1,27 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: eof┃Patch 2: eof
+     1      ┃     2
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons
+use only the source lines
+quoted in the patches.
+
+═════════════════════════
+*    DELTA DIFFERENCES  *
+═════════════════════════
+Signs mark edits made by
+only that patch. A
+sign-less line with one
+number is an edit both
+patches make: a new
+number means both add it,
+an old number means both
+remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f  ┃ old new│f
+        │@@ ┃        │@@
+        │old┃        │old
+   1    │old┃   1    │old
++      1│new┃+      1│NEW

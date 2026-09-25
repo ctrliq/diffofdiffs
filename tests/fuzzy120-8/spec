@@ -1,0 +1,3 @@
+bin: DIFFOFDIFFS
+args: mmid1 mmid2
+exit: 1

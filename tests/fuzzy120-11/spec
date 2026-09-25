@@ -1,0 +1,3 @@
+bin: DIFFOFDIFFS
+args: mfin1 mfin2
+exit: 0

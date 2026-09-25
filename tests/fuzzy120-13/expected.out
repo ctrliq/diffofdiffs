@@ -1,0 +1,44 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: secta ┃Patch 2: sectb
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use
+only the source lines quoted in
+the patches.
+
+═══════════════════════════════
+*    DELTA DIFFERENCES        *
+═══════════════════════════════
+Signs mark edits made by only
+that patch. A sign-less line
+with one number is an edit both
+patches make: a new number
+means both add it, an old
+number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f     ┃ old new│f
+        │Overla┃        │Overla
+        │pping ┃        │pping
+        │source┃        │source
+        │ quota┃        │ quota
+        │tions:┃        │tions:
+        │ edits┃        │ edits
+        │ shown┃        │ shown
+        │ witho┃        │ witho
+        │ut ass┃        │ut ass
+        │uming ┃        │uming
+        │corres┃        │corres
+        │ponden┃        │ponden
+        │ce.   ┃        │ce.
+        │@@ old┃        │@@ old
+-  1    │old   ┃-  1    │old
++      1│new   ┃+      1│NEW
+-  2    │-- a/g┃-  2    │-- a/g
++      2│++ b/g┃+      2│++ b/g
+        │──────╂────────┼──────
+        │@@ g1 ┃        │@@ g1
+-  1    │g1    ┃        │
++      1│g2    ┃        │
+        │      ┃-  1    │g1
+        │      ┃+      1│G2

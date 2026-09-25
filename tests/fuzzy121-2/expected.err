@@ -1,0 +1,55 @@
+usage: diffofdiffs [OPTIONS] patch1 patch2
+       diffofdiffs [OPTIONS] --git-tree=DIR rev1 rev2
+       diffofdiffs --help|--version
+
+Compare the original changes in patch1 and patch2. Either operand may be
+a single "-" to read standard input, but not both.
+
+With --git-tree, each operand names a commit in DIR. Its patch describes
+the changes from its first parent, or an empty tree if it has no parent.
+For a merge commit, use PARENT..COMMIT to choose which parent's version to
+compare against. PARENT must be a direct parent of COMMIT.
+
+Empty comparison output with exit status 0 means no differences were found.
+
+OPTIONS are:
+  -U N, --unified=N       keep N context lines before and after each differing
+                          block; the default is 3
+
+  --max-column-width=N    cap each source column at N display columns (at least
+                          2); the default uses up to the terminal width, or 100
+                          per source column when no terminal size is available
+
+  --tab-width=N           use N-column tab stops for terminal and HTML display;
+                          N must be positive (default: 8)
+
+  --backport-labels       label patch1 Backport and patch2 Upstream
+
+  --git-tree=DIR          read both operands as revisions in the Git repository
+                          at DIR (a working tree or a bare store); full source
+                          files give a more complete comparison than the lines
+                          quoted in patch files
+
+  --color[=WHEN]          colorize the output; WHEN is 'auto' (the default),
+                          'always', or 'never'
+
+  -o FILE, --output=FILE  write to FILE instead of standard output; '-' uses
+                          stdout
+
+  --html                  write a standalone HTML report instead of text
+
+  --highlight=MODE        highlight changes within paired lines:
+                          'words': whole words, punctuation, and whitespace
+                          'characters': only the differing characters
+                          'none': no inline highlights; keep line colors
+                          The default is 'words'. Text output needs
+                          color enabled to show highlights.
+
+  --theme=THEME           'dark' or 'light' for HTML (default: dark)
+
+  --debug                 print parse diagnostics to standard error; the output
+                          is not a stable interface and may change at any time
+
+  --help                  print this text and exit
+
+  --version               print the version number and exit

@@ -1,0 +1,7 @@
+# The first declared hunk consumes the apparent second file headers as body
+# rows. The later hunk therefore overlaps the same source. This checks the
+# parser's treatment and unresolved presentation, not a valid two-file output
+# recipe.
+bin: DIFFOFDIFFS
+args: secta sectb
+exit: 0
