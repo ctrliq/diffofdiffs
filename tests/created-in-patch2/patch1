@@ -1,0 +1,13 @@
+diff --git a/alpha b/alpha
+index 2ad6629..b934c7b 100644
+--- a/alpha
++++ b/alpha
+@@ -52,7 +52,7 @@ wild row 51
+ wild row 52
+ wild row 53
+ wild row 54
+-wild row 55
++wild row 55 reworked in the wild
+ wild row 56
+ wild row 57
+ wild row 58

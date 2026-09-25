@@ -1,0 +1,7 @@
+# Patch1 creates x.c while patch2 deletes a different x.c whole. The two records
+# never pair: the report must show patch1's creation with its create-file and
+# new-mode notes beside patch2's deletion with its delete-file and old-mode
+# notes.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

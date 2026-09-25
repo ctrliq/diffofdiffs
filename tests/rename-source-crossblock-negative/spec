@@ -1,0 +1,9 @@
+# Patch1's git block renames x.c to y.c in its header lines but then carries ---
+# a/p.c and +++ b/p.c lines with a hunk, so the block's changes belong to p.c.
+# Patch2 edits x.c. Since p.c is neither the rename's source nor its
+# destination, the rename must not tie the block to patch2's x.c: x.c's section
+# must not say that the other patch renames the file, and p.c's section, which
+# still shows the rename note, must not say that the other patch also names x.c.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

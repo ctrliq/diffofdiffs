@@ -1,0 +1,6 @@
+# Patch1 renames w.c to x.c without changing it, and patch2 changes old at line
+# 2 of x.c to new2 in place. The report must show both in one section for x.c:
+# patch1's rename note on its side and patch2's edit on the other.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,9 @@
+# Patch1 edits a.c in place while patch2 copies a.c to b.c with no hunks. The
+# copy is keyed by b.c, so nothing pairs. a.c must show patch1's edit with a
+# note that the other patch copies the file to b.c, and b.c must show patch2's
+# copy with a note that the other patch has text changes for the source a.c. A
+# copy leaves its source untouched, so neither note claims that patch2 edits
+# a.c.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,10 @@
+# Patch1 renames dir1/sub/x.c to dir1/sub/y.c in one block and changes old to
+# p1new in y.c in a second block. Patch2 only changes y.c's mode from 100644 to
+# 100755. Both patches change f2 in other/f.c, patch1 to F2 and patch2 to FF2,
+# and patch2's ---/+++ lines name that file with xx/ and yy/ prefixes. The
+# report must show patch1's rename note beside patch2's mode note once for y.c,
+# patch1's y.c edit on its side alone, and the two other/f.c edits paired, with
+# the removal of f2 as an edit both patches make.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

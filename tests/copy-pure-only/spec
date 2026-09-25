@@ -1,0 +1,6 @@
+# Patch1 is a git block that copies x.c to y.c with no hunks, and patch2 edits
+# f.c. The files don't pair, so the report must show the copy note on patch1's
+# side alone and patch2's f.c edit on its side alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

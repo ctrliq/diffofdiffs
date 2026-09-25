@@ -1,0 +1,7 @@
+# Both patches create n.c with the same bytes but different creation
+# modes. The created-pair fast path compares the two mode stories before
+# diffing the contents, so the disagreement notes in DELTA while the
+# agreeing bytes stay silent.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,8 @@
+# Patch1 edits a.c in place while patch2 renames a.c to zz/deep/other.c with no
+# hunks. The two don't pair, so each shows in its own section with a note about
+# the other patch: a.c's section must say that the other patch renames the file
+# to zz/deep/other.c, and the rename's section must say that the other patch
+# also names the source file a.c with text changes.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

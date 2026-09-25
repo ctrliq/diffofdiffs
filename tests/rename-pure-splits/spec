@@ -1,0 +1,6 @@
+# Both patches rename x.c without changing it, patch1 to y1.c and patch2 to
+# y2.c. The report must show each rename note in a section of its own, y1.c on
+# patch1's side and y2.c on patch2's.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

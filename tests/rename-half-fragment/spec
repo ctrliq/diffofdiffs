@@ -1,0 +1,5 @@
+# A similarity line and a lone rename-from half make a strict fragment that
+# never arms the latch: the junk stays dark and only the f.c pairing prints.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,8 @@
+# Patch1 edits src/longer_name.c in place while patch2 renames it to src/n.c, a
+# 66% similarity rename with a hunk of its own. The two don't pair, so each
+# shows in its own section: the edit's section must say that the other patch
+# renames the file to src/n.c, and the rename's section must say that the other
+# patch also names the source file src/longer_name.c with text changes.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

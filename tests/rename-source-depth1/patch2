@@ -1,0 +1,12 @@
+diff --git a/dir/s.c b/dir/t.c
+similarity index 100%
+rename from dir/s.c
+rename to dir/t.c
+diff --git a/z.c b/z.c
+--- a/z.c
++++ b/z.c
+@@ -1,3 +1,3 @@
+ aa
+-bb
++BB
+ cc

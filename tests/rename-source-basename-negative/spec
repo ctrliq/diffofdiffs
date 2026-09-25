@@ -1,0 +1,6 @@
+# Patch1 edits dir2/x.c while patch2 renames dir1/x.c to dir3/x.c. The paths
+# share their basename and nothing else, which doesn't relate them, so neither
+# section may carry a note about the other patch.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

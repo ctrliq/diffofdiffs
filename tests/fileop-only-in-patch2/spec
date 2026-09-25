@@ -1,0 +1,11 @@
+# Patch2 repeats patch1's bar.c change and adds two git blocks with no hunks and
+# no --- line: one renames r1.c to r2.c and changes its mode, and a final block
+# changes foo.sh's mode and carries an index line.
+#
+# The identical bar.c change must be left out. Each hunkless block must still
+# show as patch2's file operation: r2.c with its mode and rename notes, and
+# foo.sh with its mode notes and result blob, even though its block ends the
+# operand.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

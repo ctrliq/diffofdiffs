@@ -1,0 +1,8 @@
+# Patch1 renames x.c to y.c, with the rename lines above a hunk that changes old
+# at line 2 to new1 and no mode or binary lines. Patch2 changes old at line 2 of
+# f.c, a different file, to new2. The report must show the rename note and
+# patch1's edit on patch1's side in one section, and patch2's edit on its side
+# in a section for f.c.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

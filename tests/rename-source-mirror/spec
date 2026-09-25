@@ -1,0 +1,9 @@
+# rename-source-annotated with the patches swapped: patch1 renames a.c to
+# zz/deep/other.c with no hunks while patch2 edits a.c in place. The notes must
+# follow the files: the rename's section, now on patch1's side, must say that
+# the other patch also names the source file a.c with text changes, and a.c's
+# section on patch2's side must say that the other patch renames the file to
+# zz/deep/other.c.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

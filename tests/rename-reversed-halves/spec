@@ -1,0 +1,6 @@
+# A block carrying its to-half above its from-half never arms: canonical
+# from-then-to ordering is the latch's grammar, so the block stays dark and
+# patch1 keeps its no-patch warning.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

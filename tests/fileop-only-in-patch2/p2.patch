@@ -1,0 +1,16 @@
+--- a/bar.c
++++ b/bar.c
+@@ -1,2 +1,2 @@
+ aa
+-bb
++BB
+diff --git a/r1.c b/r2.c
+old mode 100644
+new mode 100755
+similarity index 100%
+rename from r1.c
+rename to r2.c
+diff --git a/foo.sh b/foo.sh
+old mode 100644
+new mode 100755
+index 3333333..3333333

@@ -1,0 +1,6 @@
+# Both sides pure-rename a different pre-image to the same destination. The
+# armed blocks pair on the b-half name, the only name a metadata block
+# offers, and the two rename claims print verbatim as a DELTA story note.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,9 @@
+# Patch1 renames src/f.c to src/y.c with no hunks and then edits src/y.c in a
+# separate block; patch2 names neither file. Both patches edit src/z.c, and
+# patch2 names it with xx/ and yy/ prefixes, which strip like a/ and b/. The
+# report must show the rename and the src/y.c edit on patch1's side alone, each
+# in its own src/y.c section, and pair the two src/z.c edits, where patch1 adds
+# Z2 and patch2 adds ZZ2.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

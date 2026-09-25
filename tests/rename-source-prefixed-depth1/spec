@@ -1,0 +1,10 @@
+# Patch1 has git's a/ and b/ prefixes and edits dir/s.c and z.c. Patch2's ---
+# and +++ lines have no prefixes; it makes the same z.c edit and renames dir/s.c
+# to dir/t.c with no hunks, so the run picks -p1 and z.c pairs and is left out.
+# Patch1's a/dir/s.c strips to dir/s.c, but the rename lines name the source
+# without a prefix, so the source must be read as a/dir/s.c before stripping.
+# Stripping the bare dir/s.c would give s.c and miss the match. Both sections
+# must carry the same notes as in rename-source-depth1.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

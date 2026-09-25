@@ -1,0 +1,8 @@
+# Patch1 deletes f.c in git's real hunk-less form, the deleted-file mode
+# word plus the index line that completes the block's metadata run,
+# while patch2 changes its mode. A deleted half neither compares nor
+# renders (only creation modes carry a ruled signal), so the note quotes
+# the pair half alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

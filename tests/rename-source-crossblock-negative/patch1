@@ -1,0 +1,11 @@
+diff --git a/x.c b/y.c
+similarity index 100%
+rename from x.c
+rename to y.c
+--- a/p.c
++++ b/p.c
+@@ -1,3 +1,3 @@
+ one
+-two
++TWO
+ three

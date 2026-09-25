@@ -1,0 +1,9 @@
+diff --git a/src/z.c b/src/z.c
+index 4444444..6666666 100644
+--- xx/src/z.c
++++ yy/src/z.c
+@@ -1,3 +1,3 @@
+ z1
+-z2
++ZZ2
+ z3

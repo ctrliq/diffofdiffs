@@ -1,0 +1,5 @@
+# A separate rename record precedes content edits for its destination.
+# Compare the content records together while keeping the rename visible.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

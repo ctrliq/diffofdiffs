@@ -1,0 +1,7 @@
+# Patch1 creates a.c and b.c, while patch2 edits existing files with the same
+# names. Each file must get its own section showing patch1's creation, with its
+# create-file and mode notes, beside patch2's in-place edit, and each note must
+# stay with the file it describes.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

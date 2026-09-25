@@ -1,0 +1,4 @@
+diff --git a/x.c b/y.c
+similarity index 100%
+rename to y.c
+rename from x.c

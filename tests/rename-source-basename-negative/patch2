@@ -1,0 +1,4 @@
+diff --git a/dir1/x.c b/dir3/x.c
+similarity index 100%
+rename from dir1/x.c
+rename to dir3/x.c

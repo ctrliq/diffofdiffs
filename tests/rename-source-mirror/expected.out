@@ -1,0 +1,62 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: patch┃Patch 2: patch
+      1       ┃      2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use
+only the source lines quoted
+in the patches.
+
+═════════════════════════════
+*    DELTA DIFFERENCES      *
+═════════════════════════════
+Signs mark edits made by only
+that patch. A sign-less line
+with one number is an edit
+both patches make: a new
+number means both add it, an
+old number means both remove
+it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│zz/de┃ old new│zz/de
+        │ep/ot┃        │ep/ot
+        │her.c┃        │her.c
+        │Renam┃        │
+        │e: a.┃        │
+        │c -> ┃        │
+        │zz/de┃        │
+        │ep/ot┃        │
+        │her.c┃        │
+        │The o┃        │
+        │ther ┃        │
+        │patch┃        │
+        │ also┃        │
+        │ name┃        │
+        │s the┃        │
+        │ sour┃        │
+        │ce fi┃        │
+        │le a.┃        │
+        │c (te┃        │
+        │xt ch┃        │
+        │anges┃        │
+        │).   ┃        │
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│a.c  ┃ old new│a.c
+        │     ┃        │The o
+        │     ┃        │ther
+        │     ┃        │patch
+        │     ┃        │ rena
+        │     ┃        │mes t
+        │     ┃        │his f
+        │     ┃        │ile t
+        │     ┃        │o zz/
+        │     ┃        │deep/
+        │     ┃        │other
+        │     ┃        │.c.
+        │@@   ┃        │@@
+        │     ┃   1   1│one
+        │     ┃-  2    │two
+        │     ┃+      2│TWO
+        │     ┃   3   3│three

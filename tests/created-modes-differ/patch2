@@ -1,0 +1,7 @@
+diff --git a/n.c b/n.c
+new file mode 100755
+index 0000000..2222222
+--- /dev/null
++++ b/n.c
+@@ -0,0 +1 @@
++n1

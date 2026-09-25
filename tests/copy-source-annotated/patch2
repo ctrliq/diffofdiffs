@@ -1,0 +1,4 @@
+diff --git a/a.c b/b.c
+similarity index 100%
+copy from a.c
+copy to b.c

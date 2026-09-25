@@ -1,0 +1,10 @@
+# Patch1 has no a/ and b/ prefixes and edits dir/s.c and z.c. Patch2 has git's
+# prefixes, renames dir/s.c to dir/t.c with no hunks, and makes the same z.c
+# edit, so the run picks -p1, under which z.c pairs and is left out and patch1's
+# dir/s.c strips to s.c. The rename's source must strip the same way to match:
+# dir/s.c's section must say that the other patch renames the file to dir/t.c,
+# and the rename's section must say that the other patch also names dir/s.c with
+# text changes.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

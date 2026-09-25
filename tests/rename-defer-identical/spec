@@ -1,0 +1,7 @@
+# rename-consume-metaonly with patch2 making the same pure rename of
+# dir1/sub/x.c to dir1/sub/y.c instead of a mode change. The report must leave
+# the identical renames out, show patch1's y.c edit on its side alone, and pair
+# the two other/f.c edits as before.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

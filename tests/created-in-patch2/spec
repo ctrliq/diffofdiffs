@@ -1,0 +1,9 @@
+# Patch1 edits line 55 of an existing alpha, while patch2 creates alpha from
+# nothing with different content. Patch1's hunk describes a change against its
+# own alpha, not the one patch2 writes, so the two never pair: the report must
+# show patch2's creation, with its create-file and mode notes, and patch1's edit
+# on patch1's side alone. tree-fill-fails covers the same pairing in tree mode;
+# the operands are diffs of the wild and wildtip commits in the tree4 store.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
