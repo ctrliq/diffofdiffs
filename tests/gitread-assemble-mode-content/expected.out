@@ -1,0 +1,15 @@
+diff --git a/mc b/mc
+old mode 100644
+new mode 100755
+--- a/mc
++++ b/mc
+@@ -1,2 +1,2 @@ run
+ run
+-me
++ME
+diff --git a/x b/x
+new file mode 100755
+--- /dev/null
++++ b/x
+@@ -0,0 +1 @@
++#!/bin/sh

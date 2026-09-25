@@ -1,0 +1,7 @@
+# A mode flip over one unchanged blob renders as the hunkless fileop-only
+# block: the "diff --git " opener that arms the intake's mode latch, then the
+# old/new mode pair, with no header pair and no hunks, exactly the form the
+# mode fixtures already feed the tool.
+bin: GITREAD_UNIT
+args: assemble-mode-only
+exit: 0

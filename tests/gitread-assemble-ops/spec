@@ -1,0 +1,8 @@
+# The reader assembles one patch for a content change to a, the creation of c,
+# and the deletion of d. The change must show plain --- and +++ lines with its
+# hunk, the creation must diff from /dev/null under a new file mode line, the
+# deletion must diff to /dev/null under a deleted file mode line, and the blocks
+# must come in path order, leaving out the file the commit doesn't change.
+bin: GITREAD_UNIT
+args: assemble-ops
+exit: 0

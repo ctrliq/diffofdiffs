@@ -1,0 +1,8 @@
+diff --git a/n b/n
+--- a/n
++++ b/n
+@@ -1,2 +1,2 @@ alpha
+ alpha
+-beta
+\ No newline at end of file
++beta

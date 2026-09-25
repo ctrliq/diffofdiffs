@@ -1,0 +1,8 @@
+# The reader assembles a patch in which mc changes mode from 100644 to 100755
+# along with its content, and x is created executable. mc's block must carry the
+# old mode and new mode lines between the diff --git line and the --- and +++
+# lines, and x's block must give its mode in the new file mode line, as git
+# writes them.
+bin: GITREAD_UNIT
+args: assemble-mode-content
+exit: 0

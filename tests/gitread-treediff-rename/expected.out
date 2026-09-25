@@ -1,0 +1,5 @@
+map 4
+delete a reg 100644 f7d55cf9a84e9ea95e8db2b6264e5a5db85d22ad
+create b reg 100644 f7d55cf9a84e9ea95e8db2b6264e5a5db85d22ad
+delete c reg 100644 9a6c8d12dea8859b821b2ba705f7efd6cc914aa5
+create d reg 100755 9a6c8d12dea8859b821b2ba705f7efd6cc914aa5

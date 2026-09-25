@@ -1,0 +1,8 @@
+# A moved file and a copied file render with no rename or copy headers: the
+# move is a delete block and a create block spelling the content in full both
+# times, the copy is a plain creation beside its surviving source, and the
+# exact-object edge stays in the map for later consumers, never in the
+# document.
+bin: GITREAD_UNIT
+args: assemble-rename-copy
+exit: 0

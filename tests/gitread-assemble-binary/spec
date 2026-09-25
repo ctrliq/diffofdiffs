@@ -1,0 +1,6 @@
+# A blob holding a NUL byte is binary content no unified diff can carry, so
+# the assembler refuses it by name before the engine ever sees the bytes,
+# rather than emitting a document whose payload the intake would misread.
+bin: GITREAD_UNIT
+args: assemble-binary
+exit: 1

@@ -1,0 +1,6 @@
+# A tree spelling its entry's mode as 100664 (a historical permission form real
+# kernel history holds) classifies as a regular file with the raw spelling kept,
+# and the permission-only difference against 100644 records as a modify.
+bin: GITREAD_UNIT
+args: treediff-rawmode
+exit: 0

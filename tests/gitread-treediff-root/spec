@@ -1,0 +1,6 @@
+# The empty-tree side: with no old commit at all, every entry of the new
+# commit's tree records as a create. This pins the differ's contract alone; the
+# CLI's reading of a parentless commit is a later stage's decision.
+bin: GITREAD_UNIT
+args: treediff-root
+exit: 0

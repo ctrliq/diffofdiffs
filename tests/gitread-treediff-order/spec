@@ -1,0 +1,6 @@
+# The tree diff must list its records in path byte order: a.c before a/x before
+# a0, since ".", "/", and "0" sort by their byte values, and records in
+# subdirectories on both sides must appear at their full paths, depth first.
+bin: GITREAD_UNIT
+args: treediff-order
+exit: 0

@@ -1,0 +1,7 @@
+# Symlinks diff as their target-path bytes: the creation and the retarget each
+# print their rows with the no-newline marker behind them, since a symlink
+# blob never ends in a line feed, and the creation carries mode 120000 in the
+# creation form.
+bin: GITREAD_UNIT
+args: assemble-symlink
+exit: 0

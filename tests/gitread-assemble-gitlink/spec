@@ -1,0 +1,7 @@
+# Gitlinks render as the Subproject-commit scalar line git prints for a
+# submodule, spelled from the map's object id alone: the created gitlink diffs
+# from /dev/null under mode 160000 and the pointer bump prints one removed and
+# one added scalar line, with no store holding either referenced commit.
+bin: GITREAD_UNIT
+args: assemble-gitlink
+exit: 0

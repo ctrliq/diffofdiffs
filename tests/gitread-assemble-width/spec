@@ -1,0 +1,6 @@
+# The context width threads through to the engine: the same one-line change
+# that would print three context lines per side at the default width prints
+# exactly one per side when the assembler is asked for one.
+bin: GITREAD_UNIT
+args: assemble-width
+exit: 0

@@ -1,0 +1,6 @@
+# A tree naming a subtree the store never held parses fine on its own, and the
+# walk's descent is that object's first reader, so the enumeration dies on the
+# missing tree rather than handing back a partial map.
+bin: GITREAD_UNIT
+args: treediff-ghost-subtree
+exit: 1

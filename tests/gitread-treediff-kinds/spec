@@ -1,0 +1,6 @@
+# Symlink and gitlink records: a retargeted symlink and a bumped gitlink are
+# modifies of their kinds, a new symlink is a create, and each record names its
+# kind beside the raw mode and object id.
+bin: GITREAD_UNIT
+args: treediff-kinds
+exit: 0

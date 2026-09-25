@@ -1,0 +1,6 @@
+# A deleted regular file and a created symlink can share one blob when the
+# file's content equals the link's target bytes. Their records must retain
+# distinct kinds even when the object IDs match.
+bin: GITREAD_UNIT
+args: treediff-kind-mismatch-edge
+exit: 0

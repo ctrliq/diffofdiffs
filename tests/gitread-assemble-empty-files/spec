@@ -1,0 +1,7 @@
+# The reader assembles a patch that creates the empty file e and deletes the
+# empty file g. Neither block has a hunk, so each must carry its mode line and a
+# full-length index line, which keeps the block complete and appliable without
+# one.
+bin: GITREAD_UNIT
+args: assemble-empty-files
+exit: 0

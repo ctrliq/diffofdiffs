@@ -1,0 +1,6 @@
+# A file becoming a directory holds foo and foo/x in the path union at once, so
+# the map records a delete and a create at distinct paths with no shared-path
+# pair involved.
+bin: GITREAD_UNIT
+args: treediff-dir-boundary
+exit: 0

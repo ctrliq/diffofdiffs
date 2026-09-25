@@ -1,0 +1,6 @@
+# Each rename retains its deletion and creation even when their object IDs
+# match. The second pair also changes permissions, which must survive beside
+# the unchanged content.
+bin: GITREAD_UNIT
+args: treediff-rename
+exit: 0

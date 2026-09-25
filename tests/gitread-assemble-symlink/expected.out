@@ -1,0 +1,15 @@
+diff --git a/ln b/ln
+new file mode 120000
+--- /dev/null
++++ b/ln
+@@ -0,0 +1 @@
++target
+\ No newline at end of file
+diff --git a/lo b/lo
+--- a/lo
++++ b/lo
+@@ -1 +1 @@ old
+-old
+\ No newline at end of file
++new
+\ No newline at end of file

@@ -1,0 +1,6 @@
+# A kind change at one path records as a delete and a create at that path with
+# the delete first (the ruled delete-plus-create form for type changes); no
+# merged record exists.
+bin: GITREAD_UNIT
+args: treediff-typechange
+exit: 0

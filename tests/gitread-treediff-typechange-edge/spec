@@ -1,0 +1,6 @@
+# Moving foo's regular-file content to bar while replacing foo with a symlink
+# needs three records: create bar, delete the old foo, and create the new foo.
+# Keeping the same path must not merge entries with different kinds.
+bin: GITREAD_UNIT
+args: treediff-typechange-edge
+exit: 0

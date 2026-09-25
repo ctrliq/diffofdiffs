@@ -1,0 +1,7 @@
+# A kind change at one path renders as its delete block followed by its create
+# block, the ruled delete-plus-create form: the regular file's content leaves
+# under its deleted-file mode, then the symlink's target arrives under the
+# creation mode, two self-contained blocks at the same path.
+bin: GITREAD_UNIT
+args: assemble-typechange
+exit: 0

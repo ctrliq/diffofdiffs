@@ -1,0 +1,6 @@
+# A tree entry whose mode sits outside all four type families parses in the
+# library (the entry's type normalizes to a blob) but has no meaning the map
+# can carry, so the differ refuses it by number rather than guessing a kind.
+bin: GITREAD_UNIT
+args: treediff-alien-mode
+exit: 1

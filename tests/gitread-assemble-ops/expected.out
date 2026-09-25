@@ -1,0 +1,21 @@
+diff --git a/a b/a
+--- a/a
++++ b/a
+@@ -1,4 +1,4 @@ one
+ one
+-two
++TWO
+ three
+ four
+diff --git a/c b/c
+new file mode 100644
+--- /dev/null
++++ b/c
+@@ -0,0 +1 @@
++fresh
+diff --git a/d b/d
+deleted file mode 100644
+--- a/d
++++ /dev/null
+@@ -1 +0,0 @@ gone
+-gone

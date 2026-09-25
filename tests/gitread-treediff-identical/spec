@@ -1,0 +1,4 @@
+# Identical trees diff to an empty map; the count header still prints.
+bin: GITREAD_UNIT
+args: treediff-identical
+exit: 0

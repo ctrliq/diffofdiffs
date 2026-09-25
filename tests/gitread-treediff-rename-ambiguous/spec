@@ -1,0 +1,6 @@
+# Retain all paths when one deleted object reappears at two created paths, and
+# when two deleted copies reappear at one path. Equal object IDs must not
+# coalesce distinct file operations.
+bin: GITREAD_UNIT
+args: treediff-rename-ambiguous
+exit: 0

@@ -1,0 +1,6 @@
+# Identical trees yield an empty map and the empty document, the identity
+# patch: the assembler emits nothing rather than a document claiming a
+# difference the trees don't carry.
+bin: GITREAD_UNIT
+args: assemble-identical
+exit: 0

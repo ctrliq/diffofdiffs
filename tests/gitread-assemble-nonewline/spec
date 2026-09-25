@@ -1,0 +1,7 @@
+# A final line gaining its line feed: the old side's short last line makes the
+# engine print the no-newline marker under the removed row and none under the
+# added one, so the derived document round-trips the incomplete-last-line
+# state without a side channel.
+bin: GITREAD_UNIT
+args: assemble-nonewline
+exit: 0

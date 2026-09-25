@@ -1,0 +1,6 @@
+# The four ordinary operations against one tree pair: a content change, a
+# creation, a deletion, and a mode-only flip each record with the sides they
+# carry, while an unchanged file stays out of the map entirely.
+bin: GITREAD_UNIT
+args: treediff-ops
+exit: 0
