@@ -1,0 +1,5 @@
+# The b14 to b14_p1 change is shared by the two patches. Only the extra
+# upstream addition contributes a result difference.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

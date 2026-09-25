@@ -1,0 +1,5 @@
+# The shared sh1/sh2 additions bound the p1head/p2head difference. The
+# separate upstream n1 insertion keeps its original identity.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,10 @@
+# Both patches fit under a 512-byte file-size limit, but the report doesn't.
+# With SIGXFSZ ignored, the first write past the limit fails with EFBIG, so the
+# run must report "write error on standard output", exit 1 rather than die on a
+# signal, and leave the output clipped at 512 bytes. fuzzy127-4 covers the
+# default SIGXFSZ disposition.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+rlimit-fsize: 512
+sigxfsz: ignore
+exit: 1

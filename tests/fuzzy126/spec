@@ -1,0 +1,8 @@
+# Patch1 changes a to A at line 1 of f. Patch2 quotes a unchanged at line 1 and
+# changes b to B below it, in a hunk whose header, "@@ -1,3 +1,3", lacks the
+# closing @@, and a second hunk changes y to Y at line 11. Since patch2 quotes a
+# unchanged, patch1's change of a must show as its own edit beside patch2's
+# change of b, and patch2's change of y must show on its side alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

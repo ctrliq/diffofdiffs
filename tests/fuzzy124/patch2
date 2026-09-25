@@ -1,0 +1,15 @@
+--- a/f.c
++++ b/f.c
+@@ -1,0 +2,1 @@
++n1
+@@ -5,7 +6,7 @@
+ ctx_row
+-old_a_v2
+-old_b
+-old_last
++p2_head
++sh1
++sh2
+ one
+ two
+ three

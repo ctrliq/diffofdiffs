@@ -1,0 +1,8 @@
+# The same 512-byte file-size limit as fuzzy127-3, with the same patch1 and a
+# patch2 whose added line is longer, under the default SIGXFSZ disposition. The
+# run must die on SIGXFSZ at the first write past the limit, with the output
+# clipped at 512 bytes.
+bin: DIFFOFDIFFS
+args: patch1 patch2big
+rlimit-fsize: 512
+exit: sig:XFSZ
