@@ -1,0 +1,7 @@
+# A context diff on its own. The recorded half never meets a hunk, so the
+# walk falls through to the no-patch diagnostic exactly as it did before the
+# reader learned to record the half: a bare context diff still doesn't
+# contain a patch the tool reads.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

@@ -1,0 +1,7 @@
+# A hunk header in a cover letter precedes the first file header pair.
+# It cannot start a body walk, because no file owns it. Both patches then
+# contain the ordinary pigeon-single changes; the third upstream insertion
+# remains the only reported difference.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

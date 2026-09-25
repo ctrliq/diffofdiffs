@@ -1,0 +1,7 @@
+# The context-format section stands ahead of the unified one. The stray header
+# line is recorded before any section starts and the refusal waits for the
+# unified hunk behind it, so the message doesn't depend on where the foreign
+# section sits.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

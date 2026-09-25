@@ -1,0 +1,42 @@
+From 1111111111111111111111111111111111111111 Mon Sep 17 00:00:00 2001
+From: Author One <author1@example.com>
+Date: Mon, 1 Jan 2024 00:00:00 +0000
+Subject: [PATCH 1/2] first commit
+
+---
+ f.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/f.txt b/f.txt
+index 1111111..2222222 100644
+--- a/f.txt
++++ b/f.txt
+@@ -1,1 +1,1 @@
+-old line
++new line
+--
+2.34.1
+
+From 2222222222222222222222222222222222222222 Mon Sep 17 00:00:00 2001
+From: Author Two <author2@example.com>
+Date: Mon, 1 Jan 2024 01:00:00 +0000
+Subject: [PATCH 2/2] second commit
+
+This fixes the issue described in the previous patch where
+--- a/f.txt
+was modified incorrectly. Now we handle it properly.
+
+---
+ f.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/f.txt b/f.txt
+index 2222222..3333333 100644
+--- a/f.txt
++++ b/f.txt
+@@ -1,1 +1,1 @@
+-new line
++newer line
+--
+2.34.1
+

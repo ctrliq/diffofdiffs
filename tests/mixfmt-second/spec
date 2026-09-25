@@ -1,0 +1,7 @@
+# The same mixed operand as patch2. Both operands pass through the same intake,
+# so the message is the one mixfmt-first expects; without the refusal the
+# unified section would produce a report at exit 0 and the context section would
+# vanish without a word.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

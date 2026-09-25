@@ -1,0 +1,8 @@
+# A prose line opening with "*** " stands directly above a real header pair.
+# The pair meets its "+++ " line, so nothing is recorded and the operand is
+# a plain unified diff: patch1 prints the same DELTA the pair prints without
+# the prose line, since a "*** " line only matters when the "--- " half
+# behind it never meets a "+++ " line.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

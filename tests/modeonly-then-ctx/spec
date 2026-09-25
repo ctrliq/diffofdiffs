@@ -1,0 +1,9 @@
+# Patch1 carries a mode-only git block for f followed by a context-format
+# section. The section's --- line means the block names a file with content, so
+# the mode lines stop counting as patch content on their own, and the
+# context-format section isn't readable. With nothing it can count, the tool
+# must refuse patch1 with "patch1 doesn't contain a patch" rather than the
+# malformed-patch message mixfmt-first expects.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

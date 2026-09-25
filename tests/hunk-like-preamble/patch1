@@ -1,0 +1,20 @@
+Cover letter with a quoted hunk header follows.
+@@ -1,1 +1,1 @@
+--- a/f.c
++++ b/f.c
+@@ -5,6 +5,7 @@
+ c05
+ c06
+ c07
++add_one
+ c08
+ c09
+ c10
+@@ -20,6 +20,7 @@
+ c20
+ c21
+ c22
++add_two
+ c23
+ c24
+ c25

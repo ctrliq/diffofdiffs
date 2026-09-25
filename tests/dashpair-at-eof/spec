@@ -1,0 +1,7 @@
+# Patch1 ends with a context-diff header pair, a *** line followed by a ---
+# line, after its unified hunk, and nothing follows the pair. The reader must
+# refuse the operand as malformed even though the pair sits at the end of input,
+# and name the --- line in the message.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

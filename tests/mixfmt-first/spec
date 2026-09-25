@@ -1,0 +1,9 @@
+# patch1 carries a unified section and then a context-format section over a
+# second file. The reader can't read the context format, so the section's "---
+# d/x.txt" header line, standing directly behind its "*** " line with no "+++ "
+# line after it, is recorded, and the operand is refused on it once the reader
+# has found the unified hunk: a generic malformed-patch message with no format
+# named, and nothing dropped in silence.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

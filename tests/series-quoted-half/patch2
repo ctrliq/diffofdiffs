@@ -1,0 +1,5 @@
+--- a/f.txt
++++ b/f.txt
+@@ -1,1 +1,1 @@
+-old line
++newest line

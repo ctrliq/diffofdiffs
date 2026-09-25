@@ -1,0 +1,7 @@
+# Patch1 ends with a lone "--- a/trunc.txt" line after its foo.txt hunk, with no
+# "+++" line or hunk behind it. The tool must ignore that trailing line and
+# compare the two foo.txt edits, showing the removal of line2 as an edit both
+# patches make with "line2 modified" beside "line2 changed".
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

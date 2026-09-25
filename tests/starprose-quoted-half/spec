@@ -1,0 +1,9 @@
+# Patch2 is a mail whose prose quotes a "--- a/other.txt" line directly under a
+# "*** BLURB HERE ***" line, ahead of its real diff of m.txt. That pair of lines
+# reads like the file header of a context diff, so the tool must refuse patch2
+# as malformed, naming the "--- a/other.txt" line, and exit 1 with no output.
+# GNU patch skips the prose and applies the m.txt hunk, so this refusal is a
+# known cost of recognizing context diff headers.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

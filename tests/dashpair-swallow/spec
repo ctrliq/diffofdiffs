@@ -1,0 +1,8 @@
+# The foreign "--- d/x.txt" half is displaced by another "--- " line instead
+# of by junk, the sequence the index's one-line peek reads as a quoted header
+# swallowing the real one. The half is recorded the moment the next "--- "
+# line displaces it, so the refusal doesn't depend on which line abandons the
+# half.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

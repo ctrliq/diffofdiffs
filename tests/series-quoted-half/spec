@@ -1,0 +1,7 @@
+# A two-commit format-patch series whose second commit message quotes a "---
+# a/f.txt" line as prose. The quoted half stands behind a prose line rather
+# than a "*** " line, so it stays the junk it always was and the series is
+# read whole.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
