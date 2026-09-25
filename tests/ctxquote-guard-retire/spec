@@ -1,0 +1,10 @@
+# Patch1 changes p1_change() at line 14 under context t_a() through t_d(), and
+# in a second hunk replaces old_core() with new_core() after shared_ctx().
+# Patch2 makes only the old_core() replacement, declared three lines earlier
+# under context p2_top_a() and p2_top_b() that patch1 never quotes.
+#
+# The shared replacement must be left out, and patch1's p1_change() edit must
+# show alone with its three nearest context lines, starting at line 11.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

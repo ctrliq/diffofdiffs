@@ -1,0 +1,12 @@
+# Both patches edit dim.c in three regions. Near line 20 they add different
+# lines, ins() and p2a(), after A2(). Near line 33 patch1 quotes e1() and adds
+# p1b(), while patch2 quotes e2() in the same place and replaces zx() below
+# K2(). Near line 41 both replace E() with F().
+#
+# The report must show the two insertions after A2() side by side, patch1's
+# p1b() and patch2's zx() replacement each on its own side, and the e1() versus
+# e2() difference in the context section. The identical E() replacement is left
+# out.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

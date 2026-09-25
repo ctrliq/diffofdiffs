@@ -1,0 +1,8 @@
+# Patch1 quotes lines 4-15 of g, changing d08 to n08 and d11 to n11. Patch2
+# quotes lines 6-15, with Z lines where patch1 has c06, c07, c09, c10, and c12;
+# it keeps d08 and d11 and adds w15 after c15. The report must show patch1's two
+# changes and patch2's w15 each on its own side, beside the lines the other
+# patch quotes there.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

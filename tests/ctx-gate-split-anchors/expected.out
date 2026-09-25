@@ -1,0 +1,55 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        Patch 1: patch1        ┃        Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the
+patches.
+
+═══════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                        *
+═══════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with
+one number is an edit both patches make: a new number means
+both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│mod.c                 ┃ old new│mod.c
+        │@@                    ┃        │@@
+  27  27│row_v1();             ┃  27  27│row_v2();
+  28  28│ctx_28();             ┃  28  28│ctx_28();
+  29  29│ctx_29();             ┃  29  29│ctx_29();
+  30  30│ctx_30();             ┃- 30    │ctx_30();
+        │                      ┃+     30│changed_thirty();
+  31  31│ctx_31();             ┃  31  31│ctx_31();
+  32  32│ctx_32();             ┃  32  32│ctx_32();
+  33  33│ctx_33();             ┃  33  33│ctx_33();
+        │──────────────────────╂────────┼──────────────────────
+        │@@                    ┃        │@@
+        │                      ┃  35  35│ctx_35();
+        │                      ┃  36  36│ctx_36();
+        │                      ┃  37  37│ctx_37();
+        │                      ┃- 38    │ctx_38();
+        │                      ┃+     38│changed_thirtyeight();
+        │                      ┃  39  39│ctx_39();
+        │                      ┃  40  40│ctx_40();
+        │                      ┃  41  41│ctx_41();
+
+═══════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                                      *
+═══════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, +
+patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│mod.c                 ┃     new│mod.c
+        │@@                    ┃        │@@
+      24│ctx_24();             ┃      24│ctx_24();
+      25│ctx_25();             ┃      25│ctx_25();
+      26│ctx_26();             ┃      26│ctx_26();
+-     27│row_v1();             ┃+     27│row_v2();
+      28│ctx_28();             ┃      28│ctx_28();
+      29│ctx_29();             ┃      29│ctx_29();
+-     30│ctx_30();             ┃+     30│changed_thirty();
+      31│ctx_31();             ┃      31│ctx_31();
+      32│ctx_32();             ┃      32│ctx_32();
+      33│ctx_33();             ┃      33│ctx_33();

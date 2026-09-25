@@ -1,0 +1,14 @@
+--- a/f
++++ b/f
+@@ -9,5 +9,6 @@
+ solo_p1();
+ anchor_a();
+ anchor_b();
+ anchor_c();
++guard_check();
+ run_one();
+@@ -28,3 +29,4 @@
+ tail_a();
++guard_release();
+ tail_b();
+ tail_c();

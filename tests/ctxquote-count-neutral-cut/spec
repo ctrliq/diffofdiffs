@@ -1,0 +1,13 @@
+# Patch1 quotes lines 1-20 of f whole, adds ADDED after FF, and changes L20 to
+# P1_L20. Patch2 is numbered three lines lower and quotes three separate windows
+# of the same file, skipping GAP1 and GAP2: it changes L06 to P2_L06, adds the
+# same ADDED after FF, and changes L19 to P2_L19, and it quotes DIFF1_V2 and
+# DIFF2_V2 where patch1 quotes DIFF1 and DIFF2. The report must show the L06,
+# L19, and L20 changes on their own patch's side and leave out the shared ADDED
+# line. The context section must show L06, DIFF1, and DIFF2 against patch2's
+# lines, split at the gap so that the second part numbers FD by each patch's own
+# line (11 and 8), and it must not show GAP1 or GAP2, which patch2 never quotes,
+# as differences.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

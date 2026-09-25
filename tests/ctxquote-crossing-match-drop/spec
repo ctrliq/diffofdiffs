@@ -1,0 +1,11 @@
+# Patch1 changes line08 and line37 of foo.c and adds P1_X after line21, quoting
+# every line from 8 to 37 except line 22. Patch2 changes line08 and line37
+# differently, adds P2_D after line23 and P2_B after line27, and quotes line 26
+# as P2_line26, in four hunks covering lines 8-17, 23, 25-27, and 29-37. The
+# report must show each patch's changes on its own side, and the context section
+# must show only line26 against P2_line26: line25 and line27 match what patch2
+# quotes, and lines 24 and 28 are lines patch2 never quotes, so none of them may
+# show as differences.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

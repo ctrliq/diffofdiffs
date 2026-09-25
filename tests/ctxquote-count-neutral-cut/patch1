@@ -1,0 +1,25 @@
+--- a/f
++++ b/f
+@@ -1,20 +1,21 @@
+ L01
+ L02
+ L03
+ L04
+ L05
+ L06
+ FA
+ DIFF1
+ FC
+ GAP1
+ FD
+ DIFF2
+ FE2
+ FF
++ADDED
+ GAP2
+ FG
+ FH
+ FI
+ L19
+-L20
++P1_L20

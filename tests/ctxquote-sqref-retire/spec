@@ -1,0 +1,8 @@
+# Both patches add guard_check() after anchor_c() and guard_release() after
+# tail_a(). Patch1 also quotes solo_p1() above anchor_a(), a line patch2 doesn't
+# quote, the line after guard_check() differs (run_one() in patch1, run_two() in
+# patch2), and the declared positions differ by up to two lines. Both insertions
+# are edits both patches make, and the fixture expects no output at all.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

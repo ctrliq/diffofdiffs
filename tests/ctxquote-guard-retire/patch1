@@ -1,0 +1,15 @@
+--- a/mod.c
++++ b/mod.c
+@@ -10,5 +10,5 @@
+ t_a();
+ t_b();
+ t_c();
+ t_d();
+-p1_change();
++p1_changed();
+@@ -18,4 +18,4 @@
+ shared_ctx();
+-old_core();
++new_core();
+ tail_a();
+ tail_b();

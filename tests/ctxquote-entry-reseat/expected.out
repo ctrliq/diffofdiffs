@@ -1,0 +1,40 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Patch 1: patch1 ┃ Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only
+the source lines quoted in the
+patches.
+
+═══════════════════════════════════
+*    DELTA DIFFERENCES            *
+═══════════════════════════════════
+Signs mark edits made by only that
+patch. A sign-less line with one
+number is an edit both patches
+make: a new number means both add
+it, an old number means both remove
+it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│dim.c   ┃ old new│dim.c
+        │@@      ┃        │@@
+        │        ┃- 19    │q1();
+        │        ┃+     19│q2();
+  20  20│A1();   ┃  20  20│A1();
+  21  21│A2();   ┃  21  21│A2();
+  22  22│A3();   ┃  22  22│A3();
+  23  23│a1();   ┃        │
+  24  24│a2();   ┃        │
+        │────────╂────────┼────────
+        │@@      ┃        │@@
+- 25    │b1();   ┃  28  28│b1();
+- 26    │b2();   ┃  29  29│b2();
+        │────────╂────────┼────────
+        │@@      ┃        │@@
+  30  28│C1();   ┃  30  30│C1();
++     29│p1ins();┃        │
+  31  30│C2();   ┃  31  31│C2();
+  32  31│C3();   ┃  32  32│C3();
+        │        ┃- 33    │zx();
+        │        ┃+     33│zy();

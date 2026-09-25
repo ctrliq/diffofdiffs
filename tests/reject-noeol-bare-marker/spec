@@ -1,0 +1,7 @@
+# The same patches as reject-noeol, except that patch2's final line, the "\ No
+# newline at end of file" marker itself, has no newline of its own. The report
+# must match reject-noeol's byte for byte: the marker still applies to zulu, the
+# line above it, and the report still ends in a newline.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

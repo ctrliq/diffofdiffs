@@ -1,0 +1,11 @@
+# Near line 10 both patches replace old_one() with new_one() but quote different
+# context above it, near_a() and near_a_v2(). Near line 30 both add new_two(),
+# but patch1 removes old_two() under far_a() while patch2 removes old_two_zz()
+# under far_a_v2().
+#
+# The report must show the far region, where the removed lines differ, with
+# new_two() as a shared addition, and leave out the near change, which both
+# patches make identically.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,5 @@
+# The common added A stays shared. Extra upstream C and D changes retain their
+# own source; blank rows alone do not identify a corresponding operation.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

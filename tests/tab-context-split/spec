@@ -1,0 +1,9 @@
+# Both patches change line4 of f, patch1 to backport and patch2 to upstream, and
+# patch2 also changes line6 to "second upstream". Both quote line 7, which
+# starts with a tab, as context. The report must show the removal of line4 as an
+# edit both patches make with backport beside upstream, the change of line6 on
+# patch2's side, line 7 with its tab as common context, and a context section in
+# which the results differ at lines 4 and 6.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

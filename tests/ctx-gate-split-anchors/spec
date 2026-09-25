@@ -1,0 +1,6 @@
+# Shared edits at two known source positions stay silent. A known middle
+# source edit is compared, while a proven extra upstream change retains its
+# own source.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

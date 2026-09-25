@@ -1,0 +1,6 @@
+# Compare the known line replacements and the upstream change whose source is
+# quoted by the backport. Do not restore an unquoted backport source row or
+# pair the other upstream change with different source.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

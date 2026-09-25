@@ -1,0 +1,8 @@
+# Both patches change bravo to BRAVO at line 2 of f.c. Patch2 also changes
+# yankee to YANKEE at line 21, in a hunk that ends on zulu, the unterminated
+# last line of the file, where patch1 quotes nothing. The shared change must be
+# left out, and patch2's second hunk must show on its side alone with its
+# no-newline marker.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

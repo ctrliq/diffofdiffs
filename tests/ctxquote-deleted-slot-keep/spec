@@ -1,0 +1,11 @@
+# Patch1's f has XOLD and DUP after FA; patch1 replaces DUP with ADDED and later
+# changes L20 to P1_L20. Patch2 is numbered three lines lower and has DUP right
+# after FA with no XOLD; it adds ADDED after DUP, keeping DUP, and later adds
+# P2_ADD after FF, quoting D2V where patch1 quotes D2. The report must show
+# ADDED as an addition both make, and patch1's removal of DUP, its L20 change,
+# and patch2's P2_ADD each on its own side. The context section must show XOLD
+# against DUP and D2 against D2V: patch1 removes the DUP that patch2 keeps, so
+# that line is a real difference between the results.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

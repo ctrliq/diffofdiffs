@@ -1,0 +1,12 @@
+--- a/mod.c
++++ b/mod.c
+@@ -10,3 +10,3 @@
+ near_a();
+-old_one();
++new_one();
+ near_b();
+@@ -30,3 +30,3 @@
+ far_a();
+-old_two();
++new_two();
+ far_b();

@@ -1,0 +1,15 @@
+--- a/mod.c
++++ b/mod.c
+@@ -9 +9 @@
+-lone_old();
++lone_new();
+@@ -13,8 +13,8 @@
+ p_a();
+ p_b();
+ p_c();
+ p_d();
+ shared_ctx();
+-old_core();
++new_core();
+ tail_a();
+ tail_b();

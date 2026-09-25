@@ -1,0 +1,8 @@
+# Both patches change lone_old() to lone_new() at line 9 and old_core() to
+# new_core() at line 18 of mod.c. Patch1 quotes m_a(), m_b() and m_c() below the
+# first change and m_d() at line 16; patch2 quotes p_a() through p_d() at lines
+# 13-16. The expected report is empty, even though the patches quote line 16
+# differently.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

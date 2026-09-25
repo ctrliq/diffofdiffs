@@ -1,0 +1,37 @@
+--- a/mod.c
++++ b/mod.c
+@@ -8,27 +8,27 @@
+ ctx_08();
+-old_nine();
++new_nine();
+ ctx_10();
+ ctx_11();
+ ctx_12();
+ ctx_13();
+ ctx_14();
+ ctx_15();
+ ctx_16();
+ ctx_17();
+ ctx_18();
+ ctx_19();
+ ctx_20();
+ ctx_21();
+ ctx_22();
+ ctx_23();
+ ctx_24();
+ ctx_25();
+ ctx_26();
+ row_v1();
+ ctx_28();
+ ctx_29();
+ ctx_30();
+ ctx_31();
+ ctx_32();
+ ctx_33();
+ ctx_34();
+@@ -42,4 +42,4 @@
+ ctx_42();
+-old_fortythree();
++new_fortythree();
+ ctx_44();
+ ctx_45();

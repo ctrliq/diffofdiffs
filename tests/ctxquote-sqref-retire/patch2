@@ -1,0 +1,13 @@
+--- a/f
++++ b/f
+@@ -9,4 +9,5 @@
+ anchor_a();
+ anchor_b();
+ anchor_c();
++guard_check();
+ run_two();
+@@ -26,3 +27,4 @@
+ tail_a();
++guard_release();
+ tail_b();
+ tail_c();

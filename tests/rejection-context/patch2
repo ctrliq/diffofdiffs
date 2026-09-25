@@ -1,0 +1,14 @@
+--- a/mod.c
++++ b/mod.c
+@@ -10,5 +10,5 @@
+ ctx_a_v2();
+-old_one();
++new_one();
+ ctx_b();
+ ctx_c();
+ ctx_d();
+@@ -18,3 +18,3 @@
+ far_a_v2();
+-old_two_zz();
++new_two();
+ far_b();

@@ -1,0 +1,9 @@
+# Both patches change L06 to NEW_L06 in f. Patch2 is numbered three lines lower
+# and quotes D1V and D2V where patch1 quotes D1 and D2. Patch1 also changes L20
+# to P1_L20, and patch2 adds P2_ADD after FF. The report must show P2_ADD and
+# the L20 change on their own sides and leave out the shared L06 change. The
+# context section must show only D2 against D2V: D1 and D1V sit next to line 9,
+# which patch1 never quotes, so the report must not show them as a difference.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
