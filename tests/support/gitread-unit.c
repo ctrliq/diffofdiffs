@@ -1616,6 +1616,246 @@ enum tree4_alpha {
 	TREE4_ALPHA_FRAG_TIP
 };
 
+/* Appends one printf-rendered row to a document under construction */
+static __printf(4, 5) void doc_row(char *buf, size_t cap, size_t *off,
+				   const char *fmt, ...)
+{
+	va_list ap;
+	int n;
+
+	va_start(ap, fmt);
+	n = vsnprintf(buf + *off, cap - *off, fmt, ap);
+	va_end(ap);
+
+	if (n < 0 || (size_t)n >= cap - *off)
+		die("a document row outgrew its buffer");
+
+	*off += (size_t)n;
+}
+
+/*
+ * Renders one variant of the tree4 family's alpha document and returns its
+ * length. The base form is 72 numbered rows. The up form reworks row 12 and
+ * adjusts row 55; the bp form reworks row 12 its own way, touches row 34, and
+ * replaces rows 48-62 wholesale with a ten-row block of its own. Rows 12, 34,
+ * and the swath sit far enough apart that each edit lands in its own rendered
+ * hunk. The wild form shares the base rows except for rows 48-62, which carry
+ * its own fifteen-row text, and the wild tip form reworks row 55 of that text:
+ * an edit whose context exists in no bp-side state, which is what a real
+ * rejection takes, since legs sharing a base always pair and resolve on real
+ * bytes.
+ *
+ * The frag form shares the base rows except for an indented preamble at rows
+ * 17-18 and an indented stanza at rows 20-24, and the frag tip form reworks
+ * stanza row 22 and base row 29 in one commit. The two edits sit six rows
+ * apart, so the derived patch carries them as one hunk with two pieces: the
+ * row-29 piece quotes pure base rows and applies against a bp-side state, while
+ * the row-22 piece quotes stanza rows no bp-side state holds and fails, which
+ * is what a split rejection takes. The indented rows also pin the trailer walk:
+ * nothing above the failed portion inside the hunk opens like a definition, so
+ * only a walk over the real file can name the portion, and it has to skip the
+ * preamble on its way to base row 16.
+ */
+static size_t tree4_alpha(enum tree4_alpha form, char *buf, size_t cap)
+{
+	size_t off = 0;
+
+	for (int row = 1; row <= 72; row++) {
+		if (form == TREE4_ALPHA_UP && row == 12) {
+			doc_row(buf, cap, &off,
+				"alpha row 12 reworked by upstream\n");
+			continue;
+		}
+
+		if (form == TREE4_ALPHA_UP && row == 55) {
+			doc_row(buf, cap, &off,
+				"alpha row 55 adjusted by upstream\n");
+			continue;
+		}
+
+		if (form == TREE4_ALPHA_BP && row == 12) {
+			doc_row(buf, cap, &off,
+				"alpha row 12 reworked by the backport\n");
+			continue;
+		}
+
+		if (form == TREE4_ALPHA_BP && row == 34) {
+			doc_row(buf, cap, &off,
+				"alpha row 34 touched only by the backport\n");
+			continue;
+		}
+
+		if (form == TREE4_ALPHA_BP && row >= 48 && row <= 62) {
+			if (row == 48) {
+				for (int i = 1; i <= 10; i++) {
+					doc_row(buf, cap, &off,
+						"alpha backport block row %d\n",
+						i);
+				}
+			}
+			continue;
+		}
+
+		if ((form == TREE4_ALPHA_WILD ||
+		     form == TREE4_ALPHA_WILD_TIP) &&
+		    row >= 48 && row <= 62) {
+			if (form == TREE4_ALPHA_WILD_TIP && row == 55)
+				doc_row(buf, cap, &off,
+					"wild row 55 reworked in the wild\n");
+			else
+				doc_row(buf, cap, &off, "wild row %02d\n", row);
+			continue;
+		}
+
+		if ((form == TREE4_ALPHA_FRAG ||
+		     form == TREE4_ALPHA_FRAG_TIP) &&
+		    (row == 17 || row == 18)) {
+			doc_row(buf, cap, &off, "  frag preamble row %02d\n",
+				row);
+			continue;
+		}
+
+		if ((form == TREE4_ALPHA_FRAG ||
+		     form == TREE4_ALPHA_FRAG_TIP) &&
+		    row >= 20 && row <= 24) {
+			if (form == TREE4_ALPHA_FRAG_TIP && row == 22)
+				doc_row(buf, cap, &off,
+					"  frag stanza row 22 reworked at the tip\n");
+			else
+				doc_row(buf, cap, &off,
+					"  frag stanza row %02d\n", row);
+			continue;
+		}
+
+		if (form == TREE4_ALPHA_FRAG_TIP && row == 29) {
+			doc_row(buf, cap, &off,
+				"alpha row 29 adjusted at the frag tip\n");
+			continue;
+		}
+
+		doc_row(buf, cap, &off, "alpha row %02d\n", row);
+	}
+
+	return off;
+}
+
+/*
+ * Builds independent commit histories for tree comparisons without relying on
+ * an external repository. The initial branches cover content, creation, mode
+ * changes, missing final newlines, empty commits, and first-parent selection.
+ * Other branches vary the parent source while preserving some shared edits.
+ *
+ * The remaining pairs cover repeated source, shifted coordinates, unequal
+ * replacement calls, file deletion, insertions beside differing parent text,
+ * and overlapping deletions. Each pair stores complete parent and tip blobs so
+ * tree fixtures can check behavior that patch quotations alone cannot
+ * establish.
+ */
+static void build_tree4(const char *target)
+{
+	git_oid alpha_base, alpha_up, alpha_bp, alpha_wild, alpha_wtip;
+	static const char notail_up_doc[] =
+		"notail row one\nnotail row two adjusted by upstream\n"
+		"notail row three\nnotail unterminated tail row";
+	git_oid t0, t1, t2, tw0, tw1, tf0, tf1, c0, c1, c2, w0, f0, m;
+	static const char notail_base_doc[] =
+		"notail row one\nnotail row two\nnotail row three\n"
+		"notail unterminated tail row";
+	static const char gamma_doc[] =
+		"gamma row one\ngamma row two\ngamma row three\n";
+	static const char runme_doc[] = "#!/bin/sh\nexit 0\n";
+	git_oid notail_base, notail_up, gamma, runme;
+	const struct tree_spec up_ents[] = {
+		{ "alpha", GIT_FILEMODE_BLOB, &alpha_up },
+		{ "gamma", GIT_FILEMODE_BLOB, &gamma },
+		{ "notail", GIT_FILEMODE_BLOB, &notail_up },
+		{ "runme", GIT_FILEMODE_BLOB_EXECUTABLE, &runme }
+	};
+	const struct tree_spec base_ents[] = {
+		{ "alpha", GIT_FILEMODE_BLOB, &alpha_base },
+		{ "notail", GIT_FILEMODE_BLOB, &notail_base },
+		{ "runme", GIT_FILEMODE_BLOB, &runme }
+	};
+	const struct tree_spec bp_ents[] = {
+		{ "alpha", GIT_FILEMODE_BLOB, &alpha_bp },
+		{ "notail", GIT_FILEMODE_BLOB, &notail_base },
+		{ "runme", GIT_FILEMODE_BLOB, &runme }
+	};
+	git_oid alpha_frag, alpha_ftip;
+	const git_commit *parents[2];
+	git_repository *repo = NULL;
+	git_commit *pbp = NULL;
+	git_commit *pup = NULL;
+	git_signature *sig;
+	git_tree *t = NULL;
+	char buf[2048];
+	size_t len;
+
+	if (git_repository_init(&repo, target, true))
+		die("cannot initialize a bare store at %s", target);
+
+	len = tree4_alpha(TREE4_ALPHA_BASE, buf, sizeof(buf));
+	put_blob(repo, buf, len, &alpha_base);
+	len = tree4_alpha(TREE4_ALPHA_UP, buf, sizeof(buf));
+	put_blob(repo, buf, len, &alpha_up);
+	len = tree4_alpha(TREE4_ALPHA_BP, buf, sizeof(buf));
+	put_blob(repo, buf, len, &alpha_bp);
+	len = tree4_alpha(TREE4_ALPHA_WILD, buf, sizeof(buf));
+	put_blob(repo, buf, len, &alpha_wild);
+	len = tree4_alpha(TREE4_ALPHA_WILD_TIP, buf, sizeof(buf));
+	put_blob(repo, buf, len, &alpha_wtip);
+	len = tree4_alpha(TREE4_ALPHA_FRAG, buf, sizeof(buf));
+	put_blob(repo, buf, len, &alpha_frag);
+	len = tree4_alpha(TREE4_ALPHA_FRAG_TIP, buf, sizeof(buf));
+	put_blob(repo, buf, len, &alpha_ftip);
+
+	put_blob(repo, notail_base_doc, sizeof(notail_base_doc) - 1,
+		 &notail_base);
+	put_blob(repo, notail_up_doc, sizeof(notail_up_doc) - 1, &notail_up);
+	put_blob(repo, gamma_doc, sizeof(gamma_doc) - 1, &gamma);
+	put_blob(repo, runme_doc, sizeof(runme_doc) - 1, &runme);
+
+	put_tree(repo, base_ents, ARRAY_SIZE(base_ents), &t0);
+	put_tree(repo, up_ents, ARRAY_SIZE(up_ents), &t1);
+	put_tree(repo, bp_ents, ARRAY_SIZE(bp_ents), &t2);
+	put_tree1(repo, "alpha", GIT_FILEMODE_BLOB, &alpha_wild, &tw0);
+	put_tree1(repo, "alpha", GIT_FILEMODE_BLOB, &alpha_wtip, &tw1);
+	put_tree1(repo, "alpha", GIT_FILEMODE_BLOB, &alpha_frag, &tf0);
+	put_tree1(repo, "alpha", GIT_FILEMODE_BLOB, &alpha_ftip, &tf1);
+
+	put_commit(repo, "refs/heads/root", &t0, NULL, "C0", &c0);
+	put_commit(repo, "refs/heads/up", &t1, &c0, "C1", &c1);
+	put_commit(repo, "refs/heads/bp", &t2, &c0, "C2", &c2);
+	put_commit(repo, "refs/heads/empty", &t1, &c1, "C3", NULL);
+	put_commit(repo, "refs/heads/wild", &tw0, NULL, "W0", &w0);
+	put_commit(repo, "refs/heads/wildtip", &tw1, &w0, "W1", NULL);
+	put_commit(repo, "refs/heads/frag", &tf0, NULL, "F0", &f0);
+	put_commit(repo, "refs/heads/fragtip", &tf1, &f0, "F1", NULL);
+
+	if (git_commit_lookup(&pbp, repo, &c2) ||
+	    git_commit_lookup(&pup, repo, &c1) ||
+	    git_tree_lookup(&t, repo, &t1))
+		die("cannot read the merge inputs back");
+
+	parents[0] = pbp;
+	parents[1] = pup;
+	sig = fixed_sig();
+
+	if (git_commit_create(&m, repo, "refs/heads/merge", sig, sig, NULL,
+			      "C4", t, 2, parents))
+		die("cannot write the merge commit");
+
+	git_signature_free(sig);
+	git_tree_free(t);
+	git_commit_free(pup);
+	git_commit_free(pbp);
+
+	if (git_repository_set_head(repo, "refs/heads/bp"))
+		die("cannot point HEAD at refs/heads/bp");
+
+	git_repository_free(repo);
+}
+
 /* One row a label file's legs rewrite, spelled per state */
 struct label_edit {
 	const char *row; /* The row as the root spells it */
@@ -1647,6 +1887,17 @@ enum label_state {
 	LABEL_UPBASE, /* The up leg's base: the root text respelled */
 	LABEL_UP /* The up leg: the respelled text with the up edits */
 };
+
+/* Build the named fixture family as a bare store in the test arena */
+static void case_build_store(int argc, char **argv)
+{
+	if (argc != 2)
+		die("build-store wants a family and a target path");
+	if (!strcmp(argv[0], "tree4"))
+		build_tree4(argv[1]);
+	else
+		die("unknown family: %s", argv[0]);
+}
 
 int main(int argc, char **argv)
 {
@@ -1763,6 +2014,8 @@ int main(int argc, char **argv)
 		case_assemble_identical();
 	} else if (!strcmp(argv[1], "assemble-binary")) {
 		case_assemble_binary();
+	} else if (!strcmp(argv[1], "build-store")) {
+		case_build_store(argc - 2, argv + 2);
 	} else {
 		fprintf(stderr, "unknown case: %s\n", argv[1]);
 		return 2;
