@@ -1,0 +1,9 @@
+# fuzzy136-1 with SIGPIPE ignored, as a shell's trap '' PIPE leaves it. Every
+# write after the reader exits fails with EPIPE, the error is latched, and the
+# run must stay quiet and exit 0. The sigpipe and stdout-limit keys set up the
+# ignored signal and the five-byte reader.
+bin: DIFFOFDIFFS
+args: big1 big2
+sigpipe: ignore
+stdout-limit: 5
+exit: 0

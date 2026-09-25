@@ -1,0 +1,5 @@
+# The first operand is two lines of text with no patch in it, so the tool must
+# refuse it at exit 1 with "garbage doesn't contain a patch".
+bin: DIFFOFDIFFS
+args: garbage good2
+exit: 1

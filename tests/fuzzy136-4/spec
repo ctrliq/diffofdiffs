@@ -1,0 +1,5 @@
+# Both patches replace old in f.c, with new1 and new2. The report must show the
+# shared removal of old and the two replacements side by side.
+bin: DIFFOFDIFFS
+args: good1 good2
+exit: 0

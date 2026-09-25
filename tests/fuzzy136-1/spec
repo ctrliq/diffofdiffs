@@ -1,0 +1,8 @@
+# The report goes to a reader that quits after five bytes, like head -c 5.
+# With the default SIGPIPE disposition, a write after the reader closes its
+# pipe must terminate the tool without a diagnostic. stdout-limit supplies
+# the five-byte reader, and expected.out contains the bytes it accepts.
+bin: DIFFOFDIFFS
+args: big1 big2
+stdout-limit: 5
+exit: sig:PIPE
