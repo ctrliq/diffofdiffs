@@ -37,6 +37,21 @@
 #define EXIT_USAGE 2
 
 /*
+ * The sanitizer lane's allocator aborts inside its runtime on an over-limit
+ * request by default instead of returning NULL, which would turn the memory
+ * bound's refusal into a lane-specific abort. Compiling the default in keeps
+ * every invocation on the NULL-then-die path the x-wrappers own; the runtime
+ * merges these defaults with ASAN_OPTIONS per flag, so an environment flag of
+ * the same name still wins. The plain lane exports the symbol and nothing reads
+ * it.
+ */
+const char *__asan_default_options(void);
+const char *__asan_default_options(void)
+{
+	return "allocator_may_return_null=1";
+}
+
+/*
  * SHA-1 (FIPS 180-4), embedded so --dump-lines can name a line's bytes
  * unambiguously without dragging a hashing library in.
  */
@@ -430,12 +445,203 @@ static void print_dp_cost(const struct operand *a, const struct operand *b)
 	printf("dp_cost=%lu\n", (unsigned long)((na - lcs) + (nb - lcs)));
 }
 
+/*
+ * The format validator. It re-parses the emitted stream through
+ * read_atatline_n, the same parser every tool in the tree uses on a hunk
+ * header, and then walks the bodies: declared counts against real marker
+ * counts, lawful markers, lawful incomplete-line marker placement, and ordering
+ * on both sides. Window non-overlap is enforced outright even though it isn't
+ * universal for the format (GNU diff 3.12 under -u -B really does emit
+ * overlapping old windows), since nothing here ever runs with -B.
+ */
+static const char no_newline_text[] = "\\ No newline at end of file";
+
 struct side_state {
 	unsigned long start; /* previous window's 0-based first line */
 	unsigned long end; /* previous window's 0-based end (exclusive) */
 	bool seen; /* a previous window exists */
 	bool closed; /* an incomplete-line marker ended this side */
 };
+
+static void validate_side(struct side_state *st, const char *which,
+			  unsigned long start, unsigned long count,
+			  unsigned long hunk)
+{
+	if (st->seen) {
+		if (start <= st->start)
+			die("hunk %lu's %s start %lu doesn't ascend past %lu",
+			    hunk, which, start, st->start);
+		if (start < st->end)
+			die("hunk %lu's %s window starts at %lu, inside the previous window ending at %lu",
+			    hunk, which, start, st->end);
+	}
+
+	st->start = start;
+	st->end = start + count;
+	st->seen = true;
+}
+
+/*
+ * Charge the body line to each side it occupies. The caller keeps the marker to
+ * associate a following incomplete-line note with those same sides.
+ */
+static void count_body_line(char marker, unsigned long hunk,
+			    unsigned long *old_left, unsigned long *new_left,
+			    struct side_state *old_st,
+			    struct side_state *new_st)
+{
+	if (marker == ' ' || marker == '-') {
+		if (!*old_left)
+			die("hunk %lu has more old-side lines than its header declared",
+			    hunk);
+		if (old_st->closed)
+			die("hunk %lu carries an old-side line past the old file's incomplete-line marker",
+			    hunk);
+		(*old_left)--;
+	}
+	if (marker == ' ' || marker == '+') {
+		if (!*new_left)
+			die("hunk %lu has more new-side lines than its header declared",
+			    hunk);
+		if (new_st->closed)
+			die("hunk %lu carries a new-side line past the new file's incomplete-line marker",
+			    hunk);
+		(*new_left)--;
+	}
+}
+
+static void close_sides(char prev_marker, unsigned long hunk,
+			struct side_state *old_st, struct side_state *new_st)
+{
+	if (prev_marker == ' ' || prev_marker == '-') {
+		if (old_st->closed)
+			die("hunk %lu repeats the old file's incomplete-line marker",
+			    hunk);
+		old_st->closed = true;
+	}
+	if (prev_marker == ' ' || prev_marker == '+') {
+		if (new_st->closed)
+			die("hunk %lu repeats the new file's incomplete-line marker",
+			    hunk);
+		new_st->closed = true;
+	}
+}
+
+/*
+ * Peel one LF-terminated line off the stream. The stream's last byte is always
+ * an LF, so a missing one is itself a breach.
+ */
+static size_t peel_line(const char *buf, size_t len, size_t at, size_t *llen)
+{
+	const char *nl;
+
+	nl = memchr(buf + at, '\n', len - at);
+	if (!nl)
+		die("the emitted stream's last line lacks its newline");
+
+	*llen = (nl - (buf + at));
+
+	return (size_t)(nl - buf) + 1;
+}
+
+static void validate_stream(const char *buf, size_t len, unsigned long hunks)
+{
+	struct side_state old_st, new_st;
+	unsigned long hunk = 0;
+
+	old_st = (typeof(old_st)){};
+	new_st = (typeof(new_st)){};
+
+	for (size_t at = 0; at < len;) {
+		unsigned long ostart, ocount, nstart, ncount;
+		unsigned long old_left, new_left;
+		char prev_marker = 0;
+		size_t llen;
+		size_t next;
+		int r;
+
+		next = peel_line(buf, len, at, &llen);
+		r = read_atatline_n(buf + at, llen, &ostart, &ocount, &nstart,
+				    &ncount);
+		if (r)
+			die("hunk %lu's header %s: %.*s", hunk + 1,
+			    r == ATAT_NOT_HEADER ? "isn't one" : "is malformed",
+			    (int)llen, buf + at);
+		hunk++;
+		at = next;
+
+		/*
+		 * A nonzero count prints a 1-based start; a zero count prints
+		 * the 0-based index of the gap. Normalize both to 0-based.
+		 */
+		if (ocount && !ostart)
+			die("hunk %lu declares %lu old lines starting at 0",
+			    hunk, ocount);
+		if (ncount && !nstart)
+			die("hunk %lu declares %lu new lines starting at 0",
+			    hunk, ncount);
+		validate_side(&old_st, "old", ocount ? ostart - 1 : ostart,
+			      ocount, hunk);
+		validate_side(&new_st, "new", ncount ? nstart - 1 : nstart,
+			      ncount, hunk);
+
+		if (!ocount && !ncount)
+			die("hunk %lu declares no lines on either side", hunk);
+
+		old_left = ocount;
+		new_left = ncount;
+		while (old_left || new_left) {
+			char marker;
+
+			if (at >= len)
+				die("hunk %lu's body ends with %lu old and %lu new lines still declared",
+				    hunk, old_left, new_left);
+			next = peel_line(buf, len, at, &llen);
+			marker = buf[at];
+
+			if (marker == '\\') {
+				if (llen != sizeof(no_newline_text) - 1 ||
+				    memcmp(buf + at, no_newline_text, llen))
+					die("hunk %lu has an unrecognized backslash line: %.*s",
+					    hunk, (int)llen, buf + at);
+				if (!prev_marker)
+					die("hunk %lu opens with an incomplete-line marker",
+					    hunk);
+				close_sides(prev_marker, hunk, &old_st,
+					    &new_st);
+				prev_marker = 0;
+				at = next;
+				continue;
+			}
+
+			if (marker != ' ' && marker != '-' && marker != '+')
+				die("hunk %lu has an unlawful body marker '%c'",
+				    hunk, marker);
+			count_body_line(marker, hunk, &old_left, &new_left,
+					&old_st, &new_st);
+			prev_marker = marker;
+			at = next;
+		}
+
+		/* The final body line's marker can trail the counts */
+		if (at < len && buf[at] == '\\') {
+			next = peel_line(buf, len, at, &llen);
+			if (llen != sizeof(no_newline_text) - 1 ||
+			    memcmp(buf + at, no_newline_text, llen))
+				die("hunk %lu has an unrecognized backslash line: %.*s",
+				    hunk, (int)llen, buf + at);
+			if (!prev_marker)
+				die("hunk %lu's trailing incomplete-line marker follows no body line",
+				    hunk);
+			close_sides(prev_marker, hunk, &old_st, &new_st);
+			at = next;
+		}
+	}
+
+	if (hunk != hunks)
+		die("the stream carries %lu hunks but the result reported %lu",
+		    hunk, hunks);
+}
 
 /*
  * Instrument reporting.
@@ -491,7 +697,7 @@ static void usage(void)
 {
 	fputs("usage: udiff_driver [-U N]\n"
 	      "                    [--loader getline|lineinfo] [--name-stub]\n"
-	      "                    [--dp-cost]\n"
+	      "                    [--dp-cost] [--validate]\n"
 	      "                    [--dump-lines] [--many N] [--concurrent]\n"
 	      "                    A B [C D]\n",
 	      stderr);
@@ -502,6 +708,7 @@ enum {
 	OPT_LOADER = 256,
 	OPT_NAME_STUB,
 	OPT_DP_COST,
+	OPT_VALIDATE,
 	OPT_DUMP_LINES,
 	OPT_MANY,
 	OPT_CONCURRENT
@@ -511,6 +718,7 @@ static const struct option long_opts[] = {
 	{ "loader", 1, NULL, OPT_LOADER },
 	{ "name-stub", 0, NULL, OPT_NAME_STUB },
 	{ "dp-cost", 0, NULL, OPT_DP_COST },
+	{ "validate", 0, NULL, OPT_VALIDATE },
 	{ "dump-lines", 0, NULL, OPT_DUMP_LINES },
 	{ "many", 1, NULL, OPT_MANY },
 	{ "concurrent", 0, NULL, OPT_CONCURRENT },
@@ -532,7 +740,7 @@ static unsigned long parse_count(const char *s, const char *what)
 
 int main(int argc, char *argv[])
 {
-	bool want_names = false, want_dp = false;
+	bool want_names = false, want_dp = false, want_validate = false;
 	bool want_dump = false, concurrent = false;
 	enum loader loader = LOADER_GETLINE;
 	unsigned int context = 3;
@@ -575,6 +783,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_DP_COST:
 			want_dp = true;
+			break;
+		case OPT_VALIDATE:
+			want_validate = true;
 			break;
 		case OPT_DUMP_LINES:
 			want_dump = true;
@@ -649,6 +860,8 @@ int main(int argc, char *argv[])
 			 */
 			if (!iter)
 				print_stream(&r);
+			if (want_validate && r.out_len)
+				validate_stream(r.out_buf, r.out_len, r.hunks);
 			snap_status(&s, &r);
 			udiff_result_free(&r);
 		}
