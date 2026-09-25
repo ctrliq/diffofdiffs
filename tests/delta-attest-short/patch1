@@ -1,0 +1,7 @@
+--- a/drivers/att/main.c
++++ b/drivers/att/main.c
+@@ -7,3 +7,3 @@ static void att_prepare(struct att *a)
+ 	att_flush(a);
+-	old_call(a);
++	new_call(a);
+ 	att_sync(a);

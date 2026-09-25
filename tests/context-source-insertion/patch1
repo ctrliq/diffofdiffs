@@ -1,0 +1,9 @@
+--- a/probe
++++ b/probe
+@@ -3,4 +3,5 @@
+ a
+-old
++new
++shared
+ b
+ c

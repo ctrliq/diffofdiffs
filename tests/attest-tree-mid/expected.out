@@ -1,0 +1,52 @@
+━━━━━━━━━━━━━━━━━━━━━━━
+Commit 1: m┃Commit 2: m
+     1     ┃     2
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons
+use complete files
+before and after each
+commit.
+
+═══════════════════════
+*    DELTA DIFFERENCES*
+═══════════════════════
+Signs mark edits made
+by only that patch. A
+sign-less line with one
+number is an edit both
+patches make: a new
+number means both add
+it, an old number means
+both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+ old new│pe┃ old new│pe
+        │nt┃        │nt
+        │a ┃        │a
+        │@@┃        │@@
+        │ a┃        │ a
+   1   1│a ┃   1   1│a
+   2   2│b ┃   2   2│b
+   3    │c ┃   3    │c
+   4   3│d ┃-  4    │d
+   5   4│e ┃   5   3│e
+
+═══════════════════════
+*  CONTEXT DIFFERENCES*
+═══════════════════════
+Signs mark lines
+present in only one
+result: - patch1, +
+patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+     new│pe┃     new│pe
+        │nt┃        │nt
+        │a ┃        │a
+        │@@┃        │@@
+        │ a┃        │ a
+       1│a ┃       1│a
+       2│b ┃       2│b
+-      3│d ┃        │
+       4│e ┃       3│e

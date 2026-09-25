@@ -1,0 +1,6 @@
+--- a/foo.c
++++ b/foo.c
+@@ -4,2 +4 @@
+-delta
+ echo
+\ No newline at end of file

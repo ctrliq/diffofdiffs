@@ -1,0 +1,7 @@
+# Tree mode. Revisions t5 and t6 share a parent whose file trio holds a, b, and
+# c. t5 removes a; t6 removes a and b. The removal of a must show as an edit
+# both patches make and b's removal as t6's alone, and the context section must
+# show b in t5's result only, with c in both.
+bin: DIFFOFDIFFS
+args: --git-tree=repo t5 t6
+exit: 0

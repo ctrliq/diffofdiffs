@@ -1,0 +1,8 @@
+# Tree mode. Revisions t3 and t4 share a parent whose file duo holds lines a and
+# b. t3 removes a; t4 removes both, so its extra removal reaches the end of the
+# file. The removal of a must show as an edit both patches make and b's removal
+# as t4's alone, and the context section must show b in t3's result only.
+# attest-tree-ctl is the three-line control.
+bin: DIFFOFDIFFS
+args: --git-tree=repo t3 t4
+exit: 0

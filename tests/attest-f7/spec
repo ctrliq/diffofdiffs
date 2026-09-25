@@ -1,0 +1,6 @@
+# Patch1 removes delta at line 4 and keeps echo as context; patch2 removes both
+# delta and echo. Delta's removal must show as an edit both patches make, and
+# echo's removal as patch2's alone beside patch1's unchanged copy of the line.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

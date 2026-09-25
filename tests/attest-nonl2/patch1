@@ -1,0 +1,11 @@
+--- a/foo.c
++++ b/foo.c
+@@ -1,6 +1,6 @@
+ l01
+-l02
++P1TWO
+ l03
+ l04
+ l05
+ LAST
+\ No newline at end of file

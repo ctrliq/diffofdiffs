@@ -1,0 +1,6 @@
+# Patch1 quotes more surrounding rows than patch2. Those extra quotes
+# cannot prove that patch2 lacks the corresponding code. Both patches make
+# the same replacement and insert the same additional row.
+# All jointly quoted context agrees, so this comparison is empty.
+bin: DIFFOFDIFFS
+args: patch1 patch2

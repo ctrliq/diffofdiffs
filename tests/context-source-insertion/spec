@@ -1,0 +1,6 @@
+# Both patches make the same replacement. Patch2 already has an extra
+# surrounding row between a and the replaced row. The common rows on either
+# side retain their own positions even though only one side has a gap between
+# them. Three following tip rows include both shared added rows and b.
+bin: DIFFOFDIFFS
+args: patch1 patch2

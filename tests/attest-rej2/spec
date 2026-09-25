@@ -1,0 +1,7 @@
+# Patch1 adds NEWLINE after line 3 with no context; patch2 changes l30 in a hunk
+# over lines 28-32, which patch1 doesn't quote. Neither patch has source
+# covering the other's edit, so each edit must show on its own side alone, with
+# patch2's context kept on its side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,8 @@
+# Both patches quote foo.c's unterminated last line, LAST. Patch1 changes l02 to
+# P1TWO; patch2 replaces LAST with NEWLAST, which also ends without a newline.
+# The report must show LAST and its no-newline marker on both sides and patch2's
+# replacement as its own edit. attest-nlrep covers a patch that appends past the
+# unterminated line instead.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

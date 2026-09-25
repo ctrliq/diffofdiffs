@@ -1,0 +1,10 @@
+--- a/probe
++++ b/probe
+@@ -3,5 +3,6 @@
+ left
+-old
++new
++added
+ tail
+ same
+ last

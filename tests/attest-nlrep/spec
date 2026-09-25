@@ -1,0 +1,10 @@
+# Both patches quote foo.c's last line, LAST, without a trailing newline. Patch1
+# changes l02 to P1TWO. Patch2 keeps LAST as context and appends APPENDED after
+# it, although LAST has no newline to end it.
+#
+# The two quotations of the same lines disagree, so the report must note the
+# overlapping quotations and show each patch's hunk on its own side, with both
+# no-newline markers intact, instead of pairing them.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

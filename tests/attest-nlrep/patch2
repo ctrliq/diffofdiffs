@@ -1,0 +1,8 @@
+--- a/foo.c
++++ b/foo.c
+@@ -3,3 +3,4 @@ x
+ l03
+ l04
+ LAST
+\ No newline at end of file
++APPENDED

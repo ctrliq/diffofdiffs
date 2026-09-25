@@ -1,0 +1,9 @@
+# Patch1 replaces old_call(a) with new_call(a) at line 8 of drivers/att/main.c
+# with one line of context, while patch2 replaces it with newer_call(a) with
+# three. The report must show the shared removal and the two differing additions
+# side by side, and each side must show only the context lines its own patch
+# quotes: line 7 above and line 9 below for patch1, lines 6-7 and 9-11 for
+# patch2.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

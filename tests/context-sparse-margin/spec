@@ -1,0 +1,7 @@
+# Patch1 quotes more surrounding rows than patch2. Those extra quotes
+# cannot prove that patch2 lacks the corresponding code. Both patches make
+# the same replacement and insert the same additional row.
+# The known left/right difference prints at tip positions 3/30, followed
+# by the two shared added rows and tail. The unknown quote margin stays open.
+bin: DIFFOFDIFFS
+args: patch1 patch2

@@ -1,0 +1,23 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: patch1┃Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use
+only the source lines quoted in
+the patches.
+
+═══════════════════════════════
+*    CONTEXT DIFFERENCES      *
+═══════════════════════════════
+Signs mark lines present in
+only one result: - patch1, +
+patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│probe ┃     new│probe
+        │@@ a  ┃        │@@ a
+       3│a     ┃      30│a
+        │      ┃+     31│extra
+       4│new   ┃      32│new
+       5│shared┃      33│shared
+       6│b     ┃      34│b

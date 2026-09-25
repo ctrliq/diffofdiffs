@@ -1,0 +1,6 @@
+# Patch1 removes delta at line 4 with no context; patch2 changes l18 in a hunk
+# over lines 16-20, which patch1 doesn't quote. Each edit must show on its own
+# patch's side alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

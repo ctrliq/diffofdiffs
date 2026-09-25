@@ -1,0 +1,7 @@
+# Patch1 removes delta at line 4 and keeps echo, foo.c's unterminated last line,
+# as context; patch2 removes both. Delta's removal must show as an edit both
+# patches make and echo's removal as patch2's alone, with the no-newline marker
+# after echo on both sides.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

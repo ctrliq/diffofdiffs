@@ -1,0 +1,8 @@
+# Tree mode. Revisions m1 and m2 share a parent whose file penta holds a through
+# e. m1 removes c; m2 removes c and d, with unchanged lines on both sides of the
+# removal. The removal of c must show as an edit both patches make and d's
+# removal as m2's alone, and the context section must show d in m1's result
+# only.
+bin: DIFFOFDIFFS
+args: --git-tree=repo m1 m2
+exit: 0

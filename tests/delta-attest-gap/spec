@@ -1,0 +1,9 @@
+# Patch1 edits lines 8 and 12 of main.c in two hunks and leaves line 10,
+# att_wake(), unquoted between them. Patch2 replaces the same line 8 with
+# different text in one wider hunk that quotes lines 5-11, including att_wake().
+# The report must show the two replacements of old_call() side by side and
+# patch1's att_arm() change as its own block, and must not show att_wake() on
+# patch1's side, since patch1 never quotes that line.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

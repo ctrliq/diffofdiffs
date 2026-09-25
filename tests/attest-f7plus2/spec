@@ -1,0 +1,7 @@
+# Patch1 removes l14 and keeps l15 as context. Patch2 removes the same l14 with
+# no context and also inserts NEW after line 3. The shared removal of l14 must
+# be left out as a common change, and NEW must show as patch2's addition at line
+# 4 of its result.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,10 @@
+--- a/probe
++++ b/probe
+@@ -30,5 +30,6 @@
+ a
+ extra
+-old
++new
++shared
+ b
+ c

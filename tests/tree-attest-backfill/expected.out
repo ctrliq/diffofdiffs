@@ -1,0 +1,26 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       Commit 1: att1        ┃       Commit 2: att2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and after
+each commit.
+
+═══════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                    *
+═══════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line
+with one number is an edit both patches make: a new number
+means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│att                 ┃ old new│att
+        │@@ static void att_p┃        │@@ static void att_p
+        │repare(struct att *a┃        │repare(struct att *a
+        │)                   ┃        │)
+   6   6│	att_mark(a); ┃   6   6│	att_mark(a);
+   7   7│	att_flush(a);┃   7   7│	att_flush(a);
+   8    │	old_call(a); ┃   8    │	old_call(a);
++      8│	new_call(a); ┃+      8│	newer_call(a);
+   9   9│	att_sync(a); ┃   9   9│	att_sync(a);
+  10  10│	att_wake(a); ┃  10  10│	att_wake(a);
+  11  11│	att_poll(a); ┃  11  11│	att_poll(a);

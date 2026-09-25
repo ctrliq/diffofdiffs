@@ -1,0 +1,8 @@
+# In git tree mode, att1 and att2 start from identical copies of att, and at
+# line 8 att1 replaces old_call(a) with new_call(a) while att2 replaces it with
+# newer_call(a). Tree mode reads context from the commits' own files rather than
+# from the patch text, so the report must show three lines on each side of the
+# differing additions, counting the shared removal of old_call(a) above them.
+bin: DIFFOFDIFFS
+args: --git-tree=repo att1 att2
+exit: 0
