@@ -189,6 +189,52 @@ struct tree_spec {
 	const git_oid *id;
 };
 
+/* A tree from a spec array, so cases spell multi-entry and nested forms */
+static void put_tree(git_repository *repo, const struct tree_spec *ents,
+		     size_t n, git_oid *out)
+{
+	git_treebuilder *tb = NULL;
+
+	if (git_treebuilder_new(&tb, repo, NULL))
+		die("cannot open a tree builder");
+
+	for (size_t i = 0; i < n; i++) {
+		if (git_treebuilder_insert(NULL, tb, ents[i].name, ents[i].id,
+					   ents[i].mode))
+			die("cannot insert %s into a tree", ents[i].name);
+	}
+
+	if (git_treebuilder_write(out, tb))
+		die("cannot write a tree");
+
+	git_treebuilder_free(tb);
+}
+
+/*
+ * A one-entry tree written as raw object bytes, so the entry can carry a mode
+ * spelling the tree builder refuses outright (its filemode validation admits
+ * only the canonical constants, while real history also holds forms like
+ * 100664). The tree format is the mode in ASCII octal, a space, the entry name,
+ * a NUL, then the 20 raw id bytes.
+ */
+static void put_raw_tree1(git_repository *repo, const char *mode,
+			  const char *name, const git_oid *id, git_oid *out)
+{
+	git_odb *odb = NULL;
+	char buf[64];
+	size_t n;
+
+	n = (size_t)snprintf(buf, sizeof(buf), "%s %s", mode, name) + 1;
+	memcpy(buf + n, id->id, GIT_OID_SHA1_SIZE);
+	n += GIT_OID_SHA1_SIZE;
+
+	if (git_repository_odb(&odb, repo) ||
+	    git_odb_write(out, odb, buf, n, GIT_OBJECT_TREE))
+		die("cannot write a raw tree");
+
+	git_odb_free(odb);
+}
+
 static void put_commit(git_repository *repo, const char *update_ref,
 		       const git_oid *tree, const git_oid *parent,
 		       const char *msg, git_oid *out)
@@ -841,6 +887,437 @@ static void case_parents(void)
 	gitread_close(&gr);
 }
 
+static const char *kind_name(enum treediff_kind kind)
+{
+	switch (kind) {
+	case TREEDIFF_REG:
+		return "reg";
+
+	case TREEDIFF_SYMLINK:
+		return "symlink";
+
+	case TREEDIFF_GITLINK:
+		return "gitlink";
+	}
+
+	die("no such kind: %d", kind);
+}
+
+/*
+ * One line per map record: the operation, the path, then each present side's
+ * kind, raw octal mode, and object id. A modify prints its kind once, since
+ * differing kinds record as a delete and a create instead.
+ */
+static void print_map(const struct treediff_map *map)
+{
+	char hex[GITREAD_OID_HEXSZ + 1];
+
+	printf("map %zu\n", map->n);
+
+	for (size_t i = 0; i < map->n; i++) {
+		const struct treediff_rec *rec = &map->recs[i];
+
+		switch (rec->op) {
+		case TREEDIFF_CREATE:
+			gitread_oid_hex(&rec->new.oid, hex);
+			printf("create %s %s %o %s", rec->path,
+			       kind_name(rec->new.kind), rec->new.mode, hex);
+			break;
+		case TREEDIFF_DELETE:
+			gitread_oid_hex(&rec->old.oid, hex);
+			printf("delete %s %s %o %s", rec->path,
+			       kind_name(rec->old.kind), rec->old.mode, hex);
+			break;
+		case TREEDIFF_MODIFY:
+			gitread_oid_hex(&rec->old.oid, hex);
+			printf("modify %s %s %o %s", rec->path,
+			       kind_name(rec->old.kind), rec->old.mode, hex);
+			gitread_oid_hex(&rec->new.oid, hex);
+			printf(" -> %o %s", rec->new.mode, hex);
+			break;
+		}
+
+		printf("\n");
+	}
+}
+
+/*
+ * Diffs old_name's commit against new_name's in the store at dir and prints the
+ * map; a null old_name exercises the empty-tree side (the differ's
+ * parentless-commit form).
+ */
+static void diff_refs(const char *dir, const char *old_name,
+		      const char *new_name)
+{
+	struct gitread_oid old_id, new_id;
+	struct treediff_map map;
+	struct gitread *gr;
+
+	gitread_open(&gr, dir);
+	gitread_resolve_commit(gr, new_name, &new_id);
+
+	if (old_name) {
+		gitread_resolve_commit(gr, old_name, &old_id);
+		treediff_build(gr, &old_id, &new_id, &map);
+	} else {
+		treediff_build(gr, NULL, &new_id, &map);
+	}
+
+	print_map(&map);
+	treediff_map_free(&map);
+	gitread_close(&gr);
+}
+
+/* The two commits every diff case reads, on refs/heads/o and refs/heads/n */
+static void put_pair(git_repository *repo, const struct tree_spec *old,
+		     size_t nold, const struct tree_spec *new, size_t nnew)
+{
+	git_oid tree;
+
+	put_tree(repo, old, nold, &tree);
+	put_commit(repo, "refs/heads/o", &tree, NULL, "O", NULL);
+	put_tree(repo, new, nnew, &tree);
+	put_commit(repo, "refs/heads/n", &tree, NULL, "N", NULL);
+}
+
+static git_repository *init_repo(const char *path)
+{
+	git_repository *repo = NULL;
+
+	if (git_repository_init(&repo, path, false))
+		die("cannot initialize a repository at %s", path);
+
+	return repo;
+}
+
+/*
+ * The four ordinary operations against one tree pair: a content change, a
+ * creation, a deletion, and a mode-only flip, with an unchanged file present to
+ * prove unchanged paths stay out of the map.
+ */
+static void case_treediff_ops(void)
+{
+	git_oid a1, a2, keep, gone, fresh, flip;
+	const struct tree_spec old[] = { { "a", GIT_FILEMODE_BLOB, &a1 },
+					 { "d", GIT_FILEMODE_BLOB, &gone },
+					 { "keep", GIT_FILEMODE_BLOB, &keep },
+					 { "m", GIT_FILEMODE_BLOB, &flip } };
+	const struct tree_spec new[] = { { "a", GIT_FILEMODE_BLOB, &a2 },
+					 { "c", GIT_FILEMODE_BLOB, &fresh },
+					 { "keep", GIT_FILEMODE_BLOB, &keep },
+					 { "m", GIT_FILEMODE_BLOB_EXECUTABLE,
+					   &flip } };
+	git_repository *repo;
+
+	repo = init_repo("s");
+	put_blob(repo, "a1\n", 3, &a1);
+	put_blob(repo, "a2\n", 3, &a2);
+	put_blob(repo, "keep\n", 5, &keep);
+	put_blob(repo, "gone\n", 5, &gone);
+	put_blob(repo, "fresh\n", 6, &fresh);
+	put_blob(repo, "flip\n", 5, &flip);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	diff_refs("s", "o", "n");
+}
+
+/*
+ * Nested directories on both sides, plus the ordering the map guarantees:
+ * path-byte order, which puts a.c before a/x before a0 (the dot, the slash, and
+ * the digit sort by their bytes) and keeps the b/y records depth-first.
+ */
+static void case_treediff_order(void)
+{
+	git_oid v1, v2, w, z, dot, zero, ao, yo, bo, an, yn, bn;
+	const struct tree_spec new[] = { { "a.c", GIT_FILEMODE_BLOB, &dot },
+					 { "a", GIT_FILEMODE_TREE, &an },
+					 { "a0", GIT_FILEMODE_BLOB, &zero },
+					 { "b", GIT_FILEMODE_TREE, &bn } };
+	const struct tree_spec old[] = { { "a", GIT_FILEMODE_TREE, &ao },
+					 { "b", GIT_FILEMODE_TREE, &bo } };
+	git_repository *repo;
+
+	repo = init_repo("s");
+	put_blob(repo, "v1\n", 3, &v1);
+	put_blob(repo, "v2\n", 3, &v2);
+	put_blob(repo, "w\n", 2, &w);
+	put_blob(repo, "z\n", 2, &z);
+	put_blob(repo, "dot\n", 4, &dot);
+	put_blob(repo, "zero\n", 5, &zero);
+
+	put_tree1(repo, "x", GIT_FILEMODE_BLOB, &v1, &ao);
+	put_tree1(repo, "w", GIT_FILEMODE_BLOB, &w, &yo);
+	put_tree1(repo, "y", GIT_FILEMODE_TREE, &yo, &bo);
+	put_tree1(repo, "x", GIT_FILEMODE_BLOB, &v2, &an);
+	put_tree1(repo, "z", GIT_FILEMODE_BLOB, &z, &yn);
+	put_tree1(repo, "y", GIT_FILEMODE_TREE, &yn, &bn);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	diff_refs("s", "o", "n");
+}
+
+/*
+ * Symlink and gitlink records: a retargeted symlink and a bumped gitlink are
+ * modifies of their kinds, and a new symlink is a create. The gitlink targets
+ * are two throwaway commits, so their printed ids stay deterministic.
+ */
+static void case_treediff_kinds(void)
+{
+	git_oid t1, t2, t3, t, tg, g1, g2;
+	const struct tree_spec old[] = { { "ln", GIT_FILEMODE_LINK, &t1 },
+					 { "mod", GIT_FILEMODE_COMMIT, &g1 } };
+	const struct tree_spec new[] = { { "ln", GIT_FILEMODE_LINK, &t2 },
+					 { "ln2", GIT_FILEMODE_LINK, &t3 },
+					 { "mod", GIT_FILEMODE_COMMIT, &g2 } };
+	git_repository *repo;
+
+	repo = init_repo("s");
+	put_blob(repo, "t1", 2, &t1);
+	put_blob(repo, "t2", 2, &t2);
+	put_blob(repo, "t3", 2, &t3);
+	put_blob(repo, "t\n", 2, &t);
+	put_tree1(repo, "f", GIT_FILEMODE_BLOB, &t, &tg);
+	put_commit(repo, NULL, &tg, NULL, "G1", &g1);
+	put_commit(repo, NULL, &tg, NULL, "G2", &g2);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	diff_refs("s", "o", "n");
+}
+
+/*
+ * A kind change at one path records as a delete and a create at that path, the
+ * delete first: the ruled delete-plus-create form for type changes, with no
+ * merged record.
+ */
+static void case_treediff_typechange(void)
+{
+	git_repository *repo;
+	git_oid data, tgt;
+	const struct tree_spec old[] = { { "f", GIT_FILEMODE_BLOB, &data } };
+	const struct tree_spec new[] = { { "f", GIT_FILEMODE_LINK, &tgt } };
+
+	repo = init_repo("s");
+	put_blob(repo, "data\n", 5, &data);
+	put_blob(repo, "elsewhere", 9, &tgt);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	diff_refs("s", "o", "n");
+}
+
+/*
+ * Moving foo's regular-file content to bar while replacing foo with a symlink
+ * needs three records: create bar, delete the old foo, and create the new foo.
+ * Keeping the same path must not merge entries with different kinds.
+ */
+static void case_treediff_typechange_edge(void)
+{
+	git_repository *repo;
+	git_oid moved, tgt;
+	const struct tree_spec old[] = { { "foo", GIT_FILEMODE_BLOB, &moved } };
+	const struct tree_spec new[] = { { "bar", GIT_FILEMODE_BLOB, &moved },
+					 { "foo", GIT_FILEMODE_LINK, &tgt } };
+
+	repo = init_repo("s");
+	put_blob(repo, "moved\n", 6, &moved);
+	put_blob(repo, "bar", 3, &tgt);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	diff_refs("s", "o", "n");
+}
+
+/*
+ * Each rename remains a delete and a create sharing one object. The second pair
+ * also changes permissions, which must survive independently of content.
+ */
+static void case_treediff_rename(void)
+{
+	git_repository *repo;
+	git_oid r1, r2;
+	const struct tree_spec new[] = { { "b", GIT_FILEMODE_BLOB, &r1 },
+					 { "d", GIT_FILEMODE_BLOB_EXECUTABLE,
+					   &r2 } };
+	const struct tree_spec old[] = { { "a", GIT_FILEMODE_BLOB, &r1 },
+					 { "c", GIT_FILEMODE_BLOB, &r2 } };
+
+	repo = init_repo("s");
+	put_blob(repo, "r1\n", 3, &r1);
+	put_blob(repo, "r2\n", 3, &r2);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	diff_refs("s", "o", "n");
+}
+
+/*
+ * Retain every path when one deleted object reappears at two created paths, and
+ * when two deleted copies reappear at one path. Equal object IDs must not
+ * coalesce distinct file operations.
+ */
+static void case_treediff_rename_ambiguous(void)
+{
+	git_repository *repo;
+	git_oid p, q;
+	const struct tree_spec old[] = { { "x1", GIT_FILEMODE_BLOB, &p },
+					 { "z1", GIT_FILEMODE_BLOB, &q },
+					 { "z2", GIT_FILEMODE_BLOB, &q } };
+	const struct tree_spec new[] = { { "w", GIT_FILEMODE_BLOB, &q },
+					 { "y1", GIT_FILEMODE_BLOB, &p },
+					 { "y2", GIT_FILEMODE_BLOB, &p } };
+
+	repo = init_repo("s");
+	put_blob(repo, "p\n", 2, &p);
+	put_blob(repo, "q\n", 2, &q);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	diff_refs("s", "o", "n");
+}
+
+/*
+ * A deleted regular file and a created symlink can share one blob (the file's
+ * content equals the link's target bytes), but their records must retain
+ * distinct kinds even when the object IDs match.
+ */
+static void case_treediff_kind_mismatch_edge(void)
+{
+	git_repository *repo;
+	git_oid tgt;
+	const struct tree_spec new[] = { { "ln", GIT_FILEMODE_LINK, &tgt } };
+	const struct tree_spec old[] = { { "f", GIT_FILEMODE_BLOB, &tgt } };
+
+	repo = init_repo("s");
+	put_blob(repo, "tgt", 3, &tgt);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	diff_refs("s", "o", "n");
+}
+
+/*
+ * The empty-tree side: with no old commit at all, every entry of the new
+ * commit's tree records as a create. This pins the differ's contract alone;
+ * what a parentless commit means for the CLI is a later stage's decision.
+ */
+static void case_treediff_root(void)
+{
+	git_repository *repo;
+	git_oid xb, fb, sub;
+	const struct tree_spec new[] = { { "d", GIT_FILEMODE_TREE, &sub },
+					 { "f", GIT_FILEMODE_BLOB, &fb } };
+	git_oid tree;
+
+	repo = init_repo("s");
+	put_blob(repo, "x\n", 2, &xb);
+	put_blob(repo, "alpha\n", 6, &fb);
+	put_tree1(repo, "x", GIT_FILEMODE_BLOB, &xb, &sub);
+
+	put_tree(repo, new, ARRAY_SIZE(new), &tree);
+	put_commit(repo, "refs/heads/n", &tree, NULL, "N", NULL);
+	git_repository_free(repo);
+	diff_refs("s", NULL, "n");
+}
+
+/* Identical trees diff to an empty map; the header line still prints */
+static void case_treediff_identical(void)
+{
+	git_repository_free(mk_basic("s", false, NULL, NULL));
+	diff_refs("s", "x", "x");
+}
+
+/*
+ * Historical permission bits such as 100664 still classify a regular file. The
+ * reader keeps the raw spelling, so a permission-only difference against the
+ * canonical 100644 surfaces as a modify.
+ */
+static void case_treediff_rawmode(void)
+{
+	git_oid alpha, tree;
+	git_repository *repo;
+
+	repo = init_repo("s");
+	put_blob(repo, "alpha\n", 6, &alpha);
+	put_tree1(repo, "f", GIT_FILEMODE_BLOB, &alpha, &tree);
+	put_commit(repo, "refs/heads/o", &tree, NULL, "O", NULL);
+	put_raw_tree1(repo, "100664", "f", &alpha, &tree);
+	put_commit(repo, "refs/heads/n", &tree, NULL, "N", NULL);
+	git_repository_free(repo);
+	diff_refs("s", "o", "n");
+}
+
+/*
+ * A tree entry whose mode sits outside all four type families parses in the
+ * library (the entry's type normalizes to a blob) but has no meaning the map
+ * can carry, so the differ refuses it by number rather than guessing a kind.
+ */
+static void case_treediff_alien_mode(void)
+{
+	git_oid alpha, tree;
+	git_repository *repo;
+
+	quiet_leak_checker();
+	repo = init_repo("s");
+	put_blob(repo, "alpha\n", 6, &alpha);
+	put_tree1(repo, "g", GIT_FILEMODE_BLOB, &alpha, &tree);
+	put_commit(repo, "refs/heads/o", &tree, NULL, "O", NULL);
+	put_raw_tree1(repo, "110000", "f", &alpha, &tree);
+	put_commit(repo, "refs/heads/n", &tree, NULL, "N", NULL);
+	git_repository_free(repo);
+	diff_refs("s", "o", "n");
+}
+
+/*
+ * A tree naming a subtree the store never held parses fine on its own, and the
+ * walk's descent is that object's first reader, so the enumeration must die on
+ * the missing tree rather than hand back a partial map.
+ */
+static void case_treediff_ghost_subtree(void)
+{
+	git_oid alpha, ghost, tree;
+	git_repository *repo;
+	git_oid sub = {};
+
+	quiet_leak_checker();
+	repo = init_repo("s");
+	put_blob(repo, "alpha\n", 6, &alpha);
+	put_tree1(repo, "g", GIT_FILEMODE_BLOB, &alpha, &tree);
+	put_commit(repo, "refs/heads/o", &tree, NULL, "O", NULL);
+	memset(sub.id, 0x42, GIT_OID_SHA1_SIZE);
+	put_raw_tree1(repo, "40000", "d", &sub, &ghost);
+	put_commit(repo, "refs/heads/n", &ghost, NULL, "N", NULL);
+	git_repository_free(repo);
+	diff_refs("s", "o", "n");
+}
+
+/*
+ * A file becoming a directory: the union holds foo and foo/x as distinct paths
+ * (a tree cannot hold both at once, but the two sides can), so the map records
+ * a delete and a create with no shared-path pair involved.
+ */
+static void case_treediff_dir_boundary(void)
+{
+	git_oid k, fdata, xdata, sub;
+	const struct tree_spec old[] = { { "anchor", GIT_FILEMODE_BLOB, &k },
+					 { "foo", GIT_FILEMODE_BLOB, &fdata } };
+	const struct tree_spec new[] = { { "anchor", GIT_FILEMODE_BLOB, &k },
+					 { "foo", GIT_FILEMODE_TREE, &sub } };
+	git_repository *repo;
+
+	repo = init_repo("s");
+	put_blob(repo, "k\n", 2, &k);
+	put_blob(repo, "f\n", 2, &fdata);
+	put_blob(repo, "x\n", 2, &xdata);
+	put_tree1(repo, "x", GIT_FILEMODE_BLOB, &xdata, &sub);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	diff_refs("s", "o", "n");
+}
+
 /* Variant selector for the tree4 family's alpha document */
 enum tree4_alpha {
 	TREE4_ALPHA_BASE,
@@ -947,6 +1424,34 @@ int main(int argc, char **argv)
 		case_blob_over_ceiling();
 	} else if (!strcmp(argv[1], "parents")) {
 		case_parents();
+	} else if (!strcmp(argv[1], "treediff-ops")) {
+		case_treediff_ops();
+	} else if (!strcmp(argv[1], "treediff-order")) {
+		case_treediff_order();
+	} else if (!strcmp(argv[1], "treediff-kinds")) {
+		case_treediff_kinds();
+	} else if (!strcmp(argv[1], "treediff-typechange")) {
+		case_treediff_typechange();
+	} else if (!strcmp(argv[1], "treediff-typechange-edge")) {
+		case_treediff_typechange_edge();
+	} else if (!strcmp(argv[1], "treediff-rename")) {
+		case_treediff_rename();
+	} else if (!strcmp(argv[1], "treediff-rename-ambiguous")) {
+		case_treediff_rename_ambiguous();
+	} else if (!strcmp(argv[1], "treediff-kind-mismatch-edge")) {
+		case_treediff_kind_mismatch_edge();
+	} else if (!strcmp(argv[1], "treediff-root")) {
+		case_treediff_root();
+	} else if (!strcmp(argv[1], "treediff-identical")) {
+		case_treediff_identical();
+	} else if (!strcmp(argv[1], "treediff-rawmode")) {
+		case_treediff_rawmode();
+	} else if (!strcmp(argv[1], "treediff-alien-mode")) {
+		case_treediff_alien_mode();
+	} else if (!strcmp(argv[1], "treediff-ghost-subtree")) {
+		case_treediff_ghost_subtree();
+	} else if (!strcmp(argv[1], "treediff-dir-boundary")) {
+		case_treediff_dir_boundary();
 	} else {
 		fprintf(stderr, "unknown case: %s\n", argv[1]);
 		return 2;
