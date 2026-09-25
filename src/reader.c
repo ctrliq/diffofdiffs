@@ -366,6 +366,197 @@ char *git_quote_name(const struct patch_name *path)
 	return out;
 }
 
+/*
+ * Cursor lines omit LF, but headers read before normalization may retain CR.
+ * Neither line-ending byte belongs to the filename or metadata field.
+ */
+size_t chomp_header(const char *base, size_t len)
+{
+	size_t at;
+
+	for (at = 0; at < len; at++) {
+		if (base[at] == '\r' || base[at] == '\n')
+			break;
+	}
+
+	return at;
+}
+
+/*
+ * Check the coordinate ceiling before each multiplication. Unlike strtoul(),
+ * this parser rejects signs rather than converting negative offsets to large
+ * unsigned values.
+ */
+static int read_atat_num(const char *s, size_t len, size_t *at,
+			 unsigned long *num)
+{
+	unsigned long val = 0;
+	size_t i;
+
+	for (i = *at; i < len && s[i] >= '0' && s[i] <= '9'; i++) {
+		unsigned long digit = s[i] - '0';
+
+		if (val > (ATAT_MAX_COORD - digit) / 10)
+			return ATAT_MALFORMED;
+
+		val = val * 10 + digit;
+	}
+
+	if (i == *at)
+		return ATAT_MALFORMED;
+
+	*at = i;
+	*num = val;
+	return 0;
+}
+
+/*
+ * One side of an @@ line, an offset with an optional count behind a comma and
+ * blanks tolerated around either. A side with no comma covers one line.
+ */
+static int read_atat_side(const char *s, size_t len, size_t *at,
+			  unsigned long *offset, unsigned long *count)
+{
+	unsigned long off, cnt = 1;
+	int ret;
+
+	*at = skip_blank(s, len, *at);
+	ret = read_atat_num(s, len, at, &off);
+	if (ret)
+		return ret;
+
+	*at = skip_blank(s, len, *at);
+	if (*at < len && s[*at] == ',') {
+		*at = skip_blank(s, len, *at + 1);
+		ret = read_atat_num(s, len, at, &cnt);
+		if (ret)
+			return ret;
+
+		*at = skip_blank(s, len, *at);
+	}
+
+	if (offset)
+		*offset = off;
+	if (count)
+		*count = cnt;
+
+	return 0;
+}
+
+int read_atatline_n(const char *base, size_t len, unsigned long *orig_offset,
+		    unsigned long *orig_count, unsigned long *new_offset,
+		    unsigned long *new_count)
+{
+	size_t at;
+	int ret;
+
+	if (len < 3 || base[0] != '@' || base[1] != '@' ||
+	    (base[2] != ' ' && base[2] != '\t'))
+		return ATAT_NOT_HEADER;
+
+	at = skip_blank(base, len, 3);
+	if (at >= len || base[at] != '-')
+		return ATAT_NOT_HEADER;
+
+	at++;
+
+	ret = read_atat_side(base, len, &at, orig_offset, orig_count);
+	if (ret)
+		return ret;
+
+	if (at >= len || base[at] != '+')
+		return ATAT_MALFORMED;
+
+	at++;
+
+	ret = read_atat_side(base, len, &at, new_offset, new_count);
+	if (ret)
+		return ret;
+
+	/*
+	 * A hand-edited header may omit its closing '@' characters. Other text
+	 * still needs that delimiter, rather than being part of a coordinate.
+	 */
+	if (at < chomp_header(base, len) && base[at] != '@')
+		return ATAT_MALFORMED;
+
+	return 0;
+}
+
+size_t atat_tail(const char *base, size_t len, const char **tail)
+{
+	size_t end = chomp_header(base, len);
+	const char *first, *second;
+
+	*tail = "";
+	first = memmem(base, end, "@@", 2);
+	if (!first)
+		return 0;
+
+	first += 2;
+	second = memmem(first, end - (first - base), "@@", 2);
+	if (!second)
+		return 0;
+
+	second += 2;
+	*tail = second;
+	return end - (second - base);
+}
+
+/*
+ * Accept context with a missing leading space when it starts with a tab or is
+ * empty. In those forms every byte belongs to the source, unlike the explicit
+ * context and edit signs which occupy one patch-only byte.
+ *
+ * A leading CR is not a context sign. Section-specific CRLF normalization has
+ * already removed line-ending CR bytes before this parser runs.
+ */
+enum body_class classify_body_line(const char *base, size_t len,
+				   size_t *content)
+{
+	enum body_class class = BODY_CONTEXT;
+	size_t at = 0;
+
+	if (len) {
+		switch (base[0]) {
+		case ' ':
+			at = 1;
+			break;
+		case '\t':
+			break;
+		case '-':
+			at = 1;
+			class = BODY_REMOVED;
+			break;
+		case '+':
+			at = 1;
+			class = BODY_ADDED;
+			break;
+		case '\\':
+			class = BODY_NO_NEWLINE;
+			break;
+		default:
+			class = BODY_JUNK;
+			break;
+		}
+	}
+
+	if (content)
+		*content = at;
+
+	return class;
+}
+
+void check_hunk_chop(unsigned long old_left, unsigned long new_left)
+{
+	if (new_left > 3)
+		die("unexpected end of file in patch");
+
+	if (old_left != new_left)
+		die("malformed patch: hunk short by %lu old and %lu new lines",
+		    old_left, new_left);
+}
+
 struct hunk_progress {
 	unsigned long old_left;
 	unsigned long new_left;
