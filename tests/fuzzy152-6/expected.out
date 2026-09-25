@@ -1,0 +1,33 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Patch 1: patch1   ┃   Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source
+lines quoted in the patches.
+
+═══════════════════════════════════════════
+*    DELTA DIFFERENCES                    *
+═══════════════════════════════════════════
+Signs mark edits made by only that patch. A
+sign-less line with one number is an edit
+both patches make: a new number means both
+add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│big         ┃ old new│big
+        │@@ ctx 1    ┃        │@@ ctx 1
+   1   1│ctx 1       ┃   1   1│ctx 1
+-  2    │m0 mine zero┃-  2    │n0 nope zero
+-  3    │m1 mine one ┃-  3    │n1 nope one
+       2│p line PPPP ┃       2│p line PPPP
+       3│q line QQQQ ┃       3│q line QQQQ
+       4│p line PPPP ┃       4│p line PPPP
+        │────────────╂────────┼────────────
+        │@@ q line QQ┃        │@@ q line QQ
+        │QQ          ┃        │QQ
+      13│q line QQQQ ┃      13│q line QQQQ
+      14│p line PPPP ┃      14│p line PPPP
+      15│q line QQQQ ┃      15│q line QQQQ
++     16│w line WWWW ┃+     16│p line PPPP
+      17│q line QQQQ ┃      17│q line QQQQ
+   4  18│ctx 3       ┃        │

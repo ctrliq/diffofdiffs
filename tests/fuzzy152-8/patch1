@@ -1,0 +1,41 @@
+--- a/big
++++ b/big
+@@ -1,4 +1,36 @@
+ ctx 1
+-m0 mine zero
+-m1 mine one
++P0 shared AAA
++P1 shared BBB
++P2 shared CCC
++P3 shared DDD
++P4 shared EEE
++P5 shared FFF
++P6 shared GGG
++P7 shared HHH
++P8 shared III
++P9 shared JJJ
++P10 shared KKK
++P11 shared LLL
++P12 shared MMM
++P13 shared NNN
++P14 shared OOO
++P15 shared PPP
++x1 mine mid
++Q0 shared FFF
++Q1 shared GGG
++Q2 shared HHH
++Q3 shared III
++Q4 shared JJJ
++Q5 shared KKK
++Q6 shared LLL
++Q7 shared MMM
++Q8 shared NNN
++Q9 shared OOO
++Q10 shared PPP
++Q11 shared QQQ
++Q12 shared RRR
++Q13 shared SSS
++Q14 shared TTT
++Q15 shared UUU
++y1 mine end
+ ctx 3

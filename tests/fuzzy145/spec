@@ -1,0 +1,7 @@
+# Patch1 deletes most of a short file f, keeping lines d and e. Patch2 adds g at
+# the top, keeps e, and deletes the lines after it. Patch2's addition of g must
+# stay visible: on its side in the delta section, and against patch1's d in the
+# context section.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

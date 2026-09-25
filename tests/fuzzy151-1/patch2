@@ -1,0 +1,15 @@
+--- a/big
++++ b/big
+@@ -2,4 +2,9 @@
+ ctx 2
+-o0 orig zero
+-o1 orig one
+-zz absent line
++b0 line AAAA
++b1 line BBBB
++b2 line CCCC
++b3 line DDDD
++b0 line AAAA
++b1 line BBBB
++b2 line CCCC
++b3 line DDDD

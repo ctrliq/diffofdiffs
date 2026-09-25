@@ -1,0 +1,40 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               Patch 1: patch1               ┃               Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                     *
+═══════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both
+patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│big                               ┃  old  new│big
+          │@@ ctx 1 xxxxxxxxxxxxxxxxxxxxxxxx ┃          │@@ ctx 1 xxxxxxxxxxxxxxxxxxxxxxxx
+    1    1│ctx 1 xxxxxxxxxxxxxxxxxxxxxxxx    ┃    1    1│ctx 1 xxxxxxxxxxxxxxxxxxxxxxxx
+    2    2│ctx 2 xxxxxxxxxxxxxxxxxxxxxxxx    ┃    2    2│ctx 2 xxxxxxxxxxxxxxxxxxxxxxxx
+    3     │orig 0 xxxxxxxxxxxxxxxxxxxxxxxx   ┃    3     │orig 0 xxxxxxxxxxxxxxxxxxxxxxxx
++        3│w head0 xxxxxxxxxxxxxxxxxxxxxxxx  ┃-   4     │zz absent xxxxxxxxxxxxxxxxxxxxxxxx
++        4│w head1 xxxxxxxxxxxxxxxxxxxxxxxx  ┃+        3│y head xxxxxxxxxxxxxxxxxxxxxxxx
+         5│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃         4│x same xxxxxxxxxxxxxxxxxxxxxxxx
+         6│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃         5│x same xxxxxxxxxxxxxxxxxxxxxxxx
+         7│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃         6│x same xxxxxxxxxxxxxxxxxxxxxxxx
+          │──────────────────────────────────╂──────────┼──────────────────────────────────
+          │@@ x same xxxxxxxxxxxxxxxxxxxxxxxx┃          │@@ x same xxxxxxxxxxxxxxxxxxxxxxxx
+       802│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃       801│x same xxxxxxxxxxxxxxxxxxxxxxxx
+       803│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃       802│x same xxxxxxxxxxxxxxxxxxxxxxxx
+       804│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃       803│x same xxxxxxxxxxxxxxxxxxxxxxxx
++      805│z sep1 xxxxxxxxxxxxxxxxxxxxxxxx   ┃+      804│y sep1 xxxxxxxxxxxxxxxxxxxxxxxx
+       806│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃       805│x same xxxxxxxxxxxxxxxxxxxxxxxx
+       807│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃       806│x same xxxxxxxxxxxxxxxxxxxxxxxx
+       808│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃       807│x same xxxxxxxxxxxxxxxxxxxxxxxx
+          │──────────────────────────────────╂──────────┼──────────────────────────────────
+          │@@ x same xxxxxxxxxxxxxxxxxxxxxxxx┃          │@@ x same xxxxxxxxxxxxxxxxxxxxxxxx
+      1603│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃      1602│x same xxxxxxxxxxxxxxxxxxxxxxxx
+      1604│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃      1603│x same xxxxxxxxxxxxxxxxxxxxxxxx
+      1605│x same xxxxxxxxxxxxxxxxxxxxxxxx   ┃      1604│x same xxxxxxxxxxxxxxxxxxxxxxxx
++     1606│z sep2 xxxxxxxxxxxxxxxxxxxxxxxx   ┃+     1605│y sep2 xxxxxxxxxxxxxxxxxxxxxxxx
+    4 1607│ctx 3 xxxxxxxxxxxxxxxxxxxxxxxx    ┃    5 1606│ctx 3 xxxxxxxxxxxxxxxxxxxxxxxx
+    5 1608│ctx 4 xxxxxxxxxxxxxxxxxxxxxxxx    ┃    6 1607│ctx 4 xxxxxxxxxxxxxxxxxxxxxxxx

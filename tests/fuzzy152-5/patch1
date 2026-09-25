@@ -1,0 +1,22 @@
+--- a/big
++++ b/big
+@@ -1,4 +1,17 @@
+ ctx 1
+-m0 mine zero
+-m1 mine one
++p line PPPP
++q line QQQQ
++p line PPPP
++q line QQQQ
++p line PPPP
++q line QQQQ
++p line PPPP
++q line QQQQ
++p line PPPP
++q line QQQQ
++p line PPPP
++q line QQQQ
++p line PPPP
++w line WWWW
++q line QQQQ
+ ctx 3

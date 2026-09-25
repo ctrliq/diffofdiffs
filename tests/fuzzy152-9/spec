@@ -1,0 +1,6 @@
+# Large corresponding replacements remain fully compared despite repeated
+# rows. The original patches and output recipe reproduce independently
+# supplied complete files.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

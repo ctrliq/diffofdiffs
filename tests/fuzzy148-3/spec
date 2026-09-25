@@ -1,0 +1,9 @@
+# Patch1 deletes blank lines, zz, c, and d around a in a short file f, keeping a
+# blank line and a final c. Patch2 quotes tab-indented a and zz lines, adds a
+# tab-indented c, and deletes whitespace-only lines, and its second hunk deletes
+# a c at line 9. The report must pair that deletion with patch1's deletion of c
+# at line 6 as an edit both patches make, and show every other deletion on its
+# own patch's side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

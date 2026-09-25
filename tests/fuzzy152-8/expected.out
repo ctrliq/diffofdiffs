@@ -1,0 +1,42 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Patch 1: patch1    ┃    Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source
+lines quoted in the patches.
+
+═══════════════════════════════════════════════
+*    DELTA DIFFERENCES                        *
+═══════════════════════════════════════════════
+Signs mark edits made by only that patch. A
+sign-less line with one number is an edit both
+patches make: a new number means both add it,
+an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│big           ┃ old new│big
+        │@@ ctx 1      ┃        │@@ ctx 1
+   1   1│ctx 1         ┃   1   1│ctx 1
+-  2    │m0 mine zero  ┃-  2    │n0 nope zero
+-  3    │m1 mine one   ┃-  3    │n1 nope one
+       2│P0 shared AAA ┃       2│P0 shared AAA
+       3│P1 shared BBB ┃       3│P1 shared BBB
+       4│P2 shared CCC ┃       4│P2 shared CCC
+        │──────────────╂────────┼──────────────
+        │@@ P13 shared ┃        │@@ P13 shared
+        │NNN           ┃        │NNN
+      15│P13 shared NNN┃      15│P13 shared NNN
+      16│P14 shared OOO┃      16│P14 shared OOO
+      17│P15 shared PPP┃      17│P15 shared PPP
++     18│x1 mine mid   ┃+     18│z1 twin mid
+      19│Q0 shared FFF ┃      19│Q0 shared FFF
+      20│Q1 shared GGG ┃      20│Q1 shared GGG
+      21│Q2 shared HHH ┃      21│Q2 shared HHH
+        │──────────────╂────────┼──────────────
+        │@@ Q13 shared ┃        │@@ Q13 shared
+        │SSS           ┃        │SSS
+      32│Q13 shared SSS┃      32│Q13 shared SSS
+      33│Q14 shared TTT┃      33│Q14 shared TTT
+      34│Q15 shared UUU┃      34│Q15 shared UUU
++     35│y1 mine end   ┃+     35│w1 twin end
+   4  36│ctx 3         ┃        │

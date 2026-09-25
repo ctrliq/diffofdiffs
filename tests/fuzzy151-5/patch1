@@ -1,0 +1,13 @@
+--- a/big
++++ b/big
+@@ -1,4 +1,8 @@
+ ctx 1
+-m0 mine zero
+-m1 mine one
++a line AAAA
++b line BBBB
++a line AAAA
++b line BBBB
++a line AAAA
++t line TTTT
+ ctx 3

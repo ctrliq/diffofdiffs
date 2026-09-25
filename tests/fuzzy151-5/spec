@@ -1,0 +1,5 @@
+# Shared added rows bound the upstream CCCC insertion. Repeated text and
+# different original source do not establish the unmatched result tail.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

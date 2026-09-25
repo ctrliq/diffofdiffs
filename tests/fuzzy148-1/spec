@@ -1,0 +1,7 @@
+# Patch1 replaces d with "  d" at the top of f and deletes the zz and g lines
+# below a. Patch2 adds " zz" and a tab-indented f at the top, then adds a
+# tab-indented e above a and replaces zz with d. The tab-indented e must show on
+# patch2's side, in the same hunk as its replacement of zz.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

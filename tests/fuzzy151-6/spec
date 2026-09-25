@@ -1,0 +1,5 @@
+# A longer repeated added run still exposes the bounded CCCC insertion.
+# Unresolved source and result edges remain explicit.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

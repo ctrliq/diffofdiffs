@@ -1,0 +1,22 @@
+--- a/big
++++ b/big
+@@ -1,11 +1,16 @@
+ ctx 1
+ ctx 2
+-o0 orig zero
+-o1 orig one
+-o2 orig two
++h1 head one
++h2 head two
++b0 line AAAA
++b1 line BBBB
++b2 line CCCC
++b3 line DDDD
++b4 line EEEE
++b5 line FFFF
+ ctx 3
+ ctx 4
+ ctx 2
+ o0 orig zero
+ o1 orig one
+ ctx 5

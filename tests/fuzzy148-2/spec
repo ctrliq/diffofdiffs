@@ -1,0 +1,5 @@
+# The unresolved upstream c, c, and tab-indented a additions remain visible
+# after other parts of the comparison succeed.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
