@@ -1,0 +1,3 @@
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

@@ -1,0 +1,11 @@
+--- a/f.c
++++ b/f.c
+@@ -1 +1 @@
+-#include "old.h"
++#include "new.h"
+@@ -4,4 +4,4 @@
+ {
+ 	if (d->quirk) {
+ 		d->flags = 0;
+-	enable_locked(d);
++		enable_locked(d);

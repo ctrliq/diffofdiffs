@@ -1,0 +1,10 @@
+--- a/f.c
++++ b/f.c
+@@ -2,6 +2,7 @@
+ {
+ 	if (ready(sp)) {
+ 		if (sp->on) {
++			check_new(sp);
+ 			run(sp);
+ 		}
+ 	}

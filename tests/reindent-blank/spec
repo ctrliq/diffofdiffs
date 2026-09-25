@@ -1,0 +1,6 @@
+# The insertion is identified by its retained source on both sides despite a
+# new surrounding wrapper. Compare every literal indentation difference,
+# including the added blank row, and show the actual surrounding code.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

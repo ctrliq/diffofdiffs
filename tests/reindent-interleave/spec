@@ -1,0 +1,6 @@
+# The three corresponding inserted calls differ in indentation. The retained
+# source on both sides identifies the insertion; preserve the literal result
+# and surrounding-code differences.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

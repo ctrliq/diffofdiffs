@@ -1,0 +1,5 @@
+# Only one surrounding source row corresponds. The different following call
+# prevents a claim that these insertions belong to the same source gap.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

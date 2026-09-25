@@ -1,0 +1,6 @@
+# Both patches insert the same call into the same source gap at different
+# indentation. The two surrounding source rows identify the gap. Preserve the
+# literal indentation difference.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

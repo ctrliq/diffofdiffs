@@ -1,0 +1,6 @@
+# The upstream run adds an indented helper_five and helper_four between shared
+# calls. The independent shared edits do not hide or duplicate those
+# additions.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

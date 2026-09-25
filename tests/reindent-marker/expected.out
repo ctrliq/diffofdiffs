@@ -1,0 +1,25 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            Patch 1: p1.patch            ┃            Patch 2: p2.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches             *
+═══════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an
+edit both patches make: a new number means both add it, an old number means both
+remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f.c                             ┃ old new│f.c
+        │@@                              ┃        │@@ static void setup(struct dev
+        │                                ┃        │*d)
+        │                                ┃   3   3│static void setup(struct dev *d)
+   4   4│{                               ┃   4   4│{
+   5   5│	if (d->quirk) {          ┃        │
+   6   6│		d->flags = 0;    ┃   5   5│	d->flags = 0;
+-  7    │		enable(d);       ┃-  6    │	enable(d);
++      7│		extra(d);        ┃+      6│	enable_locked(d);
++      8│		enable_locked(d);┃        │
+\       │No newline at end of file       ┃        │

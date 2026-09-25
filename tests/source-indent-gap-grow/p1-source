@@ -1,0 +1,6 @@
+int g(struct s *sp)
+{
+	if (sp->on) {
+		run(sp);
+	}
+}

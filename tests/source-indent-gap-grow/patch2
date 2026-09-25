@@ -1,0 +1,11 @@
+--- a/f.c
++++ b/f.c
+@@ -2,6 +2,8 @@
+ {
+ 	if (ready(sp)) {
+ 		if (sp->on) {
++			check(sp);
++			extra(sp);
+ 			run(sp);
+ 		}
+ 	}

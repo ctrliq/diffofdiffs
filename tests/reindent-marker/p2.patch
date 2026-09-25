@@ -1,0 +1,11 @@
+--- a/f.c
++++ b/f.c
+@@ -1 +1 @@
+-#include "dev.h"
++#include "dev_locked.h"
+@@ -3,4 +3,4 @@
+ static void setup(struct dev *d)
+ {
+ 	d->flags = 0;
+-	enable(d);
++	enable_locked(d);

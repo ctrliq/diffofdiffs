@@ -1,0 +1,6 @@
+# The two surrounding source rows disagree about the indentation change. Keep
+# the insertions unresolved instead of choosing one row as the entire
+# explanation.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

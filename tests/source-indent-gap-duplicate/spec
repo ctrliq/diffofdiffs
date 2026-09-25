@@ -1,0 +1,5 @@
+# The same surrounding source pair occurs twice. Matching the inserted text
+# or guessing a position cannot make the repeated source gap unique.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,14 @@
+--- a/g.c
++++ b/g.c
+@@ -1 +1 @@
+-#include "old.h"
++#include "new.h"
+@@ -3,5 +3,8 @@
+ {
+ 	if (ready(sp)) {
+ 		if (sp->on) {
++			check_a(sp);
++			
++			check_b(sp);
+ 			run(sp);
+ 		}

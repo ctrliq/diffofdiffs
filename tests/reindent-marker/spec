@@ -1,0 +1,5 @@
+# The uniquely identified call replacement differs in added calls, indentation,
+# and its final newline. All three differences remain literal.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

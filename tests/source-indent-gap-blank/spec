@@ -1,0 +1,5 @@
+# The identified original insertions contain a blank row between two calls.
+# Preserve the indentation difference on that row as well as on the calls.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

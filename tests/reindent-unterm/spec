@@ -1,0 +1,6 @@
+# The uniquely identified call replacement differs in indentation and final
+# newline. The source comparison and result comparison retain those separate
+# facts.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

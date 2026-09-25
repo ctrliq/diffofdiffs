@@ -1,0 +1,31 @@
+--- a/mod.c
++++ b/mod.c
+@@ -6,3 +6,4 @@
+ 	start(dev);
++	arm(dev);
+ 	claim(dev);
+ 	ready(dev);
+@@ -10,4 +11,10 @@
+ 	lead_one();
+ 	lead_two();
+ 	charlie_v2();
++	helper_one();
++	helper_two();
++		helper_five();
++	helper_four();
++	helper_five();
++	helper_six();
+ 	tail_one();
+@@ -20,5 +27,6 @@
+ 	stage(dev);
+ 	whilst(dev) {
+ 		if (dev->on) {
++			check(dev);
+ 			run(dev);
+ 		}
+@@ -40,4 +48,4 @@
+ 	lead_one();
+ 	lead_two();
+-	omega_old();
++	omega_new();
+ 	tail_one();

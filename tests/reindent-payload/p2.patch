@@ -1,0 +1,12 @@
+--- a/g.c
++++ b/g.c
+@@ -1 +1 @@
+-#include "s.h"
++#include "s_checked.h"
+@@ -3,5 +3,6 @@
+ {
+ 	if (ready(sp)) {
+ 		if (sp->on) {
++			check(sp);
+ 			run(sp);
+ 		}

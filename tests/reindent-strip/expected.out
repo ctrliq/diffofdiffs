@@ -1,0 +1,39 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              Patch 1: p1.patch              ┃              Patch 2: p2.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                     *
+═══════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both
+patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f.c                                 ┃ old new│f.c
+        │@@                                  ┃        │@@
+   2   2│{                                   ┃   2   2│{
+   3   3│	if (d->quirk) {              ┃        │
+   4   4│		d->flags = 0;        ┃   3   3│	d->flags = 0;
+   5   5│		d->ready = 1;        ┃   4   4│	d->ready = 1;
+-  6    │		enable(d);           ┃-  5    │	enable(d);
+\       │No newline at end of file           ┃\       │No newline at end of file
++      6│		enable_locked(d);    ┃+      5│	enable_locked(d);
+\       │No newline at end of file           ┃\       │No newline at end of file
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches               *
+═══════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f.c                                 ┃     new│f.c
+        │@@                                  ┃        │@@
+       1│static void setup_dev(struct dev *d)┃       1│static void setup_dev(struct dev *d)
+       2│{                                   ┃       2│{
+-      3│	if (d->quirk) {              ┃        │
+-      4│		d->flags = 0;        ┃+      3│	d->flags = 0;
+-      5│		d->ready = 1;        ┃+      4│	d->ready = 1;
+-      6│		enable_locked(d);    ┃+      5│	enable_locked(d);
+\       │No newline at end of file           ┃\       │No newline at end of file

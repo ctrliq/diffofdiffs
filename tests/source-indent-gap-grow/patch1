@@ -1,0 +1,10 @@
+--- a/f.c
++++ b/f.c
+@@ -1,6 +1,7 @@
+ int g(struct s *sp)
+ {
+ 	if (sp->on) {
++		check(sp);
+ 		run(sp);
+ 	}
+ }

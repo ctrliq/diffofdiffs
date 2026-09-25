@@ -1,0 +1,40 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Patch 1: p1.patch          ┃          Patch 2: p2.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches     *
+═══════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number
+is an edit both patches make: a new number means both add it, an old number
+means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│mod.c                       ┃ old new│mod.c
+        │@@                          ┃        │@@
+        │                            ┃  12  12│	charlie_v2();
+      13│	helper_one();        ┃      13│	helper_one();
+      14│	helper_two();        ┃      14│	helper_two();
+        │                            ┃+     15│		helper_five();
+        │                            ┃+     16│	helper_four();
+      15│	helper_five();       ┃      17│	helper_five();
+      16│	helper_six();        ┃      18│	helper_six();
+  13  17│	tail_one();          ┃  13  19│	tail_one();
+
+═══════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                                                  *
+═══════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│mod.c                       ┃     new│mod.c
+        │@@                          ┃        │@@
+      10│	lead_one();          ┃      10│	lead_one();
+      11│	lead_two();          ┃      11│	lead_two();
+-     12│	charlie();           ┃+     12│	charlie_v2();
+      13│	helper_one();        ┃      13│	helper_one();
+      14│	helper_two();        ┃      14│	helper_two();
+        │                            ┃+     15│		helper_five();
+      15│	helper_five();       ┃        │

@@ -1,0 +1,8 @@
+int g(struct s *sp)
+{
+	if (ready(sp)) {
+		if (sp->on) {
+			other_run(sp);
+		}
+	}
+}

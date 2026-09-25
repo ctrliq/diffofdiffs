@@ -1,0 +1,6 @@
+# Both surrounding source rows identify the insertion despite different
+# indentation. Compare the different added calls on the backport result while
+# preserving its surrounding source.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

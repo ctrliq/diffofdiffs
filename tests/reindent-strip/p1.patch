@@ -1,0 +1,14 @@
+--- a/f.c
++++ b/f.c
+@@ -1 +1 @@
+-static void setup(struct dev *d)
++static void setup_dev(struct dev *d)
+@@ -2,5 +2,5 @@
+ {
+ 	if (d->quirk) {
+ 		d->flags = 0;
+ 		d->ready = 1;
+-		enable(d);
+\\ No newline at end of file
++		enable_locked(d);
+\\ No newline at end of file

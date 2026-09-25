@@ -1,0 +1,12 @@
+--- a/f.c
++++ b/f.c
+@@ -2,6 +2,9 @@
+ {
+ 	if (ready(sp)) {
+ 		if (sp->on) {
++			check_a(sp);
++			
++			check_b(sp);
+ 			run(sp);
+ 		}
+ 	}

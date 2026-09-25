@@ -1,0 +1,6 @@
+# The corresponding insertion at the indented source gap retains its literal
+# whitespace difference. A duplicate helper elsewhere does not hide the
+# separate additions inside the earlier shared result.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

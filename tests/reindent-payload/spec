@@ -1,0 +1,6 @@
+# The retained source on both sides identifies the inserted check despite a
+# new surrounding wrapper. DELTA preserves the literal added indentation
+# difference; CONTEXT shows the actual wrapper and source changes.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

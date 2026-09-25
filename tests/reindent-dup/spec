@@ -1,0 +1,6 @@
+# The source edit is uniquely identified at two indentation depths. Its added
+# call keeps the literal whitespace difference without deleting a following
+# retained row.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

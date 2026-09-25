@@ -1,0 +1,54 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          Patch 1: p1.patch          ┃          Patch 2: p2.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches     *
+═══════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number
+is an edit both patches make: a new number means both add it, an old number
+means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│mod.c                       ┃ old new│mod.c
+        │@@                          ┃        │@@
+        │                            ┃  12  13│	charlie_v2();
+      14│	helper_one();        ┃      14│	helper_one();
+      15│	helper_two();        ┃      15│	helper_two();
+        │                            ┃+     16│		helper_five();
+        │                            ┃+     17│	helper_four();
+      16│	helper_five();       ┃      18│	helper_five();
+      17│	helper_six();        ┃      19│	helper_six();
+  13  18│	tail_one();          ┃  13  20│	tail_one();
+        │────────────────────────────╂────────┼────────────────────────────
+        │@@                          ┃        │@@
+        │                            ┃  20  27│	stage(dev);
+        │                            ┃  21  28│	whilst(dev) {
+  14  19│	if (dev->on) {       ┃  22  29│		if (dev->on) {
++     20│helper_four();              ┃+     30│	helper_four();
+  15  21│		run(dev);    ┃  23  31│			run(dev);
+  16  22│	}                    ┃  24  32│		}
+
+═══════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                                                  *
+═══════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│mod.c                       ┃     new│mod.c
+        │@@                          ┃        │@@
+      11│	lead_one();          ┃      11│	lead_one();
+      12│	lead_two();          ┃      12│	lead_two();
+-     13│	charlie();           ┃+     13│	charlie_v2();
+      14│	helper_one();        ┃      14│	helper_one();
+      15│	helper_two();        ┃      15│	helper_two();
+        │                            ┃+     16│		helper_five();
+      16│	helper_five();       ┃        │
+        │────────────────────────────╂────────┼────────────────────────────
+        │@@                          ┃        │@@
+-     19│	if (dev->on) {       ┃+     29│		if (dev->on) {
+-     20│helper_four();              ┃+     30│	helper_four();
+-     21│		run(dev);    ┃+     31│			run(dev);
+-     22│	}                    ┃+     32│		}

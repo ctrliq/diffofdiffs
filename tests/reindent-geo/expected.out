@@ -1,0 +1,32 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       Patch 1: p1.patch        ┃       Patch 2: p2.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the
+patches.
+
+═════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                          *
+═════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with
+one number is an edit both patches make: a new number means both
+add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│m.c                    ┃ old new│m.c
+        │@@                     ┃        │@@
+   1   1│m_head                 ┃   1   1│m_head
+   2   2│m_body                 ┃   2   2│m_body
+   3    │state = ZERO;          ┃   3    │state = ZERO;
++      3│state = ONE;           ┃+      3│state = TWO;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│n.c                    ┃ old new│n.c
+        │@@                     ┃        │@@
+  20  20│n_p1_a                 ┃ 120 120│n_p2_a
+  21  21│n_p1_b                 ┃ 121 121│n_p2_b
+- 22    │limit(old_cap);        ┃-122    │	limit(old_cap);
++     22│limit(new_cap);        ┃+    122│	limit(new_cap);
++     23│n_extra_line           ┃        │
+  23  24│n_shared_x             ┃ 123 123│n_shared_x
+  24  25│n_shared_y             ┃ 124 124│n_shared_y

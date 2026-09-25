@@ -1,0 +1,6 @@
+# The corresponding source gap contains one backport addition and two
+# upstream additions. Compare the entire original insertion, preserving
+# indentation and the extra call.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

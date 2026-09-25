@@ -1,0 +1,39 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               Patch 1: patch1                ┃               Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                       *
+═════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both
+patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f.c                                  ┃ old new│f.c
+        │@@                                   ┃        │@@ int g(struct s *sp)
+        │                                     ┃   1   1│int g(struct s *sp)
+   2   2│{                                    ┃   2   2│{
+   3   3│	if (ready(sp)) {              ┃        │
+   4   4│		if (sp->on) {         ┃   3   3│	if (sp->on) {
++      5│			check_new(sp);┃+      4│		check_old(sp);
+   5   6│			run(sp);      ┃   4   5│		run(sp);
+   6   7│		}                     ┃   5   6│	}
+   7   8│	}                             ┃   6   7│}
+
+═════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                 *
+═════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f.c                                  ┃     new│f.c
+        │@@                                   ┃        │@@ int g(struct s *sp)
+       2│{                                    ┃       2│{
+-      3│	if (ready(sp)) {              ┃        │
+-      4│		if (sp->on) {         ┃+      3│	if (sp->on) {
+-      5│			check_new(sp);┃+      4│		check_old(sp);
+-      6│			run(sp);      ┃+      5│		run(sp);
+-      7│		}                     ┃+      6│	}
+-      8│	}                             ┃+      7│}

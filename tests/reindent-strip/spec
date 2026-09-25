@@ -1,0 +1,6 @@
+# Corresponding call replacements at two depths retain their indentation
+# difference and missing final newlines. Repeated input marker spellings do
+# not invent extra rows.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

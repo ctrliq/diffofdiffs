@@ -1,0 +1,6 @@
+--- a/f.c
++++ b/f.c
+@@ -4,2 +4,3 @@
+ 		if (sp->on) {
++			check(sp);
+ 			run(sp);

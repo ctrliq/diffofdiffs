@@ -1,0 +1,12 @@
+--- a/g.c
++++ b/g.c
+@@ -1 +1 @@
+-#include "s.h"
++#include "s_checked.h"
+@@ -2,5 +2,6 @@
+ int g(struct s *sp)
+ {
+ 	if (sp->on) {
++		check(sp);
+ 		run(sp);
+ 	}
