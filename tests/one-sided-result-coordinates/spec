@@ -1,0 +1,6 @@
+# The earlier compared operation grows the file but is absent from the one-sided
+# patch. The remainder uses the result coordinates of its own selected
+# operations.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

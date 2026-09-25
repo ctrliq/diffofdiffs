@@ -1,0 +1,11 @@
+# Patch1 and patch2 start from versions of f that differ at line 21, where
+# patch1 quotes a_zulu and patch2 changes a_old to a_p2. Both change g_old at
+# line 28, patch1 to g_p1 and patch2 to g_p2. With -U12, the report must show
+# patch2's change at line 21 beside patch1's a_zulu, the removal of g_old as an
+# edit both patches make with g_p1 beside g_p2, and a context section in which
+# the two results differ at lines 21 and 28. The source and result files hold f
+# before and after each patch, and the runner checks that each patch turns its
+# source into its result with no fuzz.
+bin: DIFFOFDIFFS
+args: -U12 patch1 patch2
+exit: 0

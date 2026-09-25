@@ -1,0 +1,11 @@
+--- a/f
++++ b/f
+@@ -18,7 +18,7 @@
+ prefix17
+ prefix18
+ prefix19
+-g_old
++g_p1
+ middle00
+ middle01
+ middle02

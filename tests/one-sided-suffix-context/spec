@@ -1,0 +1,10 @@
+# Patch1 changes g_old at line 21 of f to g_p1. Patch2 changes the same line to
+# g_p2 and, in the same hunk, a_old at line 28 to a_p2. With -U3, the report
+# must show the removal of g_old as an edit both patches make with g_p1 beside
+# g_p2, and the change at line 28 on patch2's side alone, since patch1 doesn't
+# quote that line. The source and result files hold f before and after each
+# patch, and the runner checks that each patch turns its source into its result
+# with no fuzz.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

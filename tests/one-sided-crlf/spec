@@ -1,0 +1,11 @@
+# Both patches change g_old at line 21 of f, patch1 to g_p1 and patch2 to g_p2,
+# and patch2 also changes a_old to a_p2 at line 28, below the lines patch1
+# quotes. Every hunk line ends in CRLF while the --- and +++ lines don't, so the
+# CRs are content. With -U3, the report must show each line with its trailing
+# \x0d, the two g_old changes side by side with the removal shared, and patch2's
+# a_old change on its side alone. p1-source, p1-result, p2-source, and p2-result
+# hold f before and after each patch, and each patch must turn its source into
+# its result with no fuzz.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

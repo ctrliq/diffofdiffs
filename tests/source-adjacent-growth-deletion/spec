@@ -1,0 +1,5 @@
+# Adjacent growth and deletion retain their correct source and result
+# boundaries.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

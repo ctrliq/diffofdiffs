@@ -1,0 +1,6 @@
+# Two one-sided operations surround a compared operation that grows the file.
+# Their shared context keeps the original source of the omitted operation, and
+# their counts include only their own edits.
+bin: DIFFOFDIFFS
+args: -U12 patch1 patch2
+exit: 0

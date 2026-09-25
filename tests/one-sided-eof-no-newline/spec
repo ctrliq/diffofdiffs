@@ -1,0 +1,5 @@
+# A real file edge permits a one-sided hunk with more leading than trailing
+# context. Preserve the missing final newline on both original sides.
+bin: DIFFOFDIFFS
+args: -U5 patch1 patch2
+exit: 0

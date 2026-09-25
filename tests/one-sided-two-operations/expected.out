@@ -1,0 +1,102 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Patch 1: patch1  ┃  Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the
+source lines quoted in the patches.
+
+═══════════════════════════════════════
+*    DELTA DIFFERENCES                *
+═══════════════════════════════════════
+Signs mark edits made by only that
+patch. A sign-less line with one number
+is an edit both patches make: a new
+number means both add it, an old number
+means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f         ┃ old new│f
+        │@@ prefix1┃        │@@ prefix0
+        │5         ┃        │8
+        │          ┃   9   9│prefix08
+        │          ┃  10  10│prefix09
+        │          ┃  11  11│prefix10
+        │          ┃  12  12│prefix11
+        │          ┃  13  13│prefix12
+        │          ┃  14  14│prefix13
+        │          ┃  15  15│prefix14
+  16  16│prefix15  ┃  16  16│prefix15
+  17  17│prefix16  ┃  17  17│prefix16
+  18  18│prefix17  ┃  18  18│prefix17
+  19  19│prefix18  ┃  19  19│prefix18
+  20  20│prefix19  ┃  20  20│prefix19
+  21  21│a_zulu    ┃- 21    │a_old
+        │          ┃+     21│a_p2
+  22  22│middle00  ┃  22  22│middle00
+  23  23│middle01  ┃  23  23│middle01
+  24  24│middle02  ┃  24  24│middle02
+  25  25│middle03  ┃  25  25│middle03
+  26  26│middle04  ┃  26  26│middle04
+  27  27│middle05  ┃  27  27│middle05
+  28    │g_old     ┃  28    │g_old
++     28│g_p1      ┃+     28│g_p2_one
+        │          ┃+     29│g_p2_two
+        │          ┃+     30│g_p2_three
+  29  29│bridge0   ┃  29  31│bridge0
+  30  30│bridge1   ┃  30  32│bridge1
+  31  31│bridge2   ┃  31  33│bridge2
+  32  32│bridge3   ┃  32  34│bridge3
+  33  33│c_zulu    ┃- 33    │c_old
+        │          ┃+     35│c_p2_one
+        │          ┃+     36│c_p2_two
+  34  34│suffix00  ┃  34  37│suffix00
+  35  35│suffix01  ┃  35  38│suffix01
+  36  36│suffix02  ┃  36  39│suffix02
+  37  37│suffix03  ┃  37  40│suffix03
+  38  38│suffix04  ┃  38  41│suffix04
+  39  39│suffix05  ┃  39  42│suffix05
+  40  40│suffix06  ┃  40  43│suffix06
+        │          ┃  41  44│suffix07
+        │          ┃  42  45│suffix08
+        │          ┃  43  46│suffix09
+        │          ┃  44  47│suffix10
+        │          ┃  45  48│suffix11
+
+═══════════════════════════════════════
+*    CONTEXT DIFFERENCES              *
+═══════════════════════════════════════
+Signs mark lines present in only one
+result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f         ┃     new│f
+        │@@ prefix1┃        │@@ prefix1
+        │5         ┃        │5
+      16│prefix15  ┃      16│prefix15
+      17│prefix16  ┃      17│prefix16
+      18│prefix17  ┃      18│prefix17
+      19│prefix18  ┃      19│prefix18
+      20│prefix19  ┃      20│prefix19
+-     21│a_zulu    ┃+     21│a_p2
+      22│middle00  ┃      22│middle00
+      23│middle01  ┃      23│middle01
+      24│middle02  ┃      24│middle02
+      25│middle03  ┃      25│middle03
+      26│middle04  ┃      26│middle04
+      27│middle05  ┃      27│middle05
+-     28│g_p1      ┃+     28│g_p2_one
+        │          ┃+     29│g_p2_two
+        │          ┃+     30│g_p2_three
+      29│bridge0   ┃      31│bridge0
+      30│bridge1   ┃      32│bridge1
+      31│bridge2   ┃      33│bridge2
+      32│bridge3   ┃      34│bridge3
+-     33│c_zulu    ┃+     35│c_p2_one
+        │          ┃+     36│c_p2_two
+      34│suffix00  ┃      37│suffix00
+      35│suffix01  ┃      38│suffix01
+      36│suffix02  ┃      39│suffix02
+      37│suffix03  ┃      40│suffix03
+      38│suffix04  ┃      41│suffix04
+      39│suffix05  ┃      42│suffix05
+      40│suffix06  ┃      43│suffix06

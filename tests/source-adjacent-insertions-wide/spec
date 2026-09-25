@@ -1,0 +1,5 @@
+# A shifted unquoted insertion gap remains intact with wider requested output
+# context.
+bin: DIFFOFDIFFS
+args: -U12 patch1 patch2
+exit: 0

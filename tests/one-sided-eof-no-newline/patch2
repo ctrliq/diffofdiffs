@@ -1,0 +1,18 @@
+--- a/f
++++ b/f
+@@ -18,11 +18,11 @@
+ prefix17
+ prefix18
+ prefix19
+-g_old
++g_p2
+ middle00
+ middle01
+ middle02
+ middle03
+ middle04
+ middle05
+-a_old
+\ No newline at end of file
++a_p2
+\ No newline at end of file

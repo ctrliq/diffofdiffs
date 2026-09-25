@@ -1,0 +1,14 @@
+--- a/f
++++ b/f
+@@ -8,1 +8,1 @@
+-alpha
++ALPHA
+@@ -13,1 +13,1 @@
+-beta
++BETA
+@@ -26,1 +26,1 @@
+-delta
++DELTA
+@@ -27,1 +27,1 @@
+-epsilon
++EPSILON

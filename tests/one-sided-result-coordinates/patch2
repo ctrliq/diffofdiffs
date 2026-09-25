@@ -1,0 +1,14 @@
+--- a/f
++++ b/f
+@@ -20,3 +20,5 @@
+ prefix19
+-g_old
++g_p2_one
++g_p2_two
++g_p2_three
+ middle00
+@@ -27,3 +29,3 @@
+ middle05
+-a_old
++a_p2
+ suffix00

@@ -1,0 +1,5 @@
+# Adjacent deletions remain separate original changes even when their result
+# gap is shared.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0
