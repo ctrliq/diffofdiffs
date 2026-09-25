@@ -1,0 +1,4 @@
+# A parentless revision derives against the empty tree, and the identity
+# over that creation-shaped document stays silent.
+bin: DIFFOFDIFFS
+args: --git-tree=repo root root

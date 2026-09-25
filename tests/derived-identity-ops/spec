@@ -1,0 +1,7 @@
+# An assembler-derived document fed to the tool as both operands: the ordinary
+# create, delete, and modify blocks travel the normal intake (validation, the
+# reader, the engine) and the identity run stays silent with a zero exit, the
+# ruled no-differences interface.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

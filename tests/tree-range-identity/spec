@@ -1,0 +1,4 @@
+# In git tree mode, bp..merge and merge name the same change, since merge's
+# first parent is bp, so the report must be empty.
+bin: DIFFOFDIFFS
+args: --git-tree=repo bp..merge merge

@@ -1,0 +1,13 @@
+diff --git a/t b/t
+deleted file mode 100644
+--- a/t
++++ /dev/null
+@@ -1 +0,0 @@
+-data
+diff --git a/t b/t
+new file mode 120000
+--- /dev/null
++++ b/t
+@@ -0,0 +1 @@
++data
+\ No newline at end of file

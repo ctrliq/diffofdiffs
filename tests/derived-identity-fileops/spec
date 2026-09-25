@@ -1,0 +1,7 @@
+# The hunkless fileop-only blocks the assembler derives (a mode flip, an empty
+# creation, an empty deletion) each complete under the intake's completeness
+# rule, the flip by its mode pair and the empty fileops by their full-width
+# index lines, and the identity run over them stays silent with a zero exit.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

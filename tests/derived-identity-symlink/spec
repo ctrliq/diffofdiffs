@@ -1,0 +1,6 @@
+# The derived symlink document, its every content row carrying the no-newline
+# marker, travels the normal intake as both operands and the identity run
+# stays silent with a zero exit.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

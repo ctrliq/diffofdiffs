@@ -1,0 +1,6 @@
+# The derived type-change document places two blocks at one path, the delete
+# before the create; the pairing walks read both without mispairing and the
+# identity run stays silent with a zero exit.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

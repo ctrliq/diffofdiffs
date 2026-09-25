@@ -1,0 +1,5 @@
+# In git tree mode, both operands name empty, a commit that changes nothing, so
+# neither holds a patch. The run must print nothing at all, not even the warning
+# that an operand holds no patch.
+bin: DIFFOFDIFFS
+args: --git-tree=repo empty empty

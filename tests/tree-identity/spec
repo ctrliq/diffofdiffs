@@ -1,0 +1,4 @@
+# In git tree mode, both operands name the same commit, up, so the report must
+# be empty.
+bin: DIFFOFDIFFS
+args: --git-tree=repo up up

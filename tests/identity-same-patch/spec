@@ -1,0 +1,7 @@
+# A patch compared against itself holds no differences, so a healthy run
+# says nothing at all: no banner, no section, not one byte on either
+# stream. The operand spans two files and three hunks so the pairing and
+# emit layers all run before agreeing to stay silent.
+bin: DIFFOFDIFFS
+args: p.patch p.patch
+exit: 0

@@ -1,0 +1,22 @@
+--- a/lib/alpha.c
++++ b/lib/alpha.c
+@@ -1,5 +1,6 @@
+ int a;
+ int b;
++int b2;
+ int c;
+ int d;
+ int e;
+@@ -20,4 +21,3 @@
+ x();
+-y();
+ z();
+ w();
+--- a/lib/beta.c
++++ b/lib/beta.c
+@@ -3,4 +3,4 @@
+ f();
+-g(1);
++g(2);
+ h();
+ i();
