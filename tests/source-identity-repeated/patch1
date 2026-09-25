@@ -1,0 +1,44 @@
+--- a/f
++++ b/f
+@@ -1,40 +1,40 @@
+ pad01
+ pad02
+ pad03
+ pad04
+ pad05
+ pad06
+ pad07
+ pad08
+ pad09
+ pad10
+ pad11
+ pad12
+ pad13
+ pad14
+ pad15
+ pad16
+ pad17
+-alpha
++beta
+ pad19
+ pad20
+ pad21
+ pad22
+ pad23
+ pad24
+ pad25
+ pad26
+ pad27
+ alpha
+ pad19
+ pad30
+ pad31
+ pad32
+ pad33
+ pad34
+ pad35
+ pad36
+ pad37
+ pad38
+ pad39
+ pad40

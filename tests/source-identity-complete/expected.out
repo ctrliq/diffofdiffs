@@ -1,0 +1,62 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Patch 1: patch1  ┃  Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the
+source lines quoted in the patches.
+
+═══════════════════════════════════════
+*    DELTA DIFFERENCES                *
+═══════════════════════════════════════
+Signs mark edits made by only that
+patch. A sign-less line with one number
+is an edit both patches make: a new
+number means both add it, an old number
+means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f         ┃ old new│f
+        │@@ pad01  ┃        │@@ pad01
+   1   1│pad01     ┃   1   1│pad01
+   2   2│pad02     ┃-  2    │pad02
+        │          ┃+      2│upstream02
+   3   3│pad03     ┃   3   3│pad03
+   4   4│pad04     ┃   4   4│pad04
+   5   5│pad05     ┃   5   5│pad05
+        │──────────╂────────┼──────────
+        │@@ pad15  ┃        │@@ pad17
+  15  15│pad15     ┃        │
+  16  16│pad16     ┃        │
+  17  17│pad17     ┃  17  17│pad17
+- 18    │alpha     ┃  18  18│alpha
++     18│beta      ┃        │
+  19  19│pad19     ┃  19  19│pad19
+  20  20│pad20     ┃- 20    │pad20
+        │          ┃+     20│omega
+  21  21│pad21     ┃  21  21│pad21
+  22  22│pad22     ┃  22  22│pad22
+  23  23│pad23     ┃  23  23│pad23
+
+═══════════════════════════════════════
+*    CONTEXT DIFFERENCES              *
+═══════════════════════════════════════
+Signs mark lines present in only one
+result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f         ┃     new│f
+        │@@ pad01  ┃        │@@ pad01
+       1│pad01     ┃       1│pad01
+-      2│pad02     ┃+      2│upstream02
+       3│pad03     ┃       3│pad03
+       4│pad04     ┃       4│pad04
+       5│pad05     ┃       5│pad05
+        │──────────╂────────┼──────────
+        │@@ pad17  ┃        │@@ pad17
+      17│pad17     ┃      17│pad17
+-     18│beta      ┃+     18│alpha
+      19│pad19     ┃      19│pad19
+-     20│pad20     ┃+     20│omega
+      21│pad21     ┃      21│pad21
+      22│pad22     ┃      22│pad22
+      23│pad23     ┃      23│pad23

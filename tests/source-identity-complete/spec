@@ -1,0 +1,11 @@
+# Patch1 and patch2 start from the same 40-line f. Patch1 changes alpha at line
+# 18 to beta in a hunk that quotes the whole file. Patch2 changes pad02 to
+# upstream02 and pad20 to omega, quoting alpha unchanged. With -U3, the report
+# must show each change on its own patch's side beside the other patch's
+# unchanged line, and a context section in which the results differ at lines 2,
+# 18, and 20. The source and result files hold f before and after each patch,
+# and the runner checks that each patch turns its source into its result with no
+# fuzz.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

@@ -1,0 +1,8 @@
+# Patch1 adds ROW_A after the gamma at line 13 of f and ROW_B after the gamma at
+# line 39. Patch2 adds INSERTED_BY_P1 where patch1 adds ROW_A. The report must
+# pair the two additions at line 14 and show ROW_B on patch1's side alone.
+# p1-source and p1-result hold f before and after patch1, and p2-source and
+# p2-result do the same for patch2: the runner checks that each patch turns its
+# source into its result and that each patch's quoted lines match those files.
+bin: DIFFOFDIFFS
+args: patch1 patch2

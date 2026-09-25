@@ -1,0 +1,6 @@
+# A unique retained source block identifies alpha beside pad19. Undo beta
+# while preserving the unresolved omega edit.
+# The recipe files are independent byte oracles.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

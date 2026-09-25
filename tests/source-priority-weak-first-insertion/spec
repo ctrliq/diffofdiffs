@@ -1,0 +1,5 @@
+# The shared source identifies ROW_A at the backport insertion gap.
+# ROW_B has weaker repeated context and remains an upstream-only edit.
+# Output width must not erase the context needed to distinguish them.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2

@@ -1,0 +1,11 @@
+# In git tree mode, bp and up edit the same parent version of f.c. bp removes
+# t04h at line 5 and changes t06c and t17e to T06Cx and T17Ex. up adds N01c
+# after line 1 and N18a after t17e, and changes t09c to T09Cx. The report must
+# show each commit's edits on its own side beside the other's unchanged lines,
+# and a context section in which the two tips differ at each of those places.
+# patch1 and patch2 hold the same edits as zero-context patches, and the source
+# and result files hold f.c before and after each; the runner checks that each
+# patch turns its source into its result with no fuzz.
+bin: DIFFOFDIFFS
+args: --git-tree=repo bp up
+exit: 0

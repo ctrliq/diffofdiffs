@@ -1,0 +1,18 @@
+--- a/f
++++ b/f
+@@ -11,6 +11,7 @@
+ zeta
+ eta
+ gamma
++ROW_B
+ gamma
+ delta
+ theta
+@@ -37,6 +38,7 @@
+ alpha
+ beta
+ gamma
++ROW_A
+ gamma
+ delta
+ epsilon

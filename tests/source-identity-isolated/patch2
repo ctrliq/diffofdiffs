@@ -1,0 +1,18 @@
+--- a/f
++++ b/f
+@@ -1,5 +1,5 @@
+ pad01
+-pad02
++upstream02
+ pad03
+ pad04
+ pad05
+@@ -17,7 +17,7 @@
+ ZZZ17
+ alpha
+ ZZZ19
+-ZZZ20
++omega
+ ZZZ21
+ ZZZ22
+ ZZZ23

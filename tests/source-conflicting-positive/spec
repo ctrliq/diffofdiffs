@@ -1,0 +1,9 @@
+# Patch2 contradicts itself: its first hunk changes line 7 of g from pad07 to
+# pad07_p2, and its second hunk quotes line 7 as ZZZ07 and changes ZZZ12 to
+# omega. Patch1 quotes pad07 at line 7 and changes alpha at line 10 to beta. The
+# report must print the note about overlapping source quotations on both sides
+# and show every edit on its own patch's side, with no lines paired across the
+# two patches.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

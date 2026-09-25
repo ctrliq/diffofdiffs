@@ -1,0 +1,80 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Commit 1: bp ┃ Commit 2: up
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use
+complete files before and
+after each commit.
+
+═════════════════════════════
+*    DELTA DIFFERENCES      *
+═════════════════════════════
+Signs mark edits made by only
+that patch. A sign-less line
+with one number is an edit
+both patches make: a new
+number means both add it, an
+old number means both remove
+it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f.c  ┃ old new│f.c
+        │@@   ┃        │@@
+        │     ┃   1   1│t00d
+        │     ┃+      2│N01c
+   2   2│t01c ┃   2   3│t01c
+   3   3│t02g ┃   3   4│t02g
+   4   4│t03c ┃   4   5│t03c
+-  5    │t04h ┃   5   6│t04h
+   6   5│t05f ┃   6   7│t05f
+-  7    │t06c ┃   7   8│t06c
++      6│T06Cx┃        │
+   8   7│t07c ┃   8   9│t07c
+   9   8│t08d ┃   9  10│t08d
+  10   9│t09c ┃- 10    │t09c
+        │     ┃+     11│T09Cx
+  11  10│t10f ┃  11  12│t10f
+  12  11│t11c ┃  12  13│t11c
+  13  12│t12b ┃  13  14│t12b
+        │─────╂────────┼─────
+        │@@   ┃        │@@
+  15  14│t14c ┃  15  16│t14c
+  16  15│t15d ┃  16  17│t15d
+  17  16│t16b ┃  17  18│t16b
+- 18    │t17e ┃  18  19│t17e
++     17│T17Ex┃+     20│N18a
+  19  18│t18a ┃  19  21│t18a
+  20  19│t19h ┃  20  22│t19h
+  21  20│t20f ┃  21  23│t20f
+
+═════════════════════════════
+*    CONTEXT DIFFERENCES    *
+═════════════════════════════
+Signs mark lines present in
+only one result: - patch1, +
+patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f.c  ┃     new│f.c
+        │@@   ┃        │@@
+       3│t02g ┃        │
+       4│t03c ┃       5│t03c
+        │     ┃+      6│t04h
+       5│t05f ┃       7│t05f
+-      6│T06Cx┃+      8│t06c
+       7│t07c ┃       9│t07c
+       8│t08d ┃      10│t08d
+-      9│t09c ┃+     11│T09Cx
+      10│t10f ┃      12│t10f
+      11│t11c ┃      13│t11c
+      12│t12b ┃      14│t12b
+        │─────╂────────┼─────
+        │@@   ┃        │@@
+      14│t14c ┃      16│t14c
+      15│t15d ┃      17│t15d
+      16│t16b ┃      18│t16b
+-     17│T17Ex┃+     19│t17e
+        │     ┃+     20│N18a
+      18│t18a ┃      21│t18a
+      19│t19h ┃      22│t19h
+      20│t20f ┃      23│t20f

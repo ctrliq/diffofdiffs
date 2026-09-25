@@ -1,0 +1,10 @@
+--- a/f
++++ b/f
+@@ -11,6 +11,7 @@
+ alpha
+ beta
+ gamma
++INSERTED_BY_P1
+ gamma
+ delta
+ epsilon

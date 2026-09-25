@@ -1,0 +1,5 @@
+# Keep identical added text visible when source places it at different
+# locations. Patch2 adds ROW_A at patch1's original insertion site.
+bin: DIFFOFDIFFS
+args: -U12 patch1 patch2
+exit: 0

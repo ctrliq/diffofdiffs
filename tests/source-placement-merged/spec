@@ -1,0 +1,14 @@
+# Patch1 and patch2 start from versions of unit.c that differ near the end of
+# the quoted text: patch2's has thirteen lines, upstream_prefix0 to
+# upstream_prefix12, after pad670 that patch1's lacks, and its
+# libeth_cacheline_set_assert() for struct idpf_tx_queue starts from 112 where
+# patch1's starts from 88. In wide hunks, patch1 changes pad600 to
+# independent_p1 and 88 to 96, and patch2 changes pad630 to native_p2 and 112 to
+# 120. The report must show each pad change on its own patch's side beside the
+# other patch's unchanged line, the two size changes side by side at lines 684
+# and 697, and a context section that includes the differences at lines 600 and
+# 630 and patch2's thirteen extra lines. The source and result files hold unit.c
+# before and after each patch, and the runner checks that each patch turns its
+# source into its result with no fuzz.
+bin: DIFFOFDIFFS
+args: patch1 patch2

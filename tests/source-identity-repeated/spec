@@ -1,0 +1,6 @@
+# Two copies of alpha and pad19 leave the source identity ambiguous. Keep beta
+# and disclose the unresolved upstream edit.
+# The recipe files are independent byte oracles.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

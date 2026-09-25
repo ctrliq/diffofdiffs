@@ -1,0 +1,6 @@
+# The same supported source block remains identifiable after an upstream
+# insertion moves its coordinates by thirteen rows.
+# The recipe files are independent byte oracles.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

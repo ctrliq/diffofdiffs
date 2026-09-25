@@ -1,0 +1,35 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Patch 1: patch1    ┃    Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source
+lines quoted in the patches.
+
+═══════════════════════════════════════════════
+*    DELTA DIFFERENCES                        *
+═══════════════════════════════════════════════
+Signs mark edits made by only that patch. A
+sign-less line with one number is an edit both
+patches make: a new number means both add it,
+an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f             ┃ old new│f
+        │@@            ┃        │@@ zeta
+        │              ┃  11  11│zeta
+        │              ┃  12  12│eta
+        │              ┃  13  13│gamma
+        │              ┃- 14    │gamma
+        │              ┃+     14│ROW_B
+        │              ┃  15  15│delta
+        │              ┃  16  16│theta
+        │              ┃  17  17│separator00
+        │──────────────╂────────┼──────────────
+        │@@ alpha      ┃        │@@ alpha
+  11  11│alpha         ┃  37  37│alpha
+  12  12│beta          ┃  38  38│beta
+  13  13│gamma         ┃  39  39│gamma
++     14│INSERTED_BY_P1┃+     40│ROW_A
+  14  15│gamma         ┃  40  41│gamma
+  15  16│delta         ┃  41  42│delta
+  16  17│epsilon       ┃  42  43│epsilon

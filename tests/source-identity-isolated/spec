@@ -1,0 +1,10 @@
+# source-identity-complete, except that patch2's version of f holds ZZZ11 to
+# ZZZ40 where patch1's holds pad11 to pad40, apart from alpha at line 18, and
+# patch2 changes ZZZ20 to omega. The report must show each change on its own
+# patch's side. Since alpha is the only line the two versions share there, its
+# context section must not compare lines 17 to 23 and shows only line 2. The
+# source and result files hold f before and after each patch, and the runner
+# checks that each patch turns its source into its result with no fuzz.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0
