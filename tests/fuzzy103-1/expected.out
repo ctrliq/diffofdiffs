@@ -1,0 +1,32 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━
+[1mPatch 1: pat[0m┃[1mPatch 2: pat[0m
+    [1mch1[0m     ┃    [1mch2[0m
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons
+use only the source lines
+quoted in the patches.
+
+[1m═════════════════════════[0m
+[1m*    DELTA DIFFERENCES  *[0m
+[1m═════════════════════════[0m
+Signs mark edits made by
+only that patch. A
+sign-less line with one
+number is an edit both
+patches make: a new
+number means both add it,
+an old number means both
+remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+[1m old new│foo[0m┃[1m old new│foo[0m
+[1m        │.c[0m ┃[1m        │.c[0m
+[36m        │@@[0m ┃[36m        │@@[0m
+   8   8│L08┃   8   8│L08
+   9   9│L09┃   9   9│L09
+  10    │L10┃  10    │L10
+[32m+     10│ONE[0m┃[32m+     10│TWO[0m
+  11  11│L11┃  11  11│L11
+  12  12│L12┃  12  12│L12
+  13  13│L13┃  13  13│L13

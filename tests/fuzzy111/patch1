@@ -1,0 +1,15 @@
+--- file
++++ file
+@@ -1,10 +1,7 @@
+ pad1
+ pad2
+ ctxA
+-rem1
+-rem2
+-rem3
+-rem4
+-rem5
++new1
+ mid
++new2
+ ctxB

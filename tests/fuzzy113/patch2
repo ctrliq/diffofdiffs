@@ -1,0 +1,11 @@
+--- file
++++ file
+@@ -3,7 +3,3 @@
+ ctxA
+-rem1
+-rem2
+-XXX
+-rem4
+-rem5
++p2new1
+ mid

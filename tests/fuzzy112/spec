@@ -1,0 +1,6 @@
+# Shared additions on both sides of the changed middle identify the real
+# result differences, including the retained middle row. Keep the actual row
+# order.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

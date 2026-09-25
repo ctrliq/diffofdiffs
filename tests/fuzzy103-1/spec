@@ -1,0 +1,7 @@
+# fuzzy103-2's comparison with --color=always. Redirected output is normally
+# plain, but the forced option colors it anyway: bold patch labels, banner and
+# file headers, green additions, and cyan hunk markers. Without the escapes, the
+# report matches fuzzy103-2 byte for byte.
+bin: DIFFOFDIFFS
+args: --color=always patch1 patch2
+exit: 0

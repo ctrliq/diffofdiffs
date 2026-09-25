@@ -1,0 +1,6 @@
+# The shared result identifies the differing new1/new2 additions even though
+# the patches remove different original blocks. Keep both the result and
+# removed-source differences.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
