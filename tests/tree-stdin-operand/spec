@@ -1,0 +1,5 @@
+# A "-" revision operand dies eagerly under --git-tree, since stdin names
+# no commit.
+bin: DIFFOFDIFFS
+args: --git-tree=repo - up
+exit: 1

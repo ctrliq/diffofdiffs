@@ -1,0 +1,6 @@
+# A malformed or out-of-range -U value is a usage error from the strict
+# parse, never the width floor's diagnostic: -1 wraps past the count
+# cap and gets the usage text, keeping the two refusals distinct.
+bin: DIFFOFDIFFS
+args: -U -1 patch1 patch2
+exit: 1

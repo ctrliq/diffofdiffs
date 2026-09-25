@@ -1,0 +1,4 @@
+# Two context lines are valid, but both patch operands are still required.
+bin: DIFFOFDIFFS
+args: -U 2
+exit: 1

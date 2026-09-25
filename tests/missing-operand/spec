@@ -1,0 +1,6 @@
+# A nonexistent operand path must die on the open with the glibc errno
+# text at exit 1 and write nothing to stdout. patch2 is present and
+# readable, so the failure belongs to the first operand alone.
+bin: DIFFOFDIFFS
+args: nope patch2
+exit: 1

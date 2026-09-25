@@ -1,0 +1,5 @@
+# Body rows that look like file headers keep their change colors.
+# A second file proves that body classification ends at the declared counts.
+bin: DIFFOFDIFFS
+args: --color=always patch1 patch2
+exit: 0

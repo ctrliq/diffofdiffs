@@ -1,0 +1,6 @@
+# Two "-" operands would need two different streams from one standard
+# input, so the run must refuse up front with its one-line diagnostic at
+# exit 1 and write nothing to stdout.
+bin: DIFFOFDIFFS
+args: - -
+exit: 1

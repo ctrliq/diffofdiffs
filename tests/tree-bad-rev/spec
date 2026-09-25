@@ -1,0 +1,5 @@
+# An unresolvable revision dies eagerly with an empty stdout, the eager
+# exit contract.
+bin: DIFFOFDIFFS
+args: --git-tree=repo nosuch up
+exit: 1

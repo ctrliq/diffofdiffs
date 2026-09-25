@@ -1,0 +1,5 @@
+# A BASE that isn't a parent of TIP dies eagerly, naming both revisions,
+# with nothing on stdout.
+bin: DIFFOFDIFFS
+args: --git-tree=repo root..merge merge
+exit: 1

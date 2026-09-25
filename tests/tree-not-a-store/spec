@@ -1,0 +1,5 @@
+# A directory holding no git store dies at open, naming the operand as
+# typed.
+bin: DIFFOFDIFFS
+args: --git-tree=repo up up
+exit: 1

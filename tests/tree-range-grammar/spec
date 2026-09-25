@@ -1,0 +1,5 @@
+# The three-dot form isn't range grammar here: one ".." with a name on each
+# side, and anything else dies on the one range-grammar message.
+bin: DIFFOFDIFFS
+args: --git-tree=repo root...up up
+exit: 1

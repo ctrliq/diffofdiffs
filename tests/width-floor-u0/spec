@@ -1,0 +1,5 @@
+# -U0 requests no surrounding context. The tool accepts it as given rather than
+# raising it to a minimum width.
+bin: DIFFOFDIFFS
+args: -U0 patch1 patch2
+exit: 0

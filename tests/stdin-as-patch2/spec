@@ -1,0 +1,7 @@
+# stdin-as-patch1 with the "-" in patch2's place, so the piped bytes must be
+# read as patch2. The two patches produce different reports when swapped, so
+# reading the pipe as the wrong operand would show.
+bin: DIFFOFDIFFS
+args: patch1 -
+stdin: patch2
+exit: 0

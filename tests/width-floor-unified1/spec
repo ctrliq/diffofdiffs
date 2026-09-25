@@ -1,0 +1,4 @@
+# The long option accepts one context line before and after a difference.
+bin: DIFFOFDIFFS
+args: --unified=1 patch1 patch2
+exit: 0

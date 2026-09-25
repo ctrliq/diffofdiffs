@@ -1,0 +1,7 @@
+# A "-" operand reads the patch from standard input. The report must match a
+# file-backed read except that its title omits a filename. Piped input has no
+# size hint, so this also exercises buffer growth while reading.
+bin: DIFFOFDIFFS
+args: - patch2
+stdin: patch1
+exit: 0

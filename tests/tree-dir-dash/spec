@@ -1,0 +1,4 @@
+# --git-tree=- dies eagerly: the store is a directory, never stdin.
+bin: DIFFOFDIFFS
+args: --git-tree=- up up
+exit: 1
