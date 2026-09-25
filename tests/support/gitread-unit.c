@@ -1318,6 +1318,293 @@ static void case_treediff_dir_boundary(void)
 	diff_refs("s", "o", "n");
 }
 
+/*
+ * Diffs old_name's commit against new_name's in the store at dir, renders the
+ * map through the assembler at the given context width and prints the document
+ * bytes, which the fixture pins as the golden patch.
+ */
+static void assemble_refs(const char *dir, const char *old_name,
+			  const char *new_name, unsigned int context)
+{
+	struct gitread_oid old_id, new_id;
+	struct treediff_map map;
+	struct iomem_buf doc;
+	struct gitread *gr;
+
+	gitread_open(&gr, dir);
+	gitread_resolve_commit(gr, old_name, &old_id);
+	gitread_resolve_commit(gr, new_name, &new_id);
+	treediff_build(gr, &old_id, &new_id, &map);
+	assemble_patch(gr, &map, context, &doc);
+	fwrite(doc.base, 1, doc.len, stdout);
+	iomem_buf_free(&doc);
+	treediff_map_free(&map);
+	gitread_close(&gr);
+}
+
+/*
+ * The three ordinary operations rendered as one document: a content change, a
+ * creation, and a deletion, with an unchanged file proving unchanged paths
+ * yield no block. The golden pins the header forms, the /dev/null halves, and
+ * the path-ordered file blocks.
+ */
+static void case_assemble_ops(void)
+{
+	git_oid a1, a2, keep, gone, fresh;
+	const struct tree_spec old[] = { { "a", GIT_FILEMODE_BLOB, &a1 },
+					 { "d", GIT_FILEMODE_BLOB, &gone },
+					 { "keep", GIT_FILEMODE_BLOB, &keep } };
+	const struct tree_spec new[] = { { "a", GIT_FILEMODE_BLOB, &a2 },
+					 { "c", GIT_FILEMODE_BLOB, &fresh },
+					 { "keep", GIT_FILEMODE_BLOB, &keep } };
+	git_repository *repo;
+
+	repo = init_repo("s");
+	put_blob(repo, "one\ntwo\nthree\nfour\n", 19, &a1);
+	put_blob(repo, "one\nTWO\nthree\nfour\n", 19, &a2);
+	put_blob(repo, "keep\n", 5, &keep);
+	put_blob(repo, "gone\n", 5, &gone);
+	put_blob(repo, "fresh\n", 6, &fresh);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	assemble_refs("s", "o", "n", 3);
+}
+
+/* A mode flip over one unchanged blob: the hunkless fileop-only block */
+static void case_assemble_mode_only(void)
+{
+	git_repository *repo;
+	git_oid flip;
+	const struct tree_spec old[] = { { "m", GIT_FILEMODE_BLOB, &flip } };
+	const struct tree_spec new[] = { { "m", GIT_FILEMODE_BLOB_EXECUTABLE,
+					   &flip } };
+
+	repo = init_repo("s");
+	put_blob(repo, "flip\n", 5, &flip);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	assemble_refs("s", "o", "n", 3);
+}
+
+/*
+ * A mode flip landing together with a content change carries the old/new mode
+ * pair above the header lines, and a creation born executable carries its own
+ * mode in the creation form.
+ */
+static void case_assemble_mode_content(void)
+{
+	git_repository *repo;
+	git_oid mc1, mc2, x;
+	const struct tree_spec old[] = { { "mc", GIT_FILEMODE_BLOB, &mc1 } };
+	const struct tree_spec new[] = {
+		{ "mc", GIT_FILEMODE_BLOB_EXECUTABLE, &mc2 },
+		{ "x", GIT_FILEMODE_BLOB_EXECUTABLE, &x }
+	};
+
+	repo = init_repo("s");
+	put_blob(repo, "run\nme\n", 7, &mc1);
+	put_blob(repo, "run\nME\n", 7, &mc2);
+	put_blob(repo, "#!/bin/sh\n", 10, &x);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	assemble_refs("s", "o", "n", 3);
+}
+
+/*
+ * Creating and deleting empty files: both sides of the content diff are empty,
+ * so each record ends hunk-less, its mode word completed by the full-width
+ * index line that keeps the block appliable under the intake's completeness
+ * rule.
+ */
+static void case_assemble_empty_files(void)
+{
+	git_repository *repo;
+	git_oid empty;
+	const struct tree_spec old[] = { { "g", GIT_FILEMODE_BLOB, &empty } };
+	const struct tree_spec new[] = { { "e", GIT_FILEMODE_BLOB, &empty } };
+
+	repo = init_repo("s");
+	put_blob(repo, "", 0, &empty);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	assemble_refs("s", "o", "n", 3);
+}
+
+/*
+ * Symlinks diff as their target-path bytes: a creation and a retarget, each
+ * hunk row carrying the no-newline marker, since a symlink blob never ends in a
+ * line feed.
+ */
+static void case_assemble_symlink(void)
+{
+	git_repository *repo;
+	git_oid t1, t2, t3;
+	const struct tree_spec old[] = { { "lo", GIT_FILEMODE_LINK, &t1 } };
+	const struct tree_spec new[] = { { "ln", GIT_FILEMODE_LINK, &t3 },
+					 { "lo", GIT_FILEMODE_LINK, &t2 } };
+
+	repo = init_repo("s");
+	put_blob(repo, "old", 3, &t1);
+	put_blob(repo, "new", 3, &t2);
+	put_blob(repo, "target", 6, &t3);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	assemble_refs("s", "o", "n", 3);
+}
+
+/*
+ * Gitlinks render as the Subproject-commit scalar line git prints for a
+ * submodule, spelled from the map's object id alone: a creation and a pointer
+ * bump. The referenced commits exist here; missing submodule objects are
+ * exercised separately by the complete-tree checks.
+ */
+static void case_assemble_gitlink(void)
+{
+	git_oid t, tg, g1, g2;
+	const struct tree_spec old[] = { { "sub2", GIT_FILEMODE_COMMIT, &g1 } };
+	const struct tree_spec new[] = { { "sub", GIT_FILEMODE_COMMIT, &g1 },
+					 { "sub2", GIT_FILEMODE_COMMIT, &g2 } };
+	git_repository *repo;
+
+	repo = init_repo("s");
+	put_blob(repo, "t\n", 2, &t);
+	put_tree1(repo, "f", GIT_FILEMODE_BLOB, &t, &tg);
+	put_commit(repo, NULL, &tg, NULL, "G1", &g1);
+	put_commit(repo, NULL, &tg, NULL, "G2", &g2);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	assemble_refs("s", "o", "n", 3);
+}
+
+/*
+ * A kind change at one path renders as its delete block followed by its create
+ * block, the ruled delete-plus-create form, each block carrying its own side's
+ * mode and content.
+ */
+static void case_assemble_typechange(void)
+{
+	git_repository *repo;
+	git_oid reg, lnk;
+	const struct tree_spec old[] = { { "t", GIT_FILEMODE_BLOB, &reg } };
+	const struct tree_spec new[] = { { "t", GIT_FILEMODE_LINK, &lnk } };
+
+	repo = init_repo("s");
+	put_blob(repo, "data\n", 5, &reg);
+	put_blob(repo, "data", 4, &lnk);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	assemble_refs("s", "o", "n", 3);
+}
+
+/*
+ * A moved file and a copied file render with no rename or copy headers: the
+ * move is its delete block and its create block with the content spelled in
+ * full both times, and the copy is a plain creation beside its surviving
+ * source.
+ */
+static void case_assemble_rename_copy(void)
+{
+	git_repository *repo;
+	git_oid body, same;
+	const struct tree_spec old[] = { { "from", GIT_FILEMODE_BLOB, &body },
+					 { "srcf", GIT_FILEMODE_BLOB, &same } };
+	const struct tree_spec new[] = { { "copy", GIT_FILEMODE_BLOB, &same },
+					 { "srcf", GIT_FILEMODE_BLOB, &same },
+					 { "to", GIT_FILEMODE_BLOB, &body } };
+
+	repo = init_repo("s");
+	put_blob(repo, "body\n", 5, &body);
+	put_blob(repo, "same\n", 5, &same);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	assemble_refs("s", "o", "n", 3);
+}
+
+/*
+ * The context width threads through to the engine: the same change prints one
+ * context line per side instead of the default three.
+ */
+static void case_assemble_width(void)
+{
+	git_repository *repo;
+	git_oid w1, w2;
+	const struct tree_spec old[] = { { "w", GIT_FILEMODE_BLOB, &w1 } };
+	const struct tree_spec new[] = { { "w", GIT_FILEMODE_BLOB, &w2 } };
+
+	repo = init_repo("s");
+	put_blob(repo, "l1\nl2\nl3\nl4\nl5\nl6\nl7\nl8\nl9\n", 27, &w1);
+	put_blob(repo, "l1\nl2\nl3\nl4\nL5\nl6\nl7\nl8\nl9\n", 27, &w2);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	assemble_refs("s", "o", "n", 1);
+}
+
+/*
+ * A final line gaining its line feed: the old side's short last line makes the
+ * engine print the no-newline marker under the removed row and none under the
+ * added one.
+ */
+static void case_assemble_nonewline(void)
+{
+	git_repository *repo;
+	git_oid n1, n2;
+	const struct tree_spec old[] = { { "n", GIT_FILEMODE_BLOB, &n1 } };
+	const struct tree_spec new[] = { { "n", GIT_FILEMODE_BLOB, &n2 } };
+
+	repo = init_repo("s");
+	put_blob(repo, "alpha\nbeta", 10, &n1);
+	put_blob(repo, "alpha\nbeta\n", 11, &n2);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	assemble_refs("s", "o", "n", 3);
+}
+
+/* Identical trees yield the empty document, the identity patch */
+static void case_assemble_identical(void)
+{
+	git_repository *repo;
+	git_oid k;
+	const struct tree_spec ents[] = { { "k", GIT_FILEMODE_BLOB, &k } };
+
+	repo = init_repo("s");
+	put_blob(repo, "k\n", 2, &k);
+
+	put_pair(repo, ents, ARRAY_SIZE(ents), ents, ARRAY_SIZE(ents));
+	git_repository_free(repo);
+	assemble_refs("s", "o", "n", 3);
+}
+
+/*
+ * A blob holding a NUL byte is binary content no unified diff can carry, so the
+ * assembler refuses it loudly instead of feeding it to the engine.
+ */
+static void case_assemble_binary(void)
+{
+	git_repository *repo;
+	git_oid b1, b2;
+	const struct tree_spec old[] = { { "b", GIT_FILEMODE_BLOB, &b1 } };
+	const struct tree_spec new[] = { { "b", GIT_FILEMODE_BLOB, &b2 } };
+
+	quiet_leak_checker();
+	repo = init_repo("s");
+	put_blob(repo, "bin\0ary\n", 8, &b1);
+	put_blob(repo, "text\n", 5, &b2);
+
+	put_pair(repo, old, ARRAY_SIZE(old), new, ARRAY_SIZE(new));
+	git_repository_free(repo);
+	assemble_refs("s", "o", "n", 3);
+}
+
 /* Variant selector for the tree4 family's alpha document */
 enum tree4_alpha {
 	TREE4_ALPHA_BASE,
@@ -1452,6 +1739,30 @@ int main(int argc, char **argv)
 		case_treediff_ghost_subtree();
 	} else if (!strcmp(argv[1], "treediff-dir-boundary")) {
 		case_treediff_dir_boundary();
+	} else if (!strcmp(argv[1], "assemble-ops")) {
+		case_assemble_ops();
+	} else if (!strcmp(argv[1], "assemble-mode-only")) {
+		case_assemble_mode_only();
+	} else if (!strcmp(argv[1], "assemble-mode-content")) {
+		case_assemble_mode_content();
+	} else if (!strcmp(argv[1], "assemble-empty-files")) {
+		case_assemble_empty_files();
+	} else if (!strcmp(argv[1], "assemble-symlink")) {
+		case_assemble_symlink();
+	} else if (!strcmp(argv[1], "assemble-gitlink")) {
+		case_assemble_gitlink();
+	} else if (!strcmp(argv[1], "assemble-typechange")) {
+		case_assemble_typechange();
+	} else if (!strcmp(argv[1], "assemble-rename-copy")) {
+		case_assemble_rename_copy();
+	} else if (!strcmp(argv[1], "assemble-width")) {
+		case_assemble_width();
+	} else if (!strcmp(argv[1], "assemble-nonewline")) {
+		case_assemble_nonewline();
+	} else if (!strcmp(argv[1], "assemble-identical")) {
+		case_assemble_identical();
+	} else if (!strcmp(argv[1], "assemble-binary")) {
+		case_assemble_binary();
 	} else {
 		fprintf(stderr, "unknown case: %s\n", argv[1]);
 		return 2;
