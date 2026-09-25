@@ -1,0 +1,7 @@
+# Patch1's authored blank sits behind the context line mid, one body step away
+# from its added run, while patch2's context blank sits directly beside its
+# copy. Body adjacency fails on the delta side, so the sweep refuses and the "-"
+# blank row keeps its claim.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,9 @@
+--- a/f.c
++++ b/f.c
+@@ -1,4 +1,6 @@
+ alpha
+ 
++tx
++
+ idpf
+ tail

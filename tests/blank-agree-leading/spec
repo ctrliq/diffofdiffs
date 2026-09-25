@@ -1,0 +1,6 @@
+# The mirror of tests/blank-agree-trailing: patch1's authored blank sits above
+# the shared run and patch2 quotes its context blank right above its own copy,
+# so the leading-edge sweep covers it and the run prints nothing.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

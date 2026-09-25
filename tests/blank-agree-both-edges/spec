@@ -1,0 +1,6 @@
+# Patch1 authors a blank on each side of the shared line and patch2 quotes a
+# context blank on each side of its copy, so one covering match walks both edges
+# and the run prints nothing.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,24 @@
+diff --git a/net/ipv4/tcp.c b/net/ipv4/tcp.c
+index 2ae2458f8d70f..823d5dfc8a24c 100644
+--- a/net/ipv4/tcp.c
++++ b/net/ipv4/tcp.c
+@@ -2191,6 +2191,7 @@ int tcp_disconnect(struct sock *sk, int flags)
+ 	struct tcp_sock *tp = tcp_sk(sk);
+ 	int err = 0;
+ 	int old_state = sk->sk_state;
++	struct request_sock *req;
+ 
+ 	if (old_state != TCP_CLOSE)
+ 		tcp_set_state(sk, TCP_CLOSE);
+@@ -2245,6 +2246,11 @@ int tcp_disconnect(struct sock *sk, int flags)
+ 	dst_release(sk->sk_rx_dst);
+ 	sk->sk_rx_dst = NULL;
+ 
++	req = rcu_dereference_protected(tp->fastopen_rsk,
++					lockdep_sock_is_held(sk));
++	if (req)
++		reqsk_fastopen_remove(sk, req, false);
++
+ 	WARN_ON(inet->inet_num && !icsk->icsk_bind_hash);
+ 
+ 	sk->sk_error_report(sk);

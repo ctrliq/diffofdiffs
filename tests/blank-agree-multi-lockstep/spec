@@ -1,0 +1,9 @@
+# Patch1 adds tx and two blank lines between alpha and omega in f.c. Patch2's
+# file already has rx1, rx2, and rx3 after alpha and two blank lines before
+# omega, and patch2 adds tx between rx3 and those blanks. The report must show
+# tx as an addition both make and patch1's two blank lines on its side alone
+# beside patch2's two unchanged ones, and the context section must show rx1,
+# rx2, and rx3 as lines only patch2's result holds.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

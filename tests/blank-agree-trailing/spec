@@ -1,0 +1,10 @@
+# Both patches add tx to f.c. Patch1's file has alpha, a blank line, idpf, and
+# tail, and patch1 adds tx after the blank line with another blank line after
+# it. Patch2's file has rx between the blank line and idpf and a second blank
+# line below rx, and patch2 adds tx after rx. The report must show tx as an
+# addition both make and patch1's added blank line on its side alone beside
+# patch2's unchanged one, and the context section must show rx as a line only
+# patch2's result holds.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

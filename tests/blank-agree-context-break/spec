@@ -1,0 +1,5 @@
+# Different surrounding code does not hide the actual blank-row difference
+# inside corresponding added code.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

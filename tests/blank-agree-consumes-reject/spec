@@ -1,0 +1,11 @@
+# Both patches add #include <net/net_shaper.h> to include/net/mana/mana.h and
+# make four identical later changes. Patch1's file lacks the #include
+# <net/xdp.h> that patch2's file has after the blank line 6, so patch1 adds the
+# new include there followed by a blank line of its own, while patch2 adds it
+# right after <net/xdp.h>. The report must show the include as an addition both
+# make and patch1's added blank line on its side alone, leave out the four
+# identical changes, and the context section must show <net/xdp.h> as a line
+# only patch2's result holds.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

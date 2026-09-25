@@ -1,0 +1,5 @@
+# The retained CRLF row is not the backport's added LF blank. The added blank
+# remains a real difference, while the shared added code stays unchanged.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

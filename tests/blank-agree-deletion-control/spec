@@ -1,0 +1,5 @@
+# An unapplied source deletion cannot erase the backport's result. The output
+# preserves actual differences and discloses unresolved source.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

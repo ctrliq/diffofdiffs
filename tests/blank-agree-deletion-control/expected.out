@@ -1,0 +1,46 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                               Patch 1: patch1                               ┃                               Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                     *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number
+means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│net/ipv4/tcp.c                                                    ┃  old  new│net/ipv4/tcp.c
+          │@@ int tcp_disconnect(struct sock *sk, int flags)                 ┃          │@@ int tcp_disconnect(struct sock *sk, int flags)
+      2250│					lockdep_sock_is_held(sk));   ┃      3447│					lockdep_sock_is_held(sk));
+      2251│	if (req)                                                     ┃      3448│	if (req)
+      2252│		reqsk_fastopen_remove(sk, req, false);               ┃      3449│		reqsk_fastopen_remove(sk, req, false);
++     2253│                                                                  ┃          │
+ 2248 2254│	WARN_ON(inet->inet_num && !icsk->icsk_bind_hash);            ┃          │
+ 2249 2255│                                                                  ┃          │
+ 2250 2256│	sk->sk_error_report(sk);                                     ┃          │
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                               *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       new│net/ipv4/tcp.c                                                    ┃       new│net/ipv4/tcp.c
+          │@@ int tcp_disconnect(struct sock *sk, int flags)                 ┃          │@@ int tcp_disconnect(struct sock *sk, int flags)
+      2191│	struct tcp_sock *tp = tcp_sk(sk);                            ┃      3328│	struct tcp_sock *tp = tcp_sk(sk);
+-     2192│	int err = 0;                                                 ┃          │
+      2193│	int old_state = sk->sk_state;                                ┃      3329│	int old_state = sk->sk_state;
+      2194│	struct request_sock *req;                                    ┃      3330│	struct request_sock *req;
+          │                                                                  ┃+     3331│	u32 seq;
+      2195│                                                                  ┃      3332│
+      2196│	if (old_state != TCP_CLOSE)                                  ┃      3333│	if (old_state != TCP_CLOSE)
+          │──────────────────────────────────────────────────────────────────╂──────────┼──────────────────────────────────────────────────────────────────
+          │@@ int tcp_disconnect(struct sock *sk, int flags)                 ┃          │@@ int tcp_disconnect(struct sock *sk, int flags)
+      2248│                                                                  ┃      3443│
+          │                                                                  ┃+     3444│
+          │                                                                  ┃+     3445│	/* Clean up fastopen related fields */
+      2249│	req = rcu_dereference_protected(tp->fastopen_rsk,            ┃      3446│	req = rcu_dereference_protected(tp->fastopen_rsk,
+      2250│					lockdep_sock_is_held(sk));   ┃      3447│					lockdep_sock_is_held(sk));
+      2251│	if (req)                                                     ┃      3448│	if (req)

@@ -1,0 +1,6 @@
+# Both patches add tx after alpha in f.c, and patch2 also adds a blank line
+# after it, which patch1 doesn't. The report must show tx as an addition both
+# make and the blank line on patch2's side alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

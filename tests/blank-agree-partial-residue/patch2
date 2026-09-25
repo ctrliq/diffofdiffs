@@ -1,0 +1,10 @@
+--- a/f.c
++++ b/f.c
+@@ -1,6 +1,7 @@
+ alpha
+ rx1
+ rx2
+ rx3
++tx
+ 
+ omega
