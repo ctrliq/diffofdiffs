@@ -1,0 +1,3 @@
+bin: DIFFOFDIFFS
+args: good1 garbage
+exit: 1

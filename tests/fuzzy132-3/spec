@@ -1,0 +1,3 @@
+bin: DIFFOFDIFFS
+args: allctx norm
+exit: 1

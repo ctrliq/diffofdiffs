@@ -1,0 +1,5 @@
+# The first operand is a directory, so intake must refuse it on fstat before
+# reading anything, report the system's "Is a directory" error, and exit 1.
+bin: DIFFOFDIFFS
+args: dirop good2
+exit: 1

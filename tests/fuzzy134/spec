@@ -1,0 +1,6 @@
+# Both operands create f, with alpha and beta in cre1 and alpha and gamma in
+# cre2. The report must show alpha as an addition both patches make and beta and
+# gamma as each patch's own, with nothing on stderr.
+bin: DIFFOFDIFFS
+args: cre1 cre2
+exit: 0

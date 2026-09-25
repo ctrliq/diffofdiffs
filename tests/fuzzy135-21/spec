@@ -1,0 +1,3 @@
+bin: DIFFOFDIFFS
+args: /dev/null good2
+exit: 0

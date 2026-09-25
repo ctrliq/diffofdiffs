@@ -1,0 +1,12 @@
+quoting a hunk for discussion:
+
+@@ -10,2 +10,2 @@
+ int foo(void)
+ {
+
+--- a/f
++++ b/f
+@@ -1,2 +1,2 @@
+ a
+-b
++B

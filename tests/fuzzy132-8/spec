@@ -1,0 +1,3 @@
+bin: DIFFOFDIFFS
+args: norm zerozero
+exit: 1

@@ -1,0 +1,3 @@
+bin: DIFFOFDIFFS
+args: good1 rename-only
+exit: 0
