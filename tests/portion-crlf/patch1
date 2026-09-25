@@ -1,0 +1,12 @@
+--- a/f.c
++++ b/f.c
+@@ -1,8 +1,8 @@
+ 	c1
+ 	a_zulu
+ 	c2
+ int crlf_mid(void)
+-	b_old
++	b_p1
+ 	c3
+ 	c_zulu
+ 	c4

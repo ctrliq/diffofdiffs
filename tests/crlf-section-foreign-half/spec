@@ -1,0 +1,9 @@
+# A context-format half ("*** x" then "--- y") opens the operand ahead of a
+# real CRLF section with two hunks; the "*** x" line alone ends in bare LF, so
+# the whole-operand predicate never fired here. The half is refused at the
+# tail, after every later line was compacted in place, and the diagnostic
+# names it without its CR: the saved view survived the compaction of
+# everything behind it.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

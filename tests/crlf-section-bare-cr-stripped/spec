@@ -1,0 +1,7 @@
+# The same bare CR line inside a section whose "+++ " line ends in CRLF (the
+# "--- " line ends in bare LF, so the whole-operand predicate never fired).
+# The strip turns the row into the bare-newline context PROPOSAL-7 accepts,
+# and the pair compares instead of refusing.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

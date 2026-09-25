@@ -1,0 +1,8 @@
+# Both patches edit fa and fb, and every hunk line ends in CRLF. In fa's section
+# the --- and +++ lines end in CRLF too, so the CRs are line endings and get
+# stripped. In fb's section the --- and +++ lines end in bare LF, so the CRs
+# stay part of each line, as GNU patch would treat them. The report must decide
+# each section separately: fa's lines show plain and fb's show a trailing \x0d.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

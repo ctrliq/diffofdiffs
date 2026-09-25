@@ -1,0 +1,6 @@
+# A junk row inside a CRLF-keyed hunk. The strip runs before the row is
+# classified, so the refusal names the row without its CR, the way GNU
+# patch's own malformed diagnostic reads the stripped line.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

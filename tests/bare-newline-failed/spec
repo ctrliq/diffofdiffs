@@ -1,0 +1,10 @@
+# Both patches change line3 and line7 of f, whose line 5 is blank, and both
+# quote that blank line as a bare newline with no leading space. Patch1 changes
+# line3 to backport3 and line7 to backport7. Patch2 changes line3 to upstream3
+# and quotes line 7 as other7, changing it to upstream7. The report must show
+# both changes in one hunk, with the bare newline read as an empty context line
+# on both sides, the removal of line3 as shared, and each patch's own removal at
+# line 7.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

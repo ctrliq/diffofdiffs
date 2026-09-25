@@ -1,0 +1,7 @@
+# A stray "--- stray" line ending in CRLF stands between a bare-LF header pair
+# and its CRLF hunk. GNU patch re-decides its strip flag at every header line
+# it scans, so this one turns the strip on and the hunk rows print LF-only;
+# the whole-operand predicate this replaced kept every CR.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

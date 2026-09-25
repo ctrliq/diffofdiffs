@@ -1,0 +1,13 @@
+# Both patches spell the blank context line between one and the change as an
+# empty line, without the leading space a context line normally carries, as some
+# mail paths and editors leave it. The reader must treat the empty line as blank
+# context, as GNU patch does.
+#
+# Both patches remove three and add different replacements, so the removal must
+# show as an edit both patches make and THREE_p1 and THREE_p2 side by side at
+# line 3. A reader that tested the first byte for ' ' would lose the blank line
+# and misplace patch2's addition by one line. bare-newline-space-control and
+# bare-newline-tab-control spell the same line differently.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

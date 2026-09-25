@@ -1,0 +1,6 @@
+# A CRLF operand whose final row ends in CR with no LF behind it. The strip
+# takes the CR and leaves the row unterminated, as the whole-operand predicate
+# did for such a tail.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

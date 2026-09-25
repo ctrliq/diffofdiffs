@@ -1,0 +1,7 @@
+# The patches of portion-crlf, except that each +++ line ends in a bare LF, so
+# the lines under it keep their CRs as content. GNU patch would reject these
+# hunks on their line endings. The report must keep every CR, shown as \x0d at
+# the end of each source line.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

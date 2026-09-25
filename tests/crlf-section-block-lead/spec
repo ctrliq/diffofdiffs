@@ -1,0 +1,8 @@
+# Patch1's git block edits fz and patch2's edits fa, each also changing the
+# file's mode from 100644 to 100755, and every line of both patches ends in
+# CRLF, the mode lines included. The files don't pair, so each shows on its own
+# side, and since the block's header lines end in CRLF, the mode notes and hunk
+# lines must show without their CRs.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

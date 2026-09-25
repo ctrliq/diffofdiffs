@@ -1,0 +1,6 @@
+# An LF section carrying one bare CR line where a blank context row belongs.
+# Nothing strips it, so the CR is the row's first byte and the row is junk:
+# refused as malformed, which is GNU patch's verdict too.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

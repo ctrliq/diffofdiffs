@@ -1,0 +1,8 @@
+# The --- line ends in bare LF and the +++ line in CRLF. The +++ line is the
+# last header line before the hunk, so the reader strips the section's CRs as
+# line endings, as GNU patch does, and the report shows no CR bytes.
+# crlf-section-damage keeps the same hunks with the +++ line on bare LF, where
+# the CRs stay as content.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

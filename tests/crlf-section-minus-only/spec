@@ -1,0 +1,7 @@
+# Only the "--- " line ends in CRLF; the "+++ " line ends in bare LF and is the
+# last header line before the hunk, so the section keeps its CRs as content
+# (GNU patch fails the hunk on its line endings). The discriminator between the
+# per-section rule and a whole-operand one.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

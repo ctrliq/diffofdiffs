@@ -1,0 +1,7 @@
+# One git block whose every line ends in CRLF beside one that runs on bare LF.
+# GNU patch decides CR stripping per file section from the section's own
+# header lines, so the CRLF section is stripped and the LF one is left alone;
+# the whole-operand predicate this replaced stripped neither.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

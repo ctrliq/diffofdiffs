@@ -1,0 +1,7 @@
+# A stray "--- stray" line ending in bare LF stands between a CRLF header pair
+# and its hunk. GNU patch re-decides its strip flag at every header line it
+# scans, so the hunk keeps its CRs as content here; the pair still counts the
+# hunk out.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

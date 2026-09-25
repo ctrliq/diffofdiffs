@@ -1,0 +1,6 @@
+# A CRLF-keyed section ending in a "\ No newline at end of file" marker that
+# carries a CR like every other hunk line; the strip reaches the marker too,
+# so it's read as the marker and printed without a CR.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,46 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        Patch 1: patch1         ┃        Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the
+patches.
+
+═════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                          *
+═════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with
+one number is an edit both patches make: a new number means both
+add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f.c                    ┃ old new│f.c
+        │@@                     ┃        │@@ int crlf_top(void)
+   1   1│	c1\x0d          ┃   1   1│	c1\x0d
+   2   2│	a_zulu\x0d      ┃-  2    │	a_old\x0d
+        │                       ┃+      2│	a_p2\x0d
+   3   3│	c2\x0d          ┃   3   3│	c2\x0d
+   4   4│int crlf_mid(void)\x0d ┃-  4    │int crlf_mid(void)\x0d
+   5    │	b_old\x0d       ┃   5    │	b_old\x0d
+        │                       ┃+      4│int crlf_mid(int x)\x0d
++      5│	b_p1\x0d        ┃+      5│	b_p2\x0d
+   6   6│	c3\x0d          ┃   6   6│	c3\x0d
+   7   7│	c_zulu\x0d      ┃-  7    │	c_old\x0d
+        │                       ┃+      7│	c_p2\x0d
+   8   8│	c4\x0d          ┃   8   8│	c4\x0d
+
+═════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                                        *
+═════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f.c                    ┃     new│f.c
+        │@@                     ┃        │@@ int crlf_top(void)
+       1│	c1\x0d          ┃       1│	c1\x0d
+-      2│	a_zulu\x0d      ┃+      2│	a_p2\x0d
+       3│	c2\x0d          ┃       3│	c2\x0d
+-      4│int crlf_mid(void)\x0d ┃+      4│int crlf_mid(int x)\x0d
+-      5│	b_p1\x0d        ┃+      5│	b_p2\x0d
+       6│	c3\x0d          ┃       6│	c3\x0d
+-      7│	c_zulu\x0d      ┃+      7│	c_p2\x0d
+       8│	c4\x0d          ┃       8│	c4\x0d

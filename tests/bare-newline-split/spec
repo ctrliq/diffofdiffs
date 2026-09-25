@@ -1,0 +1,9 @@
+# Both patches spell line 3 as an empty line with no leading space. Both replace
+# line4, with different text, and patch2 also replaces line6. The empty line
+# must read as one blank context line, so the shared removal of line4 shows
+# unsigned, the two replacements side by side, and patch2's line6 change at its
+# own line. Reading the empty line any other way would shift every later line
+# and break the hunk's line counts.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

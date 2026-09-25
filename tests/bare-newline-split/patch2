@@ -1,0 +1,14 @@
+--- a/f
++++ b/f
+@@ -1,9 +1,9 @@
+ line1
+ line2
+
+-line4
++upstream
+ line5
+-line6
++second upstream
+ line7
+ line8
+ line9

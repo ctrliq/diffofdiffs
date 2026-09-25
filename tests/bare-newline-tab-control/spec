@@ -1,0 +1,9 @@
+# The blank context line of bare-newline-delta is spelled as a lone tab, as when
+# a mail path eats the leading space of a context line whose content is a tab.
+# The reader must take the line as context whose content is the tab, as GNU
+# patch does, rather than as a sign with nothing after it. The report shows the
+# same edits as bare-newline-delta, with an eight-column width floor and tabs
+# measured from the terminal row's start, since the source holds a tab.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
