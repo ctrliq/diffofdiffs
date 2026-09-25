@@ -1,0 +1,32 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     Commit 1: gate-bp     ┃     Commit 2: gate-up
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and
+after each commit.
+
+═══════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                *
+═══════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less
+line with one number is an edit both patches make: a
+new number means both add it, an old number means both
+remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│Makefile          ┃ old new│Makefile
+        │@@ all:           ┃        │@@ all:
+   3   3│	echo two   ┃   3   3│	echo two
+   4   4│	echo three ┃   4   4│	echo three
+   5    │	echo four  ┃   5    │	echo four
++      5│	echo FOUR  ┃+      5│	echo FOUR4
+   6   6│	echo five  ┃   6   6│	echo five
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│entry.S           ┃ old new│entry.S
+        │@@ el1_sync:      ┃        │@@ el1_sync:
+   3   3│	mov x1, #2 ┃   3   3│	mov x1, #2
+   4   4│	mov x2, #3 ┃   4   4│	mov x2, #3
+   5    │	mov x3, #4 ┃   5    │	mov x3, #4
++      5│	mov x3, #44┃+      5│	mov x3, #444
+   6   6│	mov x4, #5 ┃   6   6│	mov x4, #5

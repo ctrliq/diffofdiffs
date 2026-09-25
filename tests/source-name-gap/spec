@@ -1,0 +1,4 @@
+# An earlier function cannot name a later change across unquoted source.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

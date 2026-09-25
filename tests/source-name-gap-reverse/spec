@@ -1,0 +1,4 @@
+# Reversing the comparison does not give a distant function a new scope.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

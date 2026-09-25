@@ -1,0 +1,8 @@
+# The parents differ around edits that remain applicable. CONTEXT reads the
+# actual tips: ctx.c starts at b's definition and names b, while islands.c
+# starts at its file comment and has no preceding function to name. The real
+# islands rows stay in one continuous window across e and f, including any
+# authored changes inside the requested context. No missing quoted definition
+# or local jump label may substitute the name of a preceding function.
+bin: DIFFOFDIFFS
+args: --git-tree=repo inherit-bp inherit-up

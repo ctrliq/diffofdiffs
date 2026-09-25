@@ -1,0 +1,5 @@
+# Tree mode uses the actual function even when the input patches quote no
+# definition.
+bin: DIFFOFDIFFS
+args: -U3 --git-tree=repo bp up
+exit: 0

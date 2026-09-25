@@ -1,0 +1,9 @@
+# In git tree mode, skip-bp and skip-up change the same lines of alpha.c, hdr.h,
+# and top.c differently, and skip-up also changes only.c. Each change sits a few
+# lines below a label at column 0 (out:, done:, retry:), close enough that the
+# hunk's context starts just under it. For .c and .h files, hunk headers must
+# skip labels the way git's cpp funcname rule does: alpha.c, hdr.h, and only.c
+# name the function above the label, and top.c, whose label is its first line,
+# gets a bare @@.
+bin: DIFFOFDIFFS
+args: --git-tree=repo skip-bp skip-up

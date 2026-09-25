@@ -1,0 +1,16 @@
+--- a/f.c
++++ b/f.c
+@@ -1,5 +1,5 @@
+ static void earlier(void)
+ {
+-	first_original();
++	first_shared();
+ 	return;
+ }
+@@ -70,5 +70,5 @@
+ 	retained_8();
+ 	retained_9();
+-	original_change();
++	local_change();
+ 	finish();
+ 	return;

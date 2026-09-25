@@ -1,0 +1,45 @@
+--- a/f.c
++++ b/f.c
+@@ -1,19 +1,19 @@
+ static void earlier(void)
+ {
+-	first_original();
++	first_shared();
+ 	return;
+ }
+ /* Separating source 0. */
+ /* Separating source 1. */
+ /* Separating source 2. */
+ /* Separating source 3. */
+ /* Separating source 4. */
+ /* Separating source 5. */
+ /* Separating source 6. */
+ /* Separating source 7. */
+ /* Separating source 8. */
+ /* Separating source 9. */
+ /* Separating source 10. */
+ /* Separating source 11. */
+ /* Separating source 12. */
+ /* Separating source 13. */
+@@ -56,20 +56,20 @@
+ /* Separating source 50. */
+ /* Separating source 51. */
+ /* Separating source 52. */
+ /* Separating source 53. */
+ static void current(void)
+ {
+ 	retained_0();
+ 	retained_1();
+ 	retained_2();
+ 	retained_3();
+ 	retained_4();
+ 	retained_5();
+ 	retained_6();
+ 	retained_7();
+ 	retained_8();
+ 	retained_9();
+-	original_change();
++	upstream_change();
+ 	finish();
+ 	return;
+ }

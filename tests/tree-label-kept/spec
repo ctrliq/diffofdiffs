@@ -1,0 +1,6 @@
+# The label family's kept pair: kept.c holds the two label forms the skip
+# tells apart. `out: rc = 1;` carries a statement, so it isn't a label to
+# git's cpp rule and keeps naming its hunk, while `done:` followed by a
+# comment is one, so the second hunk names the function above it.
+bin: DIFFOFDIFFS
+args: --git-tree=repo kept-bp kept-up

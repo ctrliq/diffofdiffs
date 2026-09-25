@@ -1,0 +1,7 @@
+# In git tree mode, gate-bp and gate-up change the same lines of Makefile and
+# entry.S differently, each a few lines below a label (all: and el1_sync:). The
+# label skipping that tree mode applies to .c and .h files must not apply to
+# these, so both hunk headers keep naming the label, the nearest thing either
+# file has to a definition.
+bin: DIFFOFDIFFS
+args: --git-tree=repo gate-bp gate-up
