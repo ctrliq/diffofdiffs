@@ -1,0 +1,62 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                    Patch 1: patch1                                    ┃                                    Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                                         *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│mm/hugetlb.c                                                                ┃  old  new│mm/hugetlb.c
+          │@@ void __unmap_hugepage_range(struct mmu_gather *tlb, struct vm_area_struct┃          │@@ int move_hugetlb_page_tables(struct vm_area_struct *vma,
+          │ *vma,                                                                      ┃          │
+          │                                                                            ┃ 5112 5112│	unsigned long last_addr_mask;
+          │                                                                            ┃ 5113 5113│	pte_t *src_pte, *dst_pte;
+ 3982 3982│	struct mmu_notifier_range range;                                       ┃ 5114 5114│	struct mmu_notifier_range range;
+          │                                                                            ┃-5115     │	bool shared_pmd = false;
+          │                                                                            ┃+     5115│	struct mmu_gather tlb;
+          │                                                                            ┃ 5116 5116│
+          │                                                                            ┃ 5117 5117│	mmu_notifier_range_init(&range, MMU_NOTIFY_CLEAR, 0, mm, old_addr,
+          │                                                                            ┃ 5118 5118│				old_end);
+          │────────────────────────────────────────────────────────────────────────────╂──────────┼────────────────────────────────────────────────────────────────────────────
+          │@@ void __unmap_hugepage_range(struct mmu_gather *tlb, struct vm_area_struct┃          │@@ void __unmap_hugepage_range(struct mmu_gather *tlb, struct vm_area_struct
+          │ *vma,                                                                      ┃          │ *vma,
+ 4007 4006│			continue;                                              ┃ 5200 5200│		}
+ 4008 4007│                                                                            ┃ 5201 5201│
+ 4009 4008│		ptl = huge_pte_lock(h, mm, ptep);                              ┃ 5202 5202│		ptl = huge_pte_lock(h, mm, ptep);
+-4010     │		if (huge_pmd_unshare(mm, vma, &address, ptep)) {               ┃-5203     │		if (huge_pmd_unshare(mm, vma, address, ptep)) {
++     4009│		if (huge_pmd_unshare(tlb, vma, &address, ptep)) {              ┃+     5203│		if (huge_pmd_unshare(tlb, vma, address, ptep)) {
+ 4011 4010│			spin_unlock(ptl);                                      ┃ 5204 5204│			spin_unlock(ptl);
+ 4012     │			tlb_flush_pmd_range(tlb, address & PUD_MASK, PUD_SIZE);┃ 5205     │			tlb_flush_pmd_range(tlb, address & PUD_MASK, PUD_SIZE);
+ 4013     │			force_flush = true;                                    ┃ 5206     │			force_flush = true;
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                                                   *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       new│mm/hugetlb.c                                                                ┃       new│mm/hugetlb.c
+          │@@ void __unmap_hugepage_range(struct mmu_gather *tlb, struct vm_area_struct┃          │@@ void __unmap_hugepage_range(struct mmu_gather *tlb, struct vm_area_struct
+          │ *vma,                                                                      ┃          │ *vma,
+      4008│		ptl = huge_pte_lock(h, mm, ptep);                              ┃      5202│		ptl = huge_pte_lock(h, mm, ptep);
+-     4009│		if (huge_pmd_unshare(tlb, vma, &address, ptep)) {              ┃+     5203│		if (huge_pmd_unshare(tlb, vma, address, ptep)) {
+      4010│			spin_unlock(ptl);                                      ┃      5204│			spin_unlock(ptl);
+          │                                                                            ┃+     5205│			address |= last_addr_mask;
+      4011│			continue;                                              ┃      5206│			continue;
+      4012│		}                                                              ┃      5207│		}
+          │────────────────────────────────────────────────────────────────────────────╂──────────┼────────────────────────────────────────────────────────────────────────────
+          │@@ unsigned long hugetlb_change_protection(struct vm_area_struct *vma,      ┃          │@@ long hugetlb_change_protection(struct vm_area_struct *vma,
+      5074│	pte_t pte;                                                             ┃      6416│	pte_t pte;
+      5075│	struct hstate *h = hstate_vma(vma);                                    ┃      6417│	struct hstate *h = hstate_vma(vma);
+-     5076│	unsigned long pages = 0;                                               ┃+     6418│	long pages = 0, psize = huge_page_size(h);
+      5077│	struct mmu_notifier_range range;                                       ┃      6419│	struct mmu_notifier_range range;
+          │                                                                            ┃+     6420│	unsigned long last_addr_mask;
+          │                                                                            ┃+     6421│	bool uffd_wp = cp_flags & MM_CP_UFFD_WP;
+          │                                                                            ┃+     6422│	bool uffd_wp_resolve = cp_flags & MM_CP_UFFD_WP_RESOLVE;
+      5078│	struct mmu_gather tlb;                                                 ┃      6423│	struct mmu_gather tlb;
+      5079│                                                                            ┃      6424│
+      5080│	/*                                                                     ┃      6425│	/*

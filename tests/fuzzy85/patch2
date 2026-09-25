@@ -1,0 +1,20 @@
+diff --git a/util.c b/util.c
+index 1111111..4444444 100644
+--- a/util.c
++++ b/util.c
+@@ -1,5 +1,6 @@
+ one
+ two
++beta
+ three
+ four
+ five
+diff --git a/lib/table.c b/lib/table.c
+index 5555555..6666666 100644
+--- a/lib/table.c
++++ b/lib/table.c
+@@ -1,3 +1,4 @@
+ int table[] = {
+ 	ALPHA,
++	GAMMA,
+ };

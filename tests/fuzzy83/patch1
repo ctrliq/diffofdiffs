@@ -1,0 +1,22 @@
+--- a/foo.c
++++ b/foo.c
+@@ -7,19 +7,6 @@
+ 
+ void teardown(struct queue *q, int idx)
+ {
+-	if (is_gso(q)) {
+-		union desc *tx;
+-
+-		/* If we failed a mapping for a packet we will have used
+-		 * one additional descriptor for a context descriptor.
+-		 * Reset that here.
+-		 */
+-		tx = &q->flex[idx];
+-		memset(tx, 0, sizeof(struct big_ctx_desc));
+-		if (idx == 0)
+-			idx = q->count;
+-		idx--;
+-	}
+ }
+ 
+ void finish(void)

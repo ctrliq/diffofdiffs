@@ -1,0 +1,8 @@
+# patch3 adds a git block for foo.c with only a mode change and no --- line,
+# ahead of the same bar.c change patch1 makes. The missing --- line doesn't make
+# the operand malformed. The identical bar.c change must be left out, and
+# foo.c's mode change must show as patch3's file operation with its old and new
+# modes.
+bin: DIFFOFDIFFS
+args: patch1 patch3
+exit: 0

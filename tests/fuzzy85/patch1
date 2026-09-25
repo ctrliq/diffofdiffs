@@ -1,0 +1,21 @@
+diff --git a/util.c b/util.c
+index 1111111..2222222 100644
+--- a/util.c
++++ b/util.c
+@@ -1,5 +1,6 @@
+ one
+ two
++alpha
+ three
+ four
+ five
+diff --git a/lib/table.c b/lib/table.c
+new file mode 100644
+index 0000000..3333333
+--- /dev/null
++++ b/lib/table.c
+@@ -0,0 +1,4 @@
++int table[] = {
++	ALPHA,
++	BETA,
++};

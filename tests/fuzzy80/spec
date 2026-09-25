@@ -1,0 +1,5 @@
+# The added upstream lock and unlock calls remain real differences inside the
+# shared added code. Their coordinates account for earlier changes.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

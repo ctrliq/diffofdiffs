@@ -1,0 +1,23 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                 Patch 1: patch1                                 ┃                                 Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                             *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both
+remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│drivers/net/ethernet/intel/idpf/idpf_txrx.c                           ┃  old  new│drivers/net/ethernet/intel/idpf/idpf_txrx.c
+          │@@ void idpf_tx_dma_map_error(struct idpf_tx_queue *txq, struct sk_buf┃          │@@ void idpf_tx_dma_map_error(struct idpf_tx_queue *txq, struct sk_buf
+          │f *skb,                                                               ┃          │f *skb,
+ 2326     │		 * descriptor. Reset that here.                          ┃ 2380     │		 * descriptor. Reset that here.
+ 2327     │		 */                                                      ┃ 2381     │		 */
+ 2328     │		tx_desc = &txq->flex_tx[idx];                            ┃ 2382     │		tx_desc = &txq->flex_tx[idx];
+-2329     │		memset(tx_desc, 0, sizeof(struct idpf_flex_tx_ctx_desc));┃-2383     │		memset(tx_desc, 0, sizeof(*tx_desc));
+ 2330     │		if (idx == 0)                                            ┃ 2384     │		if (idx == 0)
+ 2331     │			idx = txq->desc_count;                           ┃ 2385     │			idx = txq->desc_count;
+ 2332     │		idx--;                                                   ┃ 2386     │		idx--;

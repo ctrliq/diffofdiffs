@@ -1,0 +1,5 @@
+# The actual added CCC tail remains a result difference, including its missing
+# final newline.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,20 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                  Patch 1: patch1                                  ┃                                  Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                                           *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│net/atm/lec.c                                                             ┃     new│net/atm/lec.c
+        │@@ static unsigned char bus_mac[ETH_ALEN] = { 0xff, 0xff, 0xff, 0xff, 0xff┃        │@@ static unsigned char bus_mac[ETH_ALEN] = { 0xff, 0xff, 0xff, 0xff, 0xff
+        │, 0xff };                                                                 ┃        │, 0xff };
+     125│static struct net_device *dev_lec[MAX_LEC_ITF];                           ┃     126│static struct net_device *dev_lec[MAX_LEC_ITF];
+     126│static DEFINE_MUTEX(lec_mutex);                                           ┃     127│static DEFINE_MUTEX(lec_mutex);
+     127│                                                                          ┃     128│
+-    128│#if defined(CONFIG_BRIDGE) || defined(CONFIG_BRIDGE_MODULE)               ┃+    129│#if IS_ENABLED(CONFIG_BRIDGE)
+     129│static void lec_handle_bridge(struct sk_buff *skb, struct net_device *dev)┃     130│static void lec_handle_bridge(struct sk_buff *skb, struct net_device *dev)

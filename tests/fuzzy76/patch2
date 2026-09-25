@@ -1,0 +1,10 @@
+--- a/f.c
++++ b/f.c
+@@ -1,6 +1,3 @@
+ one
+ two
+ KEEP1
+-AAA
+-BBB
+-CCC
+\ No newline at end of file

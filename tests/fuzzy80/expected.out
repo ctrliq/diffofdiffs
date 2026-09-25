@@ -1,0 +1,164 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                       Patch 1: patch1                                        ┃                                       Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                                                       *
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│include/linux/hugetlb.h                                                            ┃  old  new│include/linux/hugetlb.h
+          │@@ unsigned long hugetlb_change_protection(struct vm_area_struct *vma,             ┃          │@@ bool is_hugetlb_entry_migration(pte_t pte);
+  189  189│		unsigned long address, unsigned long end, pgprot_t newprot);          ┃          │
+  190  190│                                                                                   ┃          │
+  191  191│bool is_hugetlb_entry_migration(pte_t pte);                                        ┃  279  279│bool is_hugetlb_entry_hwpoisoned(pte_t pte);
++      192│void hugetlb_unshare_all_pmds(struct vm_area_struct *vma);                         ┃  280  280│void hugetlb_unshare_all_pmds(struct vm_area_struct *vma);
+          │                                                                                   ┃  281  281│void fixup_hugetlb_reservations(struct vm_area_struct *vma);
+       193│void hugetlb_split(struct vm_area_struct *vma, unsigned long addr);                ┃       282│void hugetlb_split(struct vm_area_struct *vma, unsigned long addr);
+  192  194│                                                                                   ┃  282  283│
+  193  195│#else /* !CONFIG_HUGETLB_PAGE */                                                   ┃  283  284│#else /* !CONFIG_HUGETLB_PAGE */
+          │───────────────────────────────────────────────────────────────────────────────────╂──────────┼───────────────────────────────────────────────────────────────────────────────────
+          │@@ static inline vm_fault_t hugetlb_fault(struct mm_struct *mm,                    ┃          │@@ static inline void fixup_hugetlb_reservations(struct vm_area_struct *vma)
+  370  372│	return 0;                                                                     ┃          │
+  371  373│}                                                                                  ┃  477  478│}
+  372  374│                                                                                   ┃  478  479│
++      375│static inline void hugetlb_unshare_all_pmds(struct vm_area_struct *vma) { }        ┃          │
++      376│                                                                                   ┃          │
+       377│static inline void hugetlb_split(struct vm_area_struct *vma, unsigned long addr) {}┃       480│static inline void hugetlb_split(struct vm_area_struct *vma, unsigned long addr) {}
+       378│                                                                                   ┃       481│
+  373  379│#endif /* !CONFIG_HUGETLB_PAGE */                                                  ┃  479  482│#endif /* !CONFIG_HUGETLB_PAGE */
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│mm/hugetlb.c                                                                       ┃  old  new│mm/hugetlb.c
+          │@@ void hugetlb_split(struct vm_area_struct *vma, unsigned long addr)              ┃          │@@ void hugetlb_split(struct vm_area_struct *vma, unsigned long addr)
+      3695│	 * MM, VMA and rmap all write-locked to prevent concurrent page table         ┃      5439│	 * MM, VMA and rmap all write-locked to prevent concurrent page table
+      3696│	 * walks (except hardware and gup_fast()).                                    ┃      5440│	 * walks (except hardware and gup_fast()).
+ 3690 3697│	 */                                                                           ┃ 5434 5441│	 */
++     3698│	mmap_assert_write_locked(vma->vm_mm);                                         ┃+     5442│	vma_assert_write_locked(vma);
+      3699│	i_mmap_assert_write_locked(vma->vm_file->f_mapping);                          ┃      5443│	i_mmap_assert_write_locked(vma->vm_file->f_mapping);
+      3700│                                                                                   ┃      5444│
+ 3691 3701│	if (addr & ~PUD_MASK) {                                                       ┃ 5435 5445│	if (addr & ~PUD_MASK) {
+          │───────────────────────────────────────────────────────────────────────────────────╂──────────┼───────────────────────────────────────────────────────────────────────────────────
+          │@@ static void hugetlb_unshare_pmds(struct vm_area_struct *vma,                    ┃          │@@ static void hugetlb_unshare_pmds(struct vm_area_struct *vma,
+          │                                                                                   ┃ 7911 7932│	mmu_notifier_range_init(&range, MMU_NOTIFY_CLEAR, 0, mm,
+ 5780 5801│				start, end);                                          ┃ 7912 7933│				start, end);
+ 5781 5802│	mmu_notifier_invalidate_range_start(&range);                                  ┃ 7913 7934│	mmu_notifier_invalidate_range_start(&range);
+          │                                                                                   ┃-7914     │	hugetlb_vma_lock_write(vma);
+ 5782     │	i_mmap_lock_write(vma->vm_file->f_mapping);                                   ┃ 7915     │	i_mmap_lock_write(vma->vm_file->f_mapping);
+      5803│	if (take_locks) {                                                             ┃      7935│	if (take_locks) {
+          │                                                                                   ┃+     7936│		hugetlb_vma_lock_write(vma);
+      5804│		i_mmap_lock_write(vma->vm_file->f_mapping);                           ┃      7937│		i_mmap_lock_write(vma->vm_file->f_mapping);
+      5805│	} else {                                                                      ┃      7938│	} else {
+      5806│		i_mmap_assert_write_locked(vma->vm_file->f_mapping);                  ┃      7939│		i_mmap_assert_write_locked(vma->vm_file->f_mapping);
+          │───────────────────────────────────────────────────────────────────────────────────╂──────────┼───────────────────────────────────────────────────────────────────────────────────
+          │@@ static void hugetlb_unshare_pmds(struct vm_area_struct *vma,                    ┃          │@@ static void hugetlb_unshare_pmds(struct vm_area_struct *vma,
+ 5790 5815│	}                                                                             ┃ 7923 7948│	}
+ 5791 5816│	flush_hugetlb_tlb_range(vma, start, end);                                     ┃ 7924 7949│	flush_hugetlb_tlb_range(vma, start, end);
+ 5792     │	i_mmap_unlock_write(vma->vm_file->f_mapping);                                 ┃ 7925     │	i_mmap_unlock_write(vma->vm_file->f_mapping);
+          │                                                                                   ┃-7926     │	hugetlb_vma_unlock_write(vma);
+      5817│	if (take_locks) {                                                             ┃      7950│	if (take_locks) {
+      5818│		i_mmap_unlock_write(vma->vm_file->f_mapping);                         ┃      7951│		i_mmap_unlock_write(vma->vm_file->f_mapping);
+          │                                                                                   ┃+     7952│		hugetlb_vma_unlock_write(vma);
+      5819│	}                                                                             ┃      7953│	}
+ 5793 5820│	/*                                                                            ┃ 7927 7954│	/*
+          │                                                                                   ┃ 7928 7955│	 * No need to call mmu_notifier_arch_invalidate_secondary_tlbs(), see
+          │───────────────────────────────────────────────────────────────────────────────────╂──────────┼───────────────────────────────────────────────────────────────────────────────────
+          │@@                                                                                 ┃          │@@ void hugetlb_unshare_all_pmds(struct vm_area_struct *vma)
+          │                                                                                   ┃ 7938 7965│void hugetlb_unshare_all_pmds(struct vm_area_struct *vma)
+          │                                                                                   ┃ 7939 7966│{
+          │                                                                                   ┃ 7940 7967│	hugetlb_unshare_pmds(vma, ALIGN(vma->vm_start, PUD_SIZE),
+          │                                                                                   ┃-7941     │			ALIGN_DOWN(vma->vm_end, PUD_SIZE));
+          │                                                                                   ┃+     7968│			ALIGN_DOWN(vma->vm_end, PUD_SIZE),
+          │                                                                                   ┃+     7969│			/* take_locks = */ true);
+          │                                                                                   ┃ 7942 7970│}
+          │                                                                                   ┃ 7943 7971│
+          │                                                                                   ┃ 7944 7972│/*
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│mm/mmap.c                                                                          ┃  old  new│mm/mmap.c
+          │@@ int __vma_adjust(struct vm_area_struct *vma, unsigned long start,               ┃          │@@
+  812  812│		}                                                                     ┃          │
+  813  813│	}                                                                             ┃          │
+  814  814│again:                                                                             ┃          │
++      815│	/*                                                                            ┃          │
++      816│	 * Get rid of huge pages and shared page tables straddling the split          ┃          │
++      817│	 * boundary.                                                                  ┃          │
++      818│	 */                                                                           ┃          │
+  815  819│	vma_adjust_trans_huge(orig_vma, start, end, adjust_next);                     ┃          │
++      820│	if (is_vm_hugetlb_page(orig_vma)) {                                           ┃          │
++      821│		hugetlb_split(orig_vma, start);                                       ┃          │
++      822│		hugetlb_split(orig_vma, end);                                         ┃          │
++      823│	}                                                                             ┃          │
+  816  824│                                                                                   ┃          │
+  817  825│	if (file) {                                                                   ┃          │
+  818  826│		mapping = file->f_mapping;                                            ┃          │
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│mm/vma.c                                                                           ┃  old  new│mm/vma.c
+          │@@                                                                                 ┃          │@@ __split_vma(struct vma_iterator *vmi, struct vm_area_struct *vma,
+          │                                                                                   ┃  539  539│	init_vma_prep(&vp, vma);
+          │                                                                                   ┃  540  540│	vp.insert = new;
+          │                                                                                   ┃  541  541│	vma_prepare(&vp);
+          │                                                                                   ┃+      542│
+          │                                                                                   ┃+      543│	/*
+          │                                                                                   ┃+      544│	 * Get rid of huge pages and shared page tables straddling the split
+          │                                                                                   ┃+      545│	 * boundary.
+          │                                                                                   ┃+      546│	 */
+          │                                                                                   ┃  542  547│	vma_adjust_trans_huge(vma, vma->vm_start, addr, NULL);
+          │                                                                                   ┃+      548│	if (is_vm_hugetlb_page(vma))
+          │                                                                                   ┃+      549│		hugetlb_split(vma, addr);
+          │                                                                                   ┃  543  550│
+          │                                                                                   ┃  544  551│	if (new_below) {
+          │                                                                                   ┃  545  552│		vma->vm_start = addr;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│tools/testing/vma/vma_internal.h                                                   ┃  old  new│tools/testing/vma/vma_internal.h
+          │@@                                                                                 ┃          │@@ static inline void vma_adjust_trans_huge(struct vm_area_struct *vma,
+          │                                                                                   ┃  932  932│	(void)next;
+          │                                                                                   ┃  933  933│}
+          │                                                                                   ┃  934  934│
+          │                                                                                   ┃+      935│static inline void hugetlb_split(struct vm_area_struct *, unsigned long) {}
+          │                                                                                   ┃+      936│
+          │                                                                                   ┃  935  937│static inline void vma_iter_free(struct vma_iterator *vmi)
+          │                                                                                   ┃  936  938│{
+          │                                                                                   ┃  937  939│	mas_destroy(&vmi->mas);
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                                                                 *
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       new│include/linux/hugetlb.h                                                            ┃       new│include/linux/hugetlb.h
+          │@@ unsigned long hugetlb_change_protection(struct vm_area_struct *vma,             ┃          │@@ bool is_hugetlb_entry_migration(pte_t pte);
+       192│void hugetlb_unshare_all_pmds(struct vm_area_struct *vma);                         ┃       280│void hugetlb_unshare_all_pmds(struct vm_area_struct *vma);
+          │                                                                                   ┃+      281│void fixup_hugetlb_reservations(struct vm_area_struct *vma);
+       193│void hugetlb_split(struct vm_area_struct *vma, unsigned long addr);                ┃       282│void hugetlb_split(struct vm_area_struct *vma, unsigned long addr);
+       194│                                                                                   ┃       283│
+       195│#else /* !CONFIG_HUGETLB_PAGE */                                                   ┃       284│#else /* !CONFIG_HUGETLB_PAGE */
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       new│mm/hugetlb.c                                                                       ┃       new│mm/hugetlb.c
+          │@@ struct mutex *hugetlb_fault_mutex_table ____cacheline_aligned_in_smp;           ┃          │@@ static void hugetlb_vma_lock_free(struct vm_area_struct *vma);
+        76│static void hugetlb_unshare_pmds(struct vm_area_struct *vma,                       ┃       123│static void hugetlb_unshare_pmds(struct vm_area_struct *vma,
+        77│		unsigned long start, unsigned long end, bool take_locks);             ┃       124│		unsigned long start, unsigned long end, bool take_locks);
+          │                                                                                   ┃+      125│static struct resv_map *vma_resv_map(struct vm_area_struct *vma);
+        78│                                                                                   ┃       126│
+          │───────────────────────────────────────────────────────────────────────────────────╂──────────┼───────────────────────────────────────────────────────────────────────────────────
+          │@@ static void hugetlb_unshare_pmds(struct vm_area_struct *vma,                    ┃          │@@ static void hugetlb_unshare_pmds(struct vm_area_struct *vma,
+      5806│		i_mmap_assert_write_locked(vma->vm_file->f_mapping);                  ┃      7939│		i_mmap_assert_write_locked(vma->vm_file->f_mapping);
+      5807│	}                                                                             ┃      7940│	}
+      5808│	for (address = start; address < end; address += PUD_SIZE) {                   ┃      7941│	for (address = start; address < end; address += PUD_SIZE) {
+-     5809│		ptep = huge_pte_offset(mm, address, sz);                              ┃+     7942│		ptep = hugetlb_walk(vma, address, sz);
+      5810│		if (!ptep)                                                            ┃      7943│		if (!ptep)
+          │───────────────────────────────────────────────────────────────────────────────────╂──────────┼───────────────────────────────────────────────────────────────────────────────────
+          │@@ static void hugetlb_unshare_pmds(struct vm_area_struct *vma,                    ┃          │@@ static void hugetlb_unshare_pmds(struct vm_area_struct *vma,
+      5818│		i_mmap_unlock_write(vma->vm_file->f_mapping);                         ┃          │
+          │                                                                                   ┃+     7952│		hugetlb_vma_unlock_write(vma);
+      5819│	}                                                                             ┃      7953│	}
+      5820│	/*                                                                            ┃      7954│	/*
+-     5821│	 * No need to call mmu_notifier_invalidate_range(), see                       ┃+     7955│	 * No need to call mmu_notifier_arch_invalidate_secondary_tlbs(), see
+      5822│	 * Documentation/mm/mmu_notifier.rst.                                         ┃      7956│	 * Documentation/mm/mmu_notifier.rst.
