@@ -1,0 +1,43 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Patch 1: crlf1   ┃   Patch 2: crlf2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the
+source lines quoted in the patches.
+
+═════════════════════════════════════════
+*    DELTA DIFFERENCES                  *
+═════════════════════════════════════════
+Signs mark edits made by only that patch.
+A sign-less line with one number is an
+edit both patches make: a new number
+means both add it, an old number means
+both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│foo.c      ┃ old new│foo.c
+        │@@         ┃        │@@
+   1   1│anchor_one ┃   1   1│anchor_one
+   2   2│anchor_two ┃   2   2│anchor_two
+   3    │alpha      ┃   3    │alpha
++      3│ALPHA      ┃+      3│OMEGA
+        │───────────╂────────┼───────────
+        │@@         ┃        │@@
+- 39    │bravo      ┃- 69    │charlie
++     39│BRAVO      ┃+     69│CHARLIE
+  40  40│           ┃  70  70│
+  41  41│patch1_line┃  71  71│patch2_line
+  42  42│           ┃  72  72│
+
+═════════════════════════════════════════
+*    CONTEXT DIFFERENCES                *
+═════════════════════════════════════════
+Signs mark lines present in only one
+result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│foo.c      ┃     new│foo.c
+        │@@         ┃        │@@
+      40│           ┃      70│
+-     41│patch1_line┃+     71│patch2_line
+      42│           ┃      72│

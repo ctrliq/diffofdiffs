@@ -1,0 +1,16 @@
+--- a/foo.c
++++ b/foo.c
+@@ -8,5 +8,5 @@
+ line8
+ line9
+-line10
++P1_line10
+ line11
+ line12
+@@ -19,5 +19,5 @@
+ line19
+ line20
+ line21
+ line22
+-line23
++P1_line23

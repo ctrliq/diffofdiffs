@@ -1,0 +1,14 @@
+--- a/foo.c
++++ b/foo.c
+@@ -10,3 +10,3 @@ static int shared_helper(void)
+ line10
+-line11
++P1_line11
+ line12
+--- a/bar.c
++++ b/bar.c
+@@ -20,3 +20,4 @@ void bar_only_in_patch1(int flag)
+ line20
+ line21
++added_by_patch1
+ line22

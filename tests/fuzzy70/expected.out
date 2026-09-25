@@ -1,0 +1,21 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Patch 1: patch1  ┃ Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the
+source lines quoted in the patches.
+
+═════════════════════════════════════
+*    CONTEXT DIFFERENCES            *
+═════════════════════════════════════
+Signs mark lines present in only one
+result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│foo.c    ┃     new│foo.c
+        │@@       ┃        │@@
+       5│         ┃       9│
+-      6│ctx_p1   ┃+     10│ctx_p2
+       7│         ┃      11│
+       8│newtarget┃      12│newtarget
+       9│common   ┃      13│common

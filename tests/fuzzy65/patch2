@@ -1,0 +1,17 @@
+--- a/foo.c
++++ b/foo.c
+@@ -10,12 +10,12 @@ int first_function(void)
+ line10
+-line11
++P2_line11
+ line12
+ line13
+ line14
+ line15
+ int second_function(void)
+ line17
+-line18
++P2_line18
+ line19
+ line20
+ line21

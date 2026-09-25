@@ -1,0 +1,11 @@
+--- a/foo.c
++++ b/foo.c
+@@ -9,7 +9,7 @@
+ 
+ ctx_p2
+ 
+-target
++newtarget
+ common
+ 
+ tail

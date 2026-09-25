@@ -1,0 +1,20 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                    Patch 1: patch1                    ┃                    Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                         *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new
+number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│foo.c                                         ┃ old new│foo.c
+        │@@                                            ┃        │@@
+  42  42│	struct tc_cookie	*old_cookie;   ┃  45  45│	struct tc_cookie	*new_cookie;
+  43  43│	struct tcf_chain	*goto_chain;   ┃  46  46│	struct tcf_chain	*goto_chain;
+  44    │	u32			tcfa_flags;    ┃  47    │	u32			tcfa_flags;
++     44│	u32			tcfa_flags_p1; ┃+     47│	u32			tcfa_flags_p2;
+  45  45│	u8			hw_stats;      ┃  48  48│	u8			hw_stats;

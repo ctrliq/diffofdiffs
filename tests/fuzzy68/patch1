@@ -1,0 +1,8 @@
+--- a/foo.c
++++ b/foo.c
+@@ -42,4 +42,4 @@
+ 	struct tc_cookie	*old_cookie;
+ 	struct tcf_chain	*goto_chain;
+-	u32			tcfa_flags;
++	u32			tcfa_flags_p1;
+ 	u8			hw_stats;

@@ -1,0 +1,7 @@
+# Both patches spell the blank context line after the change as an empty line,
+# without its leading space. The reader must take it as blank context, and the
+# report must show the shared removal of old and the replacements new1 and new2
+# side by side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

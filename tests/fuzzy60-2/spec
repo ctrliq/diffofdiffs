@@ -1,0 +1,6 @@
+# fuzzy60-1 with CRLF line endings throughout, so the blank context line reads
+# as a lone CR. Once the reader strips the CRs, that line must read as the same
+# blank context line and the report must show the same edits.
+bin: DIFFOFDIFFS
+args: crlf1 crlf2
+exit: 0

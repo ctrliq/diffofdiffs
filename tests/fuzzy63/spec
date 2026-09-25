@@ -1,0 +1,7 @@
+# Patch1 changes line15 to P1_line15 and deletes line23 in foo.c. Patch2 deletes
+# line11, line17, and line25 and quotes line15 and line16 unchanged. The report
+# must show patch1's line15 change beside patch2's unchanged line15, and every
+# deletion on its own patch's side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

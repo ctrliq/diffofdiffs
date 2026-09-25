@@ -1,0 +1,7 @@
+# Every line of both patches ends in CRLF, including the +++ line, so the reader
+# strips the CRs as line endings, as GNU patch does, and the report shows no CR
+# bytes. Both patches replace alpha, with ALPHA and OMEGA; patch1 also replaces
+# bravo at line 39 and patch2 replaces charlie at line 69.
+bin: DIFFOFDIFFS
+args: crlf1 crlf2
+exit: 0

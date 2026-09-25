@@ -1,0 +1,7 @@
+# Both patches create new.c with CRLF line endings throughout: patch1 writes
+# one, two, three and patch2 one, TWO, three. The reader strips the CRs as line
+# endings, so the report shows no CR bytes and pairs the two creations, with two
+# against TWO.
+bin: DIFFOFDIFFS
+args: crlf1 crlf2
+exit: 0

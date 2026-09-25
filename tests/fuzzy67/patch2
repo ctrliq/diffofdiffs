@@ -1,0 +1,8 @@
+--- a/foo.c
++++ b/foo.c
+@@ -19,3 +19,5 @@
+ line19
+ line20
++NEW1
++NEW2
+ line21
