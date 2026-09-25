@@ -1,0 +1,5 @@
+# The fifth retained row belongs to the backport source after the edit.
+# Comparing the added rows must not delete it.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,4 @@
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
+stdout-sha1: e72ecb9381b376381bf30ee1c192a64359fa225e

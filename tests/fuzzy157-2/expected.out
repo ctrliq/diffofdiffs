@@ -1,0 +1,71 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                 Patch 1: patch1                  ┃                 Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                               *
+═════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches
+make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│big                                      ┃ old new│big
+        │@@ head 00000000                         ┃        │@@ ctx 0 a 00000000
+   1   1│head 00000000                            ┃   1   1│ctx 0 a 00000000
+   2    │qq alpha 00000000                        ┃   2    │qq alpha 00000000
+-  3    │ff pad 0 00000000                        ┃        │
+-  4    │ff pad 1 00000000                        ┃        │
+-  5    │ff pad 2 00000000                        ┃        │
+-  6    │ff pad 3 00000000                        ┃        │
+   7    │rr beta 00000000                         ┃   3    │rr beta 00000000
+-  8    │ff pad 4 00000000                        ┃+      2│pp gamma 00000000
+-  9    │ff pad 5 00000000                        ┃   4   3│ctx 0 b 00000000
+- 10    │ff pad 6 00000000                        ┃        │
+- 11    │ff pad 7 00000000                        ┃        │
+- 12    │    qq alpha 00000000                    ┃        │
+- 13    │    rr beta 00000000                     ┃        │
+- 14    │	   qq alpha 00000000              ┃        │
+- 15    │	   rr beta 00000000               ┃        │
+- 16    │ 	  qq alpha 00000000               ┃        │
+- 17    │ 	  rr beta 00000000                ┃        │
+- 18    │		  qq alpha 00000000       ┃        │
+- 19    │		  rr beta 00000000        ┃        │
+- 20    │  	 qq alpha 00000000                ┃        │
+- 21    │  	 rr beta 00000000                 ┃        │
+- 22    │	 	 qq alpha 00000000        ┃        │
+- 23    │	 	 rr beta 00000000         ┃        │
+- 24    │ 		 qq alpha 00000000        ┃        │
+- 25    │ 		 rr beta 00000000         ┃        │
+- 26    │			 qq alpha 00000000┃        │
+- 27    │			 rr beta 00000000 ┃        │
+- 28    │   	qq alpha 00000000                 ┃        │
+- 29    │   	rr beta 00000000                  ┃        │
+- 30    │	  	qq alpha 00000000         ┃        │
+- 31    │	  	rr beta 00000000          ┃        │
+- 32    │ 	 	qq alpha 00000000         ┃        │
+- 33    │ 	 	rr beta 00000000          ┃        │
+- 34    │		 	qq alpha 00000000 ┃        │
+- 35    │		 	rr beta 00000000  ┃        │
++      2│ pp gamma 00000000                       ┃        │
++      3│	pp gamma 00000000                 ┃        │
++      4│    pp gamma 00000000                    ┃        │
++      5│	   pp gamma 00000000              ┃        │
++      6│ 	  pp gamma 00000000               ┃        │
++      7│		  pp gamma 00000000       ┃        │
++      8│  	 pp gamma 00000000                ┃        │
++      9│	 	 pp gamma 00000000        ┃        │
++     10│ 		 pp gamma 00000000        ┃        │
++     11│			 pp gamma 00000000┃        │
++     12│   	pp gamma 00000000                 ┃        │
++     13│	  	pp gamma 00000000         ┃        │
++     14│ 	 	pp gamma 00000000         ┃        │
++     15│		 	pp gamma 00000000 ┃        │
+        │─────────────────────────────────────────╂────────┼─────────────────────────────────────────
+        │@@                                       ┃        │@@ ctx 1 a 00000000
+        │                                         ┃   9   9│ctx 1 a 00000000
+        │                                         ┃- 10    │qq alpha 00000000
+        │                                         ┃- 11    │rr beta 00000000
+        │                                         ┃+     10│pp gamma 00000000
+        │                                         ┃  12  11│ctx 1 b 00000000
