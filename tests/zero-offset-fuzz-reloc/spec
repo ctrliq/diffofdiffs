@@ -1,0 +1,11 @@
+# Patch1 and patch2 edit the same foo.c, in which each line is named after its
+# number. Patch1 adds P1_X after line12 and replaces line20 and line24 with
+# P1_line20 and P1_line24. Patch2 removes line07 and line09 and replaces line08
+# with P2_line08, removes line16, line17, line25, and line38, and replaces
+# line40 with P2_line40. Patch2's hunk headers give every hunk the same new
+# start line as old, ignoring the lines its earlier hunks remove. The report
+# must show every edit on its own patch's side, with patch2's removals of line17
+# and line25 beside those lines as patch1's context.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

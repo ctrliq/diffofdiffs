@@ -1,0 +1,23 @@
+diff --git a/f b/f
+old mode 100644
+new mode 100755
+--- a/f
++++ b/f
+@@ -2,7 +2,7 @@
+ m02
+ m03
+ m04
+-mode_v0
++mode_p1
+ m06
+ m07
+ m08
+@@ -12,7 +12,7 @@
+ m12
+ m13
+ m14
+-m15_v0
++m15_new
+ m16
+ m17
+ m18

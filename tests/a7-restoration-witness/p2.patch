@@ -1,0 +1,22 @@
+--- a/g
++++ b/g
+@@ -1,9 +1,6 @@
+ pad01
+ pad02
+ pad03
+-BLOCK1
+-BLOCK2
+-BLOCK3
+ pad07
+ pad08
+ pad09
+@@ -39,6 +36,9 @@
+ pad39
+ pad40
+ pad41
++BLOCK1
++BLOCK2
++BLOCK3
+ pad42
+ pad43
+ pad44

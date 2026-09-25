@@ -1,0 +1,6 @@
+# Patch1 changes target_v0 at line 4 of f to target_p1, and patch2 changes zzz2
+# at line 32 to zzz2x. Neither patch quotes the other's lines. The report must
+# show each change on its own patch's side.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

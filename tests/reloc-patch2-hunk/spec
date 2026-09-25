@@ -1,0 +1,5 @@
+# The agreed_v0 to agreed_new edit is shared. Only the extra upstream
+# p2_only_line contributes a result difference.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

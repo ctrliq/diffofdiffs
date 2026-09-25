@@ -1,0 +1,7 @@
+# Patch1 deletes T1 and T2 at lines 1-2 and T5 and T6 at lines 6-7 of f, and
+# changes b31 to b31_x at line 31. Patch2 makes only the b31 change. The report
+# must show both deletions on patch1's side alone, as removals in two separate
+# hunks the way patch1 wrote them, and leave out the shared b31 change.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

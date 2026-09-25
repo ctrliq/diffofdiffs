@@ -1,0 +1,7 @@
+# Both patches change b20 at line 20 of f, patch1 to b20_p1 and patch2 to
+# b20_p2. Patch1 also changes b10 to b10_p1 in the same 29-line hunk. The report
+# must show the change at line 10 on patch1's side alone, and the removal of b20
+# as an edit both patches make with the two replacements side by side.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

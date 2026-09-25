@@ -1,0 +1,12 @@
+--- a/f
++++ b/f
+@@ -1,7 +1,8 @@
+ e01
+-agreed_v0
++agreed_new
+ e03
+ e04
++p2_only_line
+ e05
+ e06
+ e07

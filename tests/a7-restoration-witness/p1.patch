@@ -1,0 +1,16 @@
+--- a/g
++++ b/g
+@@ -1,12 +1,12 @@
+ pad01
+-pad02
++PAD02X
+ pad03
+ BLOCK1
+ BLOCK2
+ BLOCK3
+ pad07
+ pad08
+ pad09
+ pad10
+ pad11
+ pad12

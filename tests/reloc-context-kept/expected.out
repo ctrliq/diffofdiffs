@@ -1,0 +1,44 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: p1.patch┃Patch 2: p2.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only
+the source lines quoted in the
+patches.
+
+═══════════════════════════════════
+*    DELTA DIFFERENCES            *
+═══════════════════════════════════
+Signs mark edits made by only that
+patch. A sign-less line with one
+number is an edit both patches
+make: a new number means both add
+it, an old number means both remove
+it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f       ┃ old new│f
+        │@@ d22  ┃        │@@
+  22  22│d22     ┃        │
+  23  23│d23     ┃        │
+  24  24│d24     ┃        │
+- 25    │t_v0    ┃        │
++     25│t_p1    ┃        │
+  26  26│d26     ┃        │
+  27  27│d27     ┃        │
+  28  28│d28     ┃        │
+
+═══════════════════════════════════
+*    CONTEXT DIFFERENCES          *
+═══════════════════════════════════
+Signs mark lines present in only
+one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f       ┃     new│f
+        │@@ d06  ┃        │@@ d06
+       6│d06     ┃       6│d06
+-      7│drift_BP┃+      7│drift_UP
+       8│d08     ┃       8│d08
+       9│ctx_new ┃       9│ctx_new
+      10│d10     ┃      10│d10

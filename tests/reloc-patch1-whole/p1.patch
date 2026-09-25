@@ -1,0 +1,20 @@
+--- a/f
++++ b/f
+@@ -1,7 +1,7 @@
+ c01
+ c02
+ c03
+-target_v0
++target_p1
+ c05
+ c06
+ c07
+@@ -18,7 +18,7 @@
+ c18
+ c19
+ c20
+-agreed_v0
++agreed_new
+ c22
+ c23
+ c24

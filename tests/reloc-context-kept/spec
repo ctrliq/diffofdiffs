@@ -1,0 +1,8 @@
+# Both patches replace ctx_v0 with ctx_new at line 9 of f, but patch1 quotes
+# drift_BP as line 7 where patch2 quotes drift_UP. Patch1 also changes t_v0 to
+# t_p1 at line 25, where patch2 quotes nothing. The report must show the line-25
+# change on patch1's side alone and leave out the shared line-9 change, and it
+# must still show the line-7 difference in its own context section.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

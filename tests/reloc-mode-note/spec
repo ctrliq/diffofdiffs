@@ -1,0 +1,7 @@
+# Patch1 changes f's mode from 100644 to 100755 and changes mode_v0 to mode_p1
+# at line 5, where patch2 quotes nothing. Both patches change m15_v0 to m15_new
+# at line 15. The report must show the mode change and the line-5 change on
+# patch1's side alone and leave out the shared line-15 change.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

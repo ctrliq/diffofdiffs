@@ -1,0 +1,6 @@
+# Both patches rewrite the same line to different text, so the delta hunk
+# carries one change line from each patch. A mixed hunk is a genuine
+# difference between the patches and must stay in DELTA untouched.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

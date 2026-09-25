@@ -1,0 +1,7 @@
+# Lines 3 and 4 of f are both blank. Patch1 removes the blank line at 4 and
+# changes k12 at line 6 to k12x, and patch2 makes only the k12 change. The
+# report must show the blank line's removal on patch1's side, and the k12
+# change, which falls in the same group, as an edit both patches make.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

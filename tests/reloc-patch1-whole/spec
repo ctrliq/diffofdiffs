@@ -1,0 +1,7 @@
+# Patch1 changes target_v0 to target_p1 at line 4 of f, where patch2 quotes
+# nothing, and both patches change agreed_v0 to agreed_new at line 21. The
+# report must show the line-4 change on patch1's side alone and leave out the
+# shared line-21 change.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

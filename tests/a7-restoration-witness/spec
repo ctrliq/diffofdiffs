@@ -1,0 +1,11 @@
+# Patch1 changes pad02 to PAD02X near the top of g. Patch2 removes BLOCK1-BLOCK3
+# from lines 4-6 and adds the same three lines after pad41, so the removal falls
+# inside the lines patch1 quotes while the addition lies past them.
+#
+# The report must show patch2's removal of BLOCK1-BLOCK3 as '-' lines beside
+# patch1's unchanged copies and the later addition on patch2's side alone. The
+# moved block must not collapse into unchanged context just because patch2 adds
+# the same lines back elsewhere.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0
