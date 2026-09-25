@@ -850,10 +850,302 @@ static void align_until(struct paired_rows *pairs, size_t *at,
 	}
 }
 
+static void align_unpaired(struct paired_rows *pairs, size_t *at,
+			   const size_t *end)
+{
+	for (; at[0] < end[0]; at[0]++)
+		append_pair(pairs, at[0], SIZE_MAX, false);
+	for (; at[1] < end[1]; at[1]++)
+		append_pair(pairs, SIZE_MAX, at[1], false);
+}
+
+static void align_fallback(struct paired_rows *pairs, size_t *at,
+			   const size_t *end,
+			   const struct source_view *views[2], bool backward)
+{
+	if (backward) {
+		/* Keep excess rows above a suffix's following anchor */
+		size_t count = MIN(end[0] - at[0], end[1] - at[1]);
+		size_t start[2] = { end[0] - count, end[1] - count };
+
+		align_unpaired(pairs, at, start);
+	}
+	align_until(pairs, at, end, views);
+}
+
+static unsigned int replacement_similarity(const struct udiff_line *a,
+					   const struct udiff_line *b)
+{
+	struct udiff_matches matches __free(udiff_matches) = {};
+	size_t total_bytes = a->len + b->len, count = 0, common = 0;
+	size_t identifiers;
+	const struct udiff_line *source[2] = { a, b };
+	struct udiff_line *lines __free(free) = NULL;
+	struct udiff_image image[2] = {};
+	char *bytes __free(free) = NULL;
+
+	if (total_bytes > REPLACEMENT_MAX_BYTES || patch_row_equal(a, b))
+		return 0;
+
+	lines = xmalloc_array(total_bytes, sizeof(*lines));
+	bytes = xmalloc_array(total_bytes, 2);
+
+	/*
+	 * Identifier bytes carry more evidence than whitespace and punctuation.
+	 * Encode each as a separate line for libgit2, without locale-dependent
+	 * expansion, so terminal settings cannot change the chosen rows. At
+	 * least three quarters must survive to displace positional pairing.
+	 */
+	for (int leg = 0; leg < 2; leg++) {
+		image[leg].lines = lines + count;
+		image[leg].bytes = bytes + 2 * count;
+		for (size_t i = 0; i < source[leg]->len; i++) {
+			char c = source[leg]->ptr[i];
+
+			if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') &&
+			    (c < '0' || c > '9') && c != '_' && c < 0x80)
+				continue;
+
+			bytes[2 * count] = c;
+			bytes[2 * count + 1] = '\n';
+			lines[count] =
+				(typeof(lines[0])){ .ptr = bytes + 2 * count,
+						    .len = 2 };
+			count++;
+			image[leg].nlines++;
+		}
+	}
+	udiff_match(&image[0], &image[1], &matches);
+	for (size_t i = 0; i < image[0].nlines; i++)
+		common += matches.side[0][i] != SIZE_MAX;
+
+	/* Reward common bytes and subtract the longer side's unmatched bytes */
+	identifiers = MAX(image[0].nlines, image[1].nlines);
+	return common * 4 >= identifiers * 3 ? common * 2 - identifiers : 0;
+}
+
+static const struct patch_row *gap_row(const struct comparison *review,
+				       const struct source_view *views[2],
+				       int leg, size_t at)
+{
+	return &review->source[leg].rows[views ? views[leg]->rows[at] : at];
+}
+
 struct replacement_match {
 	size_t mate;
 	unsigned int score;
 };
+
+static void consider_replacement(struct replacement_match *best, size_t mate,
+				 unsigned int score)
+{
+	/*
+	 * Keep the tied score so a later equal candidate cannot break the tie.
+	 */
+	if (score > best->score)
+		*best = (typeof(*best)){ .mate = mate, .score = score };
+	else if (score == best->score)
+		best->mate = SIZE_MAX;
+}
+
+static void align_known_replacements(const struct comparison *review,
+				     struct paired_rows *pairs, size_t *at,
+				     const size_t *end,
+				     const struct source_view *views[2],
+				     bool backward)
+{
+	size_t count[2] = { end[0] - at[0], end[1] - at[1] };
+	size_t first[2] = { at[0], at[1] }, last = SIZE_MAX;
+	struct replacement_match *best __free(free) = NULL;
+	struct replacement_match *right;
+
+	/*
+	 * Empty or single-row gaps need no candidate search. Large gaps also
+	 * retain positional pairing to bound quadratic work.
+	 */
+	if (!count[0] || !count[1] || (count[0] == 1 && count[1] == 1) ||
+	    count[0] > REPLACEMENT_MAX_PAIRS / count[1]) {
+		align_fallback(pairs, at, end, views, backward);
+		return;
+	}
+
+	best = xzalloc_array(count[0] + count[1], sizeof(*best));
+	right = best + count[0];
+
+	/*
+	 * These pairs affect layout only. Exact parent/result matches still
+	 * determine equality, edit ownership, and the boundaries of this gap.
+	 */
+	for (size_t i = 0; i < count[0]; i++) {
+		const struct patch_row *a =
+			gap_row(review, views, 0, first[0] + i);
+
+		for (size_t j = 0; j < count[1]; j++) {
+			const struct patch_row *b =
+				gap_row(review, views, 1, first[1] + j);
+			unsigned int weight = 0;
+
+			if (views || a->sign == b->sign || a->sign == ' ' ||
+			    b->sign == ' ')
+				weight = replacement_similarity(&a->text,
+								&b->text);
+			consider_replacement(&best[i], j, weight);
+			consider_replacement(&right[j], i, weight);
+		}
+	}
+
+	/* Tied or crossed matches cannot choose a reliable source occurrence */
+	for (size_t i = 0; i < count[0]; i++) {
+		size_t mate = best[i].mate;
+
+		if (!best[i].score || mate == SIZE_MAX ||
+		    right[mate].mate != i) {
+			best[i].mate = SIZE_MAX;
+			continue;
+		}
+
+		if (last != SIZE_MAX && mate < last) {
+			align_fallback(pairs, at, end, views, backward);
+			return;
+		}
+		last = mate;
+	}
+	for (size_t i = 0; i < count[0]; i++) {
+		size_t boundary[2];
+
+		if (best[i].mate == SIZE_MAX)
+			continue;
+
+		boundary[0] = first[0] + i;
+		boundary[1] = first[1] + best[i].mate;
+		align_fallback(pairs, at, boundary, views, backward);
+		append_pair(pairs, at[0]++, at[1]++, false);
+	}
+	align_fallback(pairs, at, end, views, backward);
+}
+
+static void align_replaced_additions(const struct comparison *review,
+				     struct paired_rows *pairs, size_t *at,
+				     const size_t *end)
+{
+	size_t next[2] = { at[0], at[1] };
+
+	if (!at[0] || !at[1] ||
+	    gap_row(review, NULL, 0, at[0] - 1)->sign != '-' ||
+	    gap_row(review, NULL, 1, at[1] - 1)->sign != '-' ||
+	    review_mate(review, 0, 0, at[0] - 1) != at[1] - 1)
+		return;
+
+	/* A shared removal locates its immediately following replacement */
+	for (int leg = 0; leg < 2; leg++) {
+		for (; next[leg] < end[leg]; next[leg]++) {
+			if (gap_row(review, NULL, leg, next[leg])->sign != '+')
+				break;
+		}
+	}
+	if (next[0] > at[0] && next[1] > at[1])
+		align_known_replacements(review, pairs, at, next, NULL, false);
+}
+
+static size_t quoted_island_position(const struct comparison *review,
+				     const struct source_view *views[2],
+				     int leg, size_t at, size_t end)
+{
+	for (; at < end; at++) {
+		const struct patch_row *row = gap_row(review, views, leg, at);
+
+		if (row->sign != '?')
+			return row->pos[0];
+	}
+	return SIZE_MAX;
+}
+
+/*
+ * Order unpaired islands by position so reversal keeps the same groups. These
+ * coordinates order presentation only; they cannot establish a match.
+ */
+static void align_unknown_islands(const struct comparison *review,
+				  struct paired_rows *pairs, size_t *at,
+				  const size_t *end,
+				  const struct source_view *views[2])
+{
+	while (at[0] < end[0] || at[1] < end[1]) {
+		size_t key[2], stop[2], next;
+
+		for (int leg = 0; leg < 2; leg++) {
+			key[leg] = quoted_island_position(review, views, leg,
+							  at[leg], end[leg]);
+		}
+
+		next = MIN(key[0], key[1]);
+
+		/* Islands starting together share one group after both gaps */
+		for (int leg = 0; leg < 2; leg++) {
+			stop[leg] = at[leg];
+			if (at[leg] == end[leg] || key[leg] != next)
+				continue;
+			for (; stop[leg] < end[leg]; stop[leg]++) {
+				if (gap_row(review, views, leg, stop[leg])
+					    ->sign != '?')
+					break;
+			}
+		}
+		align_unpaired(pairs, at, stop);
+		for (int leg = 0; leg < 2; leg++) {
+			if (at[leg] == end[leg] || key[leg] != next)
+				continue;
+			for (; stop[leg] < end[leg]; stop[leg]++) {
+				if (gap_row(review, views, leg, stop[leg])
+					    ->sign == '?')
+					break;
+			}
+		}
+		align_unpaired(pairs, at, stop);
+	}
+}
+
+static void align_replacements(const struct comparison *review,
+			       struct paired_rows *pairs, size_t *at,
+			       const size_t *end,
+			       const struct source_view *views[2])
+{
+	size_t first[2] = { end[0], end[1] }, last[2] = {};
+
+	for (int leg = 0; leg < 2; leg++) {
+		for (size_t i = at[leg]; i < end[leg]; i++) {
+			if (gap_row(review, views, leg, i)->sign != '?')
+				continue;
+
+			first[leg] = MIN(first[leg], i);
+			last[leg] = i + 1;
+		}
+	}
+	if (!last[0] && !last[1]) {
+		align_known_replacements(review, pairs, at, end, views, false);
+		return;
+	}
+
+	/* A gapless opposite interval has no boundary at which to split it */
+	if (!last[0] || !last[1]) {
+		if (!views)
+			align_replaced_additions(review, pairs, at, end);
+		align_unknown_islands(review, pairs, at, end, views);
+		return;
+	}
+
+	/*
+	 * Only the quoted prefix and suffix attach to the surrounding anchors.
+	 * Rows between the first and last gap have no reliable correspondence.
+	 */
+	align_until(pairs, at, first, views);
+	align_unknown_islands(review, pairs, at, last, views);
+
+	/*
+	 * The suffix is wholly quoted. Similar rows anchor it; unmatched rows
+	 * attach backward to the next anchor, leaving any excess above.
+	 */
+	align_known_replacements(review, pairs, at, end, views, true);
+}
 
 /* Parent rows can pair deletions inside each interval between result rows */
 static void align_parents(const struct comparison *review,
@@ -869,11 +1161,11 @@ static void align_parents(const struct comparison *review,
 
 		next[0] = i;
 		next[1] = mate;
-		align_until(pairs, at, next, NULL);
+		align_replacements(review, pairs, at, next, NULL);
 		append_pair(pairs, at[0]++, at[1]++,
 			    review_mate(review, 0, 0, i) == mate);
 	}
-	align_until(pairs, at, end, NULL);
+	align_replacements(review, pairs, at, end, NULL);
 }
 
 /*
@@ -904,7 +1196,7 @@ static void pair_rows(const struct comparison *review,
 		end[0] = context ? i : views[0]->rows[i];
 		end[1] = context ? mate : views[1]->rows[mate];
 		if (context)
-			align_until(pairs, at, end, views);
+			align_replacements(review, pairs, at, end, views);
 		else
 			align_parents(review, pairs, at, end);
 		append_pair(pairs, at[0]++, at[1]++,
@@ -915,7 +1207,7 @@ static void pair_rows(const struct comparison *review,
 				     review->source[leg].nrows;
 	}
 	if (context)
-		align_until(pairs, at, end, views);
+		align_replacements(review, pairs, at, end, views);
 	else
 		align_parents(review, pairs, at, end);
 	if (context) {
