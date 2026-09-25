@@ -1906,6 +1906,254 @@ static void tree4_mark_leg(git_repository *repo, const char *name,
 }
 
 /*
+ * Both operands replace row 8 of the same parent source with different calls.
+ * The surrounding rows remain equal, so tree comparisons can distinguish the
+ * replacement from its unchanged context.
+ */
+static size_t tree4_att_doc(const char *leg, bool tip, char *buf, size_t cap)
+{
+	const char *call = "old_call";
+	size_t off = 0;
+
+	if (tip)
+		call = strcmp(leg, "one") ? "newer_call" : "new_call";
+
+	doc_row(buf, cap, &off, "static void att_prepare(struct att *a)\n");
+	doc_row(buf, cap, &off, "{\n");
+	doc_row(buf, cap, &off, "\tatt_reset(a);\n");
+	doc_row(buf, cap, &off, "\tatt_clear(a);\n");
+	doc_row(buf, cap, &off, "\tatt_index(a);\n");
+	doc_row(buf, cap, &off, "\tatt_mark(a);\n");
+	doc_row(buf, cap, &off, "\tatt_flush(a);\n");
+	doc_row(buf, cap, &off, "\t%s(a);\n", call);
+	doc_row(buf, cap, &off, "\tatt_sync(a);\n");
+	doc_row(buf, cap, &off, "\tatt_wake(a);\n");
+	doc_row(buf, cap, &off, "\tatt_poll(a);\n");
+	doc_row(buf, cap, &off, "\tatt_arm(a);\n");
+	doc_row(buf, cap, &off, "\tatt_run(a);\n");
+	doc_row(buf, cap, &off, "}\n");
+
+	return off;
+}
+
+/*
+ * The two histories have byte-identical parents and different replacement
+ * calls. Separate parent and tip trees preserve the source on both sides of
+ * each edit.
+ */
+static void tree4_att_leg(git_repository *repo, const char *name,
+			  const char *leg)
+{
+	git_oid blob, trees[2];
+	char buf[1024];
+	size_t len;
+
+	for (int tip = 0; tip <= 1; tip++) {
+		len = tree4_att_doc(leg, tip, buf, sizeof(buf));
+		put_blob(repo, buf, len, &blob);
+		put_tree1(repo, "att", GIT_FILEMODE_BLOB, &blob, &trees[tip]);
+	}
+
+	tree4_leg(repo, name, &trees[0], &trees[1]);
+}
+
+/*
+ * One deletion-pair leg: the parentless base holds the leg's own del document
+ * beside the shared keeper file, and the tip keeps only the keeper, so the
+ * derivation is a pure deletion whose deleted bytes are the leg's own.
+ */
+static void tree4_del_leg(git_repository *repo, const char *name,
+			  const char *leg)
+{
+	static const char keep_doc[] = "keep row 01\n";
+	git_oid del, keep, trees[2];
+	const struct tree_spec base_ents[] = {
+		{ "del", GIT_FILEMODE_BLOB, &del },
+		{ "keep", GIT_FILEMODE_BLOB, &keep }
+	};
+	char buf[1024];
+	size_t len;
+
+	len = tree4_pair_doc("del", leg, false, 0, 0, 0, false, buf,
+			     sizeof(buf));
+	put_blob(repo, buf, len, &del);
+	put_blob(repo, keep_doc, sizeof(keep_doc) - 1, &keep);
+
+	put_tree(repo, base_ents, ARRAY_SIZE(base_ents), &trees[0]);
+	put_tree1(repo, "keep", GIT_FILEMODE_BLOB, &keep, &trees[1]);
+	tree4_leg(repo, name, &trees[0], &trees[1]);
+}
+
+/*
+ * Renders one state of the pigeon document: forty numbered rows, of which rows
+ * 30 through 34 carry the leg's own spelling, since the two legs' bases are
+ * meant to disagree over that stretch alone. A tip adds one row after row 5 and
+ * one after row 15, and the reworking tip rewrites row 32 as well, the row
+ * sitting inside the disagreement.
+ */
+static size_t tree4_pigeon_doc(const char *leg, bool tip, bool rework,
+			       char *buf, size_t cap)
+{
+	size_t off = 0;
+
+	for (int n = 1; n <= 40; n++) {
+		if (rework && n == 32)
+			doc_row(buf, cap, &off, "pigeon row 32 reworked\n");
+		else if (n >= 30 && n <= 34)
+			doc_row(buf, cap, &off, "pigeon row %02d leg %s\n", n,
+				leg);
+		else
+			doc_row(buf, cap, &off, "pigeon row %02d\n", n);
+
+		if (tip && (n == 5 || n == 15))
+			doc_row(buf, cap, &off, "pigeon row %02d addendum\n",
+				n);
+	}
+
+	return off;
+}
+
+/*
+ * One pigeonhole leg: a parentless base commit and its refed tip child over the
+ * single pigeon file, the reworking leg's tip carrying the extra row-32 edit
+ * the other leg's base holds no matching bytes for.
+ */
+static void tree4_pigeon_leg(git_repository *repo, const char *name,
+			     const char *leg, bool rework)
+{
+	git_oid blob, trees[2];
+	char buf[1024];
+	size_t len;
+
+	for (int tip = 0; tip <= 1; tip++) {
+		len = tree4_pigeon_doc(leg, tip, rework && tip, buf,
+				       sizeof(buf));
+		put_blob(repo, buf, len, &blob);
+		put_tree1(repo, "pigeon", GIT_FILEMODE_BLOB, &blob,
+			  &trees[tip]);
+	}
+
+	tree4_leg(repo, name, &trees[0], &trees[1]);
+}
+
+/*
+ * Leg one repeats the www/o50/ggg sequence at rows 20 and 80; leg two has one
+ * copy at row 50. Leg one inserts ADD1 and ADD2 at its two copies, leaving
+ * equal text at competing correspondence sites. Numbered filler distinguishes
+ * all other rows.
+ *
+ * In the plain form, both legs replace SHARED_OLD below the last copy. The
+ * silent form instead replaces qqq_OLD four rows farther down and puts unequal
+ * ddd/eee rows below the repeated sequence. This separates evidence in the edit
+ * itself from evidence supplied only by surrounding source.
+ */
+static size_t tree4_arb_doc(const char *pfx, bool silent, bool leg2, bool tip,
+			    char *buf, size_t cap)
+{
+	const int site = leg2 ? 50 : 80;
+	const int last = site + (silent ? 8 : 5);
+	size_t off = 0;
+
+	for (int n = 1; n <= last; n++) {
+		int r = !leg2 && n >= 20 && n <= 22 ? n - 20 : n - site;
+
+		switch (r) {
+		case 0:
+			doc_row(buf, cap, &off, "www\n");
+			break;
+		case 1:
+			doc_row(buf, cap, &off, "o50\n");
+			break;
+		case 2:
+			doc_row(buf, cap, &off, "ggg\n");
+			break;
+		case 3:
+			if (silent)
+				doc_row(buf, cap, &off,
+					leg2 ? "eee\n" : "ddd\n");
+			else
+				doc_row(buf, cap, &off,
+					tip ? "SHARED_NEW\n" : "SHARED_OLD\n");
+			break;
+		case 4:
+			doc_row(buf, cap, &off, "nnn\n");
+			break;
+		case 5:
+			doc_row(buf, cap, &off, leg2 ? "kkk\n" : "mmm\n");
+			break;
+		case 6:
+			doc_row(buf, cap, &off, "ppp\n");
+			break;
+		case 7:
+			doc_row(buf, cap, &off,
+				tip ? "qqq_NEW\n" : "qqq_OLD\n");
+			break;
+		case 8:
+			doc_row(buf, cap, &off, "rrr\n");
+			break;
+		default:
+			doc_row(buf, cap, &off, "%s row %02d\n", pfx, n);
+			break;
+		}
+
+		if (tip && !leg2 && (n == 21 || n == site + 1))
+			doc_row(buf, cap, &off, "ADD%d\n", n == 21 ? 1 : 2);
+	}
+
+	return off;
+}
+
+/*
+ * One arbitration leg: a parentless base commit and its refed tip child over
+ * the single document, leg one's tip carrying the pair of insertions whose
+ * delta pieces contend on leg two's base.
+ */
+static void tree4_arb_leg(git_repository *repo, const char *name,
+			  const char *pfx, bool silent, bool leg2)
+{
+	git_oid blob, trees[2];
+	char buf[2048];
+	size_t len;
+
+	for (int tip = 0; tip <= 1; tip++) {
+		len = tree4_arb_doc(pfx, silent, leg2, tip, buf, sizeof(buf));
+		put_blob(repo, buf, len, &blob);
+		put_tree1(repo, pfx, GIT_FILEMODE_BLOB, &blob, &trees[tip]);
+	}
+
+	tree4_leg(repo, name, &trees[0], &trees[1]);
+}
+
+/*
+ * Keep each source row literal when building the base and result blobs. A fixed
+ * "%s\n" format prevents '%' in fixture source from being interpreted as a
+ * conversion.
+ */
+static void tree4_rows_leg(git_repository *repo, const char *name,
+			   const char *fname, const char *const *base_rows,
+			   size_t n_base, const char *const *tip_rows,
+			   size_t n_tip)
+{
+	git_oid blob, trees[2];
+	char buf[512];
+	size_t off;
+
+	off = 0;
+	for (size_t i = 0; i < n_base; i++)
+		doc_row(buf, sizeof(buf), &off, "%s\n", base_rows[i]);
+	put_blob(repo, buf, off, &blob);
+	put_tree1(repo, fname, GIT_FILEMODE_BLOB, &blob, &trees[0]);
+
+	off = 0;
+	for (size_t i = 0; i < n_tip; i++)
+		doc_row(buf, sizeof(buf), &off, "%s\n", tip_rows[i]);
+	put_blob(repo, buf, off, &blob);
+	put_tree1(repo, fname, GIT_FILEMODE_BLOB, &blob, &trees[1]);
+
+	tree4_leg(repo, name, &trees[0], &trees[1]);
+}
+
+/*
  * Builds independent commit histories for tree comparisons without relying on
  * an external repository. The initial branches cover content, creation, mode
  * changes, missing final newlines, empty commits, and first-parent selection.
@@ -2024,6 +2272,73 @@ static void build_tree4(const char *target)
 	tree4_mark_leg(repo, "mark2", "two", true, false);
 	tree4_pair_leg(repo, "wid1", "wid", "one", false, 0, 0, 0, false);
 	tree4_pair_leg(repo, "wid2", "wid", "two", false, 0, 8, 9, false);
+	tree4_att_leg(repo, "att1", "one");
+	tree4_att_leg(repo, "att2", "two");
+	tree4_del_leg(repo, "del1", "one");
+	tree4_del_leg(repo, "del2", "two");
+	tree4_pigeon_leg(repo, "pig1", "one", false);
+	tree4_pigeon_leg(repo, "pig2", "two", true);
+	tree4_arb_leg(repo, "arb1", "arb", false, false);
+	tree4_arb_leg(repo, "arb2", "arb", false, true);
+	tree4_arb_leg(repo, "sil1", "sil", true, false);
+	tree4_arb_leg(repo, "sil2", "sil", true, true);
+
+	/*
+	 * view4a/view4b share a six-row parent; one replaces its last row and
+	 * the other appends a similar row. The t3/t4 and t5/t6 pairs delete
+	 * overlapping prefixes, with the latter retaining a common suffix. The
+	 * m1/m2 pair moves the overlapping deletions into the middle of a file,
+	 * leaving source on both sides.
+	 */
+	{
+		static const char *const view4_base[] = { "a", "b", "c",
+							  "d", "e", "f" };
+		static const char *const view4a_tip[] = { "a", "b", "c",
+							  "d", "e", "F" };
+		static const char *const view4b_tip[] = { "a", "b", "c",    "d",
+							  "e", "f", "b!!!!" };
+		static const char *const solo_base[] = { "a" };
+		static const char *const t1_tip[] = { "a", "X" };
+		static const char *const duo_base[] = { "a", "b" };
+		static const char *const t3_tip[] = { "b" };
+		static const char *const trio_base[] = { "a", "b", "c" };
+		static const char *const t5_tip[] = { "b", "c" };
+		static const char *const t6_tip[] = { "c" };
+		static const char *const penta_base[] = { "a", "b", "c", "d",
+							  "e" };
+		static const char *const m1_tip[] = { "a", "b", "d", "e" };
+		static const char *const m2_tip[] = { "a", "b", "e" };
+
+		tree4_rows_leg(repo, "view4a", "view4", view4_base,
+			       ARRAY_SIZE(view4_base), view4a_tip,
+			       ARRAY_SIZE(view4a_tip));
+		tree4_rows_leg(repo, "view4b", "view4", view4_base,
+			       ARRAY_SIZE(view4_base), view4b_tip,
+			       ARRAY_SIZE(view4b_tip));
+		tree4_rows_leg(repo, "t1", "solo", solo_base,
+			       ARRAY_SIZE(solo_base), t1_tip,
+			       ARRAY_SIZE(t1_tip));
+		tree4_rows_leg(repo, "t2", "solo", solo_base,
+			       ARRAY_SIZE(solo_base), NULL, 0);
+		tree4_rows_leg(repo, "t3", "duo", duo_base,
+			       ARRAY_SIZE(duo_base), t3_tip,
+			       ARRAY_SIZE(t3_tip));
+		tree4_rows_leg(repo, "t4", "duo", duo_base,
+			       ARRAY_SIZE(duo_base), NULL, 0);
+		tree4_rows_leg(repo, "t5", "trio", trio_base,
+			       ARRAY_SIZE(trio_base), t5_tip,
+			       ARRAY_SIZE(t5_tip));
+		tree4_rows_leg(repo, "t6", "trio", trio_base,
+			       ARRAY_SIZE(trio_base), t6_tip,
+			       ARRAY_SIZE(t6_tip));
+		tree4_rows_leg(repo, "m1", "penta", penta_base,
+			       ARRAY_SIZE(penta_base), m1_tip,
+			       ARRAY_SIZE(m1_tip));
+		tree4_rows_leg(repo, "m2", "penta", penta_base,
+			       ARRAY_SIZE(penta_base), m2_tip,
+			       ARRAY_SIZE(m2_tip));
+	}
+
 	if (git_repository_set_head(repo, "refs/heads/bp"))
 		die("cannot point HEAD at refs/heads/bp");
 
