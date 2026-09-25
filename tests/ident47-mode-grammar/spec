@@ -1,0 +1,8 @@
+# Patch1 edits x.c's text. Patch2's block for x.c carries `new file mode 8`, a
+# mode whose value isn't octal, followed by a GIT binary patch. The reader must
+# still take patch2's block as a binary file record despite the bad mode value,
+# so the report shows patch1's text edit beside patch2's binary file note, with
+# the base85 payload left out.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

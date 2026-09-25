@@ -1,0 +1,8 @@
+# ident47-fragment-only with the block's mode line replaced by a GIT binary
+# patch line, which counts as patch content on its own. That keeps each operand
+# from being refused outright: both operands are read, "doesn't contain a patch"
+# goes out once for each as a warning, and the run finishes at exit 0 with
+# nothing on stdout.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

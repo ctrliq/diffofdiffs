@@ -1,0 +1,8 @@
+# Both patches carry the same git-generated binary block for f.bin, with the
+# same before and after blob ids and the same base85 payload. Nothing differs,
+# so the report must be empty. The block comes from a real `git diff --binary`
+# capture with both the forward and reverse literal runs, not a trimmed
+# stand-in.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

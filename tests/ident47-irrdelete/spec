@@ -1,0 +1,7 @@
+# Both patches delete the same file object. Patch1 uses Git's
+# --irreversible-delete form, which omits the source text. Patch2 quotes
+# the deleted lines. Matching nonzero preimage IDs establish the same
+# whole-file deletion, so different quotation detail is not a delta.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

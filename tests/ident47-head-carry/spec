@@ -1,0 +1,8 @@
+# Both patches are the same: they open with an old mode and new mode pair ahead
+# of any diff --git line, then a block with no hunk that creates the binary file
+# logo.bin with a git binary patch. The stray mode lines must not keep the
+# logo.bin block from being read, and since the patches match, the report is
+# empty.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,6 @@
+# Both patches carry a git binary patch for f.bin from the same before blob to
+# different after blobs, since they write different bytes. The report must show
+# the two binary file notes side by side, each with its own result blob.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,15 @@
+diff --git a/shared.txt b/shared.txt
+index 1111111..2222222 100644
+--- a/shared.txt
++++ b/shared.txt
+@@ -1 +1 @@
+-old line
++new line
+diff --git a/f.bin b/f.bin
+index 07da29e92946a4e1081c9917866c119df2cd3252..743400a00620411f15c603c27a764a2c9c54670d 100644
+GIT binary patch
+literal 31
+mcmZ>CVsLh0aCOVgPsvQnOifA3%u6h)Oi3(Bw6wIWs009-ehQKR
+
+literal 30
+lcmZ>CVsLh0aCOT_&B@6x&o9bJNy^MiEUHXNEJ-vp0sxa>3RD09

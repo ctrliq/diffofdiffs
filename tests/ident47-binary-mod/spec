@@ -1,0 +1,9 @@
+# Both patches carry git binary patches, with no mode lines, for g.bin and
+# f.bin. They change g.bin identically, so g.bin must be left out, while for
+# f.bin they start from the same blob and end at different ones, so the report
+# must show f.bin's two binary file notes side by side with their result blobs.
+# g.bin staying out while f.bin shows checks that the two files are compared
+# separately.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,32 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Patch 1: patch1  ┃  Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the
+source lines quoted in the patches.
+
+═══════════════════════════════════════
+*    DELTA DIFFERENCES                *
+═══════════════════════════════════════
+Signs mark edits made by only that
+patch. A sign-less line with one number
+is an edit both patches make: a new
+number means both add it, an old number
+means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│g.dat     ┃ old new│g.dat
+        │Result blo┃        │Binary fil
+        │b: 4444444┃        │e
+        │          ┃        │Result blo
+        │          ┃        │b: 1708288
+        │          ┃        │413787ed60
+        │          ┃        │4d73652756
+        │          ┃        │e865b83b6e
+        │          ┃        │cfa
+        │@@ line on┃        │@@
+        │e         ┃        │
+   1   1│line one  ┃        │
+-  2    │line two  ┃        │
++      2│line TWO  ┃        │
+   3   3│line three┃        │

@@ -1,0 +1,8 @@
+# Both patches are the same: a block with no hunk that creates the empty file
+# notes.txt, whose diff --git, mode, and index lines end in CRLF, followed by a
+# text block for plain.c on bare LF. An index line may end in one CR and still
+# complete its block, so each block pairs with its identical copy and the report
+# is empty.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,127 @@
+━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: pa┃Patch 2: pa
+   tch1    ┃   tch2
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons
+use only the source
+lines quoted in the
+patches.
+
+═══════════════════════
+*    DELTA DIFFERENCES*
+═══════════════════════
+Signs mark edits made
+by only that patch. A
+sign-less line with one
+number is an edit both
+patches make: a new
+number means both add
+it, an old number means
+both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+ old new│to┃ old new│to
+        │ol┃        │ol
+        │s/┃        │s/
+        │te┃        │te
+        │st┃        │st
+        │in┃        │in
+        │g/┃        │g/
+        │se┃        │se
+        │lf┃        │lf
+        │te┃        │te
+        │st┃        │st
+        │s/┃        │s/
+        │ne┃        │ne
+        │t/┃        │t/
+        │ne┃        │ne
+        │tf┃        │tf
+        │il┃        │il
+        │te┃        │te
+        │r/┃        │r/
+        │br┃        │br
+        │_n┃        │_n
+        │et┃        │et
+        │fi┃        │fi
+        │lt┃        │lt
+        │er┃        │er
+        │.s┃        │.s
+        │h ┃        │h
+        │Ol┃        │Ol
+        │d ┃        │d
+        │mo┃        │mo
+        │de┃        │de
+        │: ┃        │:
+        │10┃        │10
+        │06┃        │06
+        │44┃        │44
+        │Ne┃        │Ne
+        │w ┃        │w
+        │mo┃        │mo
+        │de┃        │de
+        │: ┃        │:
+        │10┃        │10
+        │07┃        │07
+        │55┃        │55
+        │Re┃        │Re
+        │na┃        │na
+        │me┃        │me
+        │: ┃        │:
+        │to┃        │to
+        │ol┃        │ol
+        │s/┃        │s/
+        │te┃        │te
+        │st┃        │st
+        │in┃        │in
+        │g/┃        │g/
+        │se┃        │se
+        │lf┃        │lf
+        │te┃        │te
+        │st┃        │st
+        │s/┃        │s/
+        │ne┃        │ol
+        │tf┃        │dn
+        │il┃        │et
+        │te┃        │fi
+        │r/┃        │lt
+        │br┃        │er
+        │id┃        │/b
+        │ge┃        │ri
+        │_n┃        │dg
+        │et┃        │e_
+        │fi┃        │ne
+        │lt┃        │tf
+        │er┃        │il
+        │.s┃        │te
+        │h ┃        │r.
+        │->┃        │sh
+        │ t┃        │ -
+        │oo┃        │>
+        │ls┃        │to
+        │/t┃        │ol
+        │es┃        │s/
+        │ti┃        │te
+        │ng┃        │st
+        │/s┃        │in
+        │el┃        │g/
+        │ft┃        │se
+        │es┃        │lf
+        │ts┃        │te
+        │/n┃        │st
+        │et┃        │s/
+        │/n┃        │ne
+        │et┃        │t/
+        │fi┃        │ne
+        │lt┃        │tf
+        │er┃        │il
+        │/b┃        │te
+        │r_┃        │r/
+        │ne┃        │br
+        │tf┃        │_n
+        │il┃        │et
+        │te┃        │fi
+        │r.┃        │lt
+        │sh┃        │er
+        │  ┃        │.s
+        │  ┃        │h

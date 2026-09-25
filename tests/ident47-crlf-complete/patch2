@@ -1,0 +1,12 @@
+diff --git a/notes.txt b/notes.txt
+new file mode 100644
+index 0000000..e69de29
+diff --git a/plain.c b/plain.c
+index 1111111..2222222 100644
+--- a/plain.c
++++ b/plain.c
+@@ -1,3 +1,4 @@
+ int main(void)
+ {
++	return 0;
+ }

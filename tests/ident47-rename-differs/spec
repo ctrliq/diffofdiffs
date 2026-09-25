@@ -1,0 +1,11 @@
+# The same wide operand as ident47-rename-same with one path respelled:
+# patch2's armed block renames from a different old name, respelled in
+# the block's own header line too so the document still agrees with
+# itself. The two blocks still pair on the b-name they share and the
+# modes still agree, so the rename dimension is the only one left to
+# disagree, and the note quotes both authored spellings whole. Neither
+# the similarity percentage nor the pre-state oids get a say, since
+# neither of them is a dimension the story comparison runs.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

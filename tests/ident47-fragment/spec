@@ -1,0 +1,10 @@
+# Three pasted fragments in one document, each on its own path: a bare fragment
+# ahead of the real block for dir/file.txt, the same fragment with a stray prose
+# operation line ahead of dir/fileb.txt, and dir/filec.txt with no fragment as
+# the control. A fragment is a git block that names a path and claims an
+# operation but never reaches a payload, so the reader must drop it and let the
+# real block further down keep the path. Both operands carry the same document,
+# so all three paths must stay silent together and the report must be empty.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

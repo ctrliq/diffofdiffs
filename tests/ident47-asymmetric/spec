@@ -1,0 +1,8 @@
+# Patch1 changes g.dat as an ordinary text hunk while patch2 changes the same
+# path as a GIT binary patch block, and their index lines name different result
+# blobs. The report must show g.dat once, with each side's result blob: patch1's
+# text hunk on its side and patch2's binary file note on the other, with the
+# base85 payload left out.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

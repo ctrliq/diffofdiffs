@@ -1,0 +1,45 @@
+From: A <a@b.c>
+Subject: demo
+
+Message text, author pasted a fragment:
+
+diff --git a/dir/file.txt b/dir/file.txt
+new file mode 100644
+
+Then a second pasted fragment, this one with a prose line riding it:
+
+diff --git a/dir/fileb.txt b/dir/fileb.txt
+new file mode 100644
+rename to somewhere else, we decided
+
+And a third path mentioned with no fragment at all.
+---
+ dir/file.txt  | 2 ++
+ dir/fileb.txt | 2 ++
+ dir/filec.txt | 2 ++
+ 3 files changed, 6 insertions(+)
+
+diff --git a/dir/file.txt b/dir/file.txt
+new file mode 100644
+index 0000000..d00491f
+--- /dev/null
++++ b/dir/file.txt
+@@ -0,0 +1,2 @@
++hello
++world
+diff --git a/dir/fileb.txt b/dir/fileb.txt
+new file mode 100644
+index 0000000..d00491f
+--- /dev/null
++++ b/dir/fileb.txt
+@@ -0,0 +1,2 @@
++hello
++world
+diff --git a/dir/filec.txt b/dir/filec.txt
+new file mode 100644
+index 0000000..d00491f
+--- /dev/null
++++ b/dir/filec.txt
+@@ -0,0 +1,2 @@
++hello
++world

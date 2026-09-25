@@ -1,0 +1,8 @@
+# The mirror of ident47-binary-only2: patch1 carries a GIT binary patch block
+# for f.bin that patch2 never mentions, beside a shared.txt change both patches
+# make byte for byte. The identical shared.txt change must be left out, and
+# f.bin must show on patch1's side alone as a binary file note naming the result
+# blob, with the base85 payload left out.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

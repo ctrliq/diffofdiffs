@@ -1,0 +1,9 @@
+# A whole kernel patch fed to itself, carried in for the one hunk-less
+# block in it that flips a mode alongside its rename lines. That block is
+# the only thing in the operand the armed flush ever sees, since arming
+# takes mode or binary vocabulary and the sibling rename blocks carry
+# neither, and against its own twin every dimension the two stories speak
+# agrees, so the whole run comes out silent.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

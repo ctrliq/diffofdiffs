@@ -1,0 +1,10 @@
+# A mode word sitting ahead of every opener, and then a bare opener with
+# nothing at all behind it. The latch that remembers a mode word is per block,
+# so the stray word can't reach forward across the opener to arm the block it
+# precedes, and the bare block behind that opener completes nothing on its own.
+# Neither operand ends up carrying a record anybody could pair, so intake
+# refuses patch1 outright with the no-patch line at exit 1 rather than
+# validating an operand whose only metadata is junk sitting between sections.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

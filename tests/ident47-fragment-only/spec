@@ -1,0 +1,8 @@
+# An operand that's nothing but a pasted fragment: the block names z.c and
+# claims a new file, but no payload follows, so once the reader drops the
+# fragment the operand holds no patch at all. The tool must refuse the first
+# operand with "patch1 doesn't contain a patch" at exit 1, before reading
+# patch2. ident47-fragment-warn shows how one extra line changes the outcome.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1
