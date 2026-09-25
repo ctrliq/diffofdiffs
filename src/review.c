@@ -87,6 +87,16 @@ struct line_occurrence {
 	size_t count[2];
 };
 
+static int line_occurrence_order(const void *a, const void *b)
+{
+	const struct line_occurrence *left = a, *right = b;
+
+	if (left->text.len != right->text.len)
+		return left->text.len < right->text.len ? -1 : 1;
+
+	return memcmp(left->text.ptr, right->text.ptr, left->text.len);
+}
+
 static void init_unmatched_lines(const struct udiff_image *images,
 				 struct udiff_matches *matches)
 {
@@ -96,6 +106,71 @@ static void init_unmatched_lines(const struct udiff_image *images,
 		for (size_t i = 0; i < images[leg].nlines; i++)
 			matches->side[leg][i] = SIZE_MAX;
 	}
+}
+
+static struct line_occurrence *
+collect_line_occurrences(const struct udiff_image *images,
+			 const struct udiff_image *candidates,
+			 const size_t *map, size_t *count)
+{
+	struct line_occurrence *keys =
+		xmalloc_array(candidates->nlines, sizeof(*keys));
+	size_t n = 0;
+
+	*count = 0;
+	for (size_t i = 0; i < candidates->nlines; i++) {
+		if (!map || map[i] != SIZE_MAX)
+			keys[n++] = (typeof(keys[0])){
+				.text = candidates->lines[i]
+			};
+	}
+	qsort(keys, n, sizeof(*keys), line_occurrence_order);
+
+	/* Repeated candidate lines must share one occurrence counter */
+	for (size_t i = 0; i < n; i++) {
+		if (!*count ||
+		    line_occurrence_order(&keys[*count - 1], &keys[i]))
+			keys[(*count)++] = keys[i];
+	}
+	for (int leg = 0; leg < 2; leg++) {
+		for (size_t i = 0; i < images[leg].nlines; i++) {
+			struct line_occurrence key = {
+				.text = images[leg].lines[i]
+			};
+			struct line_occurrence *found;
+
+			found = bsearch(&key, keys, *count, sizeof(*keys),
+					line_occurrence_order);
+
+			/* Two occurrences suffice to disprove uniqueness */
+			if (found && found->count[leg] < 2)
+				found->count[leg]++;
+		}
+	}
+	return keys;
+}
+
+static bool line_has_content(const struct udiff_line *line)
+{
+	for (size_t i = 0; i < line->len; i++) {
+		if (!isspace(line->ptr[i]))
+			return true;
+	}
+	return false;
+}
+
+static bool line_is_unique_in_both(const struct line_occurrence *keys,
+				   size_t count, const struct udiff_line *line)
+{
+	struct line_occurrence key = { .text = *line };
+	const struct line_occurrence *found;
+
+	if (!count || !line_has_content(line))
+		return false;
+
+	found = bsearch(&key, keys, count, sizeof(*keys),
+			line_occurrence_order);
+	return found && found->count[0] == 1 && found->count[1] == 1;
 }
 
 /* A split-file edit can have its shared counterpart in another file pair */
@@ -114,6 +189,63 @@ struct reindentation {
 	struct line_occurrence *keys;
 	size_t nkeys;
 };
+
+static bool blank_neighbors_correspond(const struct comparison *review,
+				       const struct udiff_matches *matches,
+				       const size_t *rows, int direction)
+{
+	int stage = review->source[0].rows[rows[0]].sign == '+';
+	size_t neighbor[2] = { SIZE_MAX, SIZE_MAX };
+	bool boundary[2] = {};
+
+	for (int leg = 0; leg < 2; leg++) {
+		const struct patch_source *source = &review->source[leg];
+		const struct source_view *view = &source->view[stage];
+		size_t at;
+
+		for (at = view->index[rows[leg]] + direction; at < view->count;
+		     at += direction) {
+			const struct patch_row *next =
+				&source->rows[view->rows[at]];
+
+			if (next->sign == '?')
+				break;
+
+			if (line_has_content(&next->text) &&
+			    (next->sign == ' ' ||
+			     matches->side[leg][at] != SIZE_MAX)) {
+				neighbor[leg] = view->rows[at];
+				break;
+			}
+		}
+		boundary[leg] = at >= view->count;
+	}
+	return (boundary[0] && boundary[1]) ||
+	       (neighbor[0] != SIZE_MAX && neighbor[1] != SIZE_MAX &&
+		source_mate(review, matches, 0, stage, neighbor[0]) ==
+			neighbor[1]);
+}
+
+/* A blank edit needs a neighboring correspondence to identify its site */
+static bool same_blank_edit_site(const struct comparison *review, size_t row,
+				 size_t mate)
+{
+	int stage = review->source[0].rows[row].sign == '+';
+	const size_t rows[2] = { row, mate };
+
+	for (int direction = -1; direction <= 1; direction += 2) {
+		if (blank_neighbors_correspond(review, &review->matches[stage],
+					       rows, direction))
+			return true;
+	}
+
+	/* Reindented edits need support on both sides of the blank */
+	return review->alignment[stage].side[0] &&
+	       blank_neighbors_correspond(review, &review->alignment[stage],
+					  rows, -1) &&
+	       blank_neighbors_correspond(review, &review->alignment[stage],
+					  rows, 1);
+}
 
 static void match_changes(struct comparison *review)
 {
@@ -138,6 +270,30 @@ static void match_changes(struct comparison *review)
 			}
 			review->edits[leg][i] = mate;
 		}
+	}
+
+	/* Reject the raw match too, so layout can't reuse a bad site */
+	for (size_t i = 0; i < review->source[0].nrows; i++) {
+		const struct patch_row *row = &review->source[0].rows[i];
+		size_t mate = review->edits[0][i];
+		size_t left, right;
+		int stage;
+
+		if (mate == SIZE_MAX || line_has_content(&row->text) ||
+		    same_blank_edit_site(review, i, mate))
+			continue;
+
+		stage = row->sign == '+';
+		left = review->source[0].view[stage].index[i];
+		right = review->source[1].view[stage].index[mate];
+		review->matches[stage].side[0][left] = SIZE_MAX;
+		review->matches[stage].side[1][right] = SIZE_MAX;
+		if (review->alignment[stage].side[0]) {
+			review->alignment[stage].side[0][left] = SIZE_MAX;
+			review->alignment[stage].side[1][right] = SIZE_MAX;
+		}
+		review->edits[0][i] = SIZE_MAX;
+		review->edits[1][mate] = SIZE_MAX;
 	}
 }
 
@@ -283,7 +439,67 @@ static void compare_sources(struct comparison *review)
 	}
 }
 
-static void select_delta(struct comparison *review)
+/* Quoted source or a unique match can locate retained counterparts */
+static void select_counterparts(struct comparison *review, int stage)
+{
+	struct line_occurrence *keys __free(free) = NULL;
+	struct udiff_image images[2];
+	size_t count = 0;
+
+	for (int leg = 0; leg < 2; leg++) {
+		const struct source_view *view =
+			&review->source[leg].view[stage];
+
+		images[leg] = (typeof(images[0])){ .lines = view->lines,
+						   .nlines = view->count };
+	}
+	if (review->source[0].complete)
+		keys = collect_line_occurrences(images, &images[0],
+						review->matches[stage].side[0],
+						&count);
+	for (int leg = 0; leg < 2; leg++) {
+		const struct patch_source *source = &review->source[leg];
+		const struct patch_source *other = &review->source[!leg];
+		char sign = stage ? '+' : '-';
+
+		for (size_t i = 0; i < source->nrows; i++) {
+			const struct patch_row *row = &source->rows[i];
+			size_t mate;
+
+			if (!review->selected[leg][i] || row->sign != sign)
+				continue;
+
+			mate = review_mate(review, leg, stage, i);
+			if (mate == SIZE_MAX || other->rows[mate].sign != ' ')
+				continue;
+
+			if (other->rows[mate].hunk != SIZE_MAX ||
+			    line_is_unique_in_both(keys, count, &row->text))
+				review->selected[!leg][mate] = true;
+		}
+	}
+}
+
+static void select_margin(const struct patch_source *source, bool *selected,
+			  size_t at, unsigned int context, int direction)
+{
+	for (size_t n = 0; n < context; n++) {
+		if ((!at && direction < 0) ||
+		    (at + 1 == source->nrows && direction > 0))
+			break;
+
+		at = direction < 0 ? at - 1 : at + 1;
+
+		/* An unquoted gap gives no source to use as display context */
+		if (source->rows[at].sign == '?')
+			break;
+
+		selected[at] = true;
+	}
+}
+
+static void select_delta(struct comparison *review, unsigned int context,
+			 bool shared_deletion)
 {
 	for (int leg = 0; leg < 2; leg++) {
 		const struct patch_source *source = &review->source[leg];
@@ -304,7 +520,8 @@ static void select_delta(struct comparison *review)
 			if (row->sign != '-' && row->sign != '+')
 				continue;
 
-			if (patch_row_partner(source, i)) {
+			if ((shared_deletion && row->sign == '-') ||
+			    patch_row_partner(source, i)) {
 				review->shared[leg][i] = true;
 				continue;
 			}
@@ -319,6 +536,27 @@ static void select_delta(struct comparison *review)
 	}
 
 	/* Include retained counterparts before growing context margins */
+	for (int stage = 0; stage < 2; stage++)
+		select_counterparts(review, stage);
+	for (int leg = 0; leg < 2; leg++) {
+		const struct patch_source *source = &review->source[leg];
+		bool *seeds __free(free) =
+			xmalloc_array(source->nrows, sizeof(*seeds));
+
+		/* Freeze the seeds so newly selected context can't grow more */
+		memcpy(seeds, review->selected[leg],
+		       source->nrows * sizeof(*seeds));
+		for (size_t i = 0; i < source->nrows; i++) {
+			if (!seeds[i])
+				continue;
+
+			for (int direction = -1; direction <= 1;
+			     direction += 2) {
+				select_margin(source, review->selected[leg], i,
+					      context, direction);
+			}
+		}
+	}
 }
 
 struct row_pair {
@@ -477,6 +715,52 @@ static void select_pairs(const struct comparison *review,
 	}
 }
 
+static char *source_name(const struct patch_source *source,
+			 const struct patch_file *other, size_t first,
+			 bool result)
+{
+	const struct source_view *view =
+		&source->view[result || source->rows[first].sign == '+'];
+	size_t position = view->index[first], begin = position,
+	       end = position + 1;
+	size_t hunk = source->rows[first].hunk;
+	struct iomem_slice name = {};
+	struct udiff_image image;
+	size_t definition;
+
+	if (source->complete) {
+		begin = 0;
+		end = view->count;
+	} else {
+		/* Unquoted patch boundaries limit declaration searches */
+		for (;
+		     begin && source->rows[view->rows[begin - 1]].hunk == hunk;
+		     begin--)
+			;
+		for (; end < view->count &&
+		       source->rows[view->rows[end]].hunk == hunk;
+		     end++)
+			;
+	}
+	image = (typeof(image)){ .lines = view->lines + begin,
+				 .nlines = end - begin };
+	definition = source_definition(
+		&image, position - begin,
+		path_names_c_source(patch_file_path(source->file ?: other)));
+	if (definition != SIZE_MAX)
+		name = (typeof(name)){ .base = image.lines[definition].ptr,
+				       .len = image.lines[definition].len };
+
+	/* A patch may quote no declaration, leaving only its hunk heading */
+	if (!name.len && source->file && hunk != SIZE_MAX)
+		name = source->file->hunks[hunk].name;
+	for (; name.len && isspace(name.base[0]); name.len--)
+		name.base++;
+	for (; name.len && isspace(name.base[name.len - 1]); name.len--)
+		;
+	return name.len ? memdup(name.base, name.len) : NULL;
+}
+
 static void save_review_row(const struct comparison *review,
 			    const struct row_pair *pair, int leg, bool context,
 			    struct review_row *saved)
@@ -567,9 +851,17 @@ static void save_section(const struct comparison *review,
 		block = &section->blocks[section->nblocks - 1];
 		block->count++;
 		for (int leg = 0; leg < 2; leg++) {
+			const struct patch_source *source =
+				&review->source[leg];
+			size_t at = pair->side[leg];
+
 			if (!pair->selected[leg])
 				continue;
 
+			if (previous[leg] == SIZE_MAX)
+				block->name[leg] = source_name(
+					source, review->source[!leg].file, at,
+					context);
 			previous[leg] = indexes[leg];
 			save_review_row(review, pair, leg, context,
 					&saved->side[leg]);
@@ -603,17 +895,91 @@ static char *file_label(const struct patch_source *source,
 	return git_quote_name(stripped_name);
 }
 
+/* Null IDs name absence; present IDs compare at their common written width */
+static bool same_blob(const struct iomem_slice *a, const struct iomem_slice *b)
+{
+	const struct iomem_slice *ids[2] = { a, b };
+	bool zero[2] = { true, true };
+
+	for (int leg = 0; leg < 2; leg++) {
+		for (size_t i = 0; i < ids[leg]->len; i++)
+			zero[leg] &= ids[leg]->base[i] == '0';
+	}
+	if (zero[0] || zero[1])
+		return zero[0] == zero[1];
+
+	/* A full SHA-1 ID cannot abbreviate an ID from a longer hash family */
+	if ((a->len == 40 && b->len > 40) || (b->len == 40 && a->len > 40))
+		return false;
+
+	return !memcmp(a->base, b->base, MIN(a->len, b->len));
+}
+
+static char *format_file_metadata(const struct patch_file *file, bool show_id)
+{
+	struct iomem_writer writer = {};
+	const struct block_story *story;
+	struct iomem_buf out = {};
+
+	if (!file)
+		return NULL;
+
+	story = &file->story;
+	iomem_writer_open(&writer);
+	if (file->empty[0])
+		fprintf(writer.fp, "Create file\n");
+	if (file->empty[1])
+		fprintf(writer.fp, "Delete file\n");
+	if (story->mode.old_mode[0])
+		fprintf(writer.fp, "Old mode: %s\n", story->mode.old_mode);
+	if (story->mode.new_mode[0])
+		fprintf(writer.fp, "New mode: %s\n", story->mode.new_mode);
+	if (file->operation_name[0]) {
+		char *old_text __free(free) =
+			git_quote_name(file->operation_name[0]);
+		char *new_text __free(free) =
+			git_quote_name(file->operation_name[1]);
+
+		fprintf(writer.fp, "%s: %s -> %s\n",
+			file->copy ? "Copy" : "Rename", old_text, new_text);
+	}
+
+	/* Blob identities carry the difference when source is not quoted */
+	if (story->has_binary)
+		fputs("Binary file\n", writer.fp);
+	if (show_id && story->has_index)
+		fprintf(writer.fp, "Result blob: %.*s\n",
+			(int)story->index_post.len, story->index_post.base);
+	iomem_writer_publish(&writer, &out);
+	if (!out.len) {
+		iomem_buf_free(&out);
+		return NULL;
+	}
+
+	return out.base;
+}
+
 static void review_file_build(struct review_file *file,
 			      const struct patch_file *a,
 			      const struct patch_file *b)
 {
 	struct comparison review __free(comparison) = {};
+	const struct iomem_slice absent = {};
+	bool shared_deletion;
+	bool show_id = false;
 
 	patch_source_read(&review.source[0], a, b, 0, gittree_active());
 	patch_source_read(&review.source[1], b, a, 1, gittree_active());
 	compare_sources(&review);
 
-	select_delta(&review);
+	/* An irreversible deletion omits text, not the whole-file operation */
+	shared_deletion = a && b && a->empty[1] && b->empty[1] &&
+			  (!a->nhunks || !b->nhunks) && a->story.has_index &&
+			  b->story.has_index &&
+			  !same_blob(&a->story.index_pre, &absent) &&
+			  same_blob(&a->story.index_pre, &b->story.index_pre);
+	select_delta(&review, max_context, shared_deletion);
+
 	for (int section = 0; section < 1; section++) {
 		struct paired_rows pairs __free(paired_rows) = {};
 
@@ -626,6 +992,38 @@ static void review_file_build(struct review_file *file,
 
 		file->path[leg] = file_label(source, &review.source[!leg]);
 		file->ambiguous |= source->ambiguous;
+		if (source->file && source->file->empty[1] &&
+		    !source->file->nhunks && !shared_deletion)
+			file->note[leg] = xstrdup(
+				"This patch deletes the whole file without quoting its source.\n");
+	}
+	/* Original file comparisons own operations and blob metadata */
+	if (a && b) {
+		show_id =
+			a->story.has_index && b->story.has_index &&
+			(a->story.has_binary || b->story.has_binary ||
+			 !a->nhunks || !b->nhunks) &&
+			!same_blob(&a->story.index_post, &b->story.index_post);
+	} else {
+		const struct patch_file *only = a ?: b;
+
+		show_id = only && (only->story.has_binary || !only->nhunks);
+	}
+	file->metadata[0] = format_file_metadata(a, show_id);
+	file->metadata[1] = format_file_metadata(b, show_id);
+	file->metadata_diff =
+		strcmp(file->metadata[0] ?: "", file->metadata[1] ?: "") != 0;
+	if (a && b && a->story.has_binary && b->story.has_binary &&
+	    (!a->story.has_index || !b->story.has_index) &&
+	    (a->binary.len != b->binary.len ||
+	     (a->binary.len &&
+	      memcmp(a->binary.base, b->binary.base, a->binary.len)))) {
+		char *previous __free(free) = file->note[0];
+
+		file->metadata_diff = true;
+		xasprintf(&file->note[0],
+			  "%sThe quoted binary patch data differs.\n",
+			  previous ?: "");
 	}
 }
 
