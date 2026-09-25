@@ -1,0 +1,14 @@
+--- a/f
++++ b/f
+@@ -1,9 +1,9 @@
+-aaa
++AAA
+ bbb
+ tail one
+ tail two
+ ccc
+ ddd
+ eee
+ tail one
+ tail two
+\ No newline at end of file

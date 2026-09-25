@@ -1,0 +1,15 @@
+--- a/foo.c
++++ b/foo.c
+@@ -6,4 +6,2 @@
+ line06
+-line07
+-line08
++P2_line08
+-line09
+@@ -16,3 +16,1 @@
+-line16
+-line17
+ line18
+@@ -25,2 +23,1 @@
+-line25
+ line26

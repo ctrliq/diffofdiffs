@@ -1,0 +1,9 @@
+# Patch1 changes beta, echo1, and hotel in f to P1_beta, P1_echo1, and P1_hotel.
+# Patch2 is numbered three lines lower and changes romeo, mike, and november, a
+# line or two below each of those; it quotes echo1 and hotel unchanged, but
+# quotes P1_beta, patch1's new line, above its first change. The report must
+# pair the three regions and show all six changes on their own patch's sides:
+# patch2 quoting P1_beta doesn't make patch1's beta change shared.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,9 @@
+--- a/f
++++ b/f
+@@ -3,2 +3,1 @@
+ bravo two
+-drop me
+@@ -5,3 +4,2 @@
+ alpha one
+-target line
+ bravo two

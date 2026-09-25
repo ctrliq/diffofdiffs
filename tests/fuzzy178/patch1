@@ -1,0 +1,15 @@
+--- a/f
++++ b/f
+@@ -1,9 +1,8 @@
+ juliet
+-	TAB
+    
+ alpha
+ delta
+ foxtrot
+ mike
+-foxtrot
+-alpha
++foxtrot_M
++alpha
+\ No newline at end of file

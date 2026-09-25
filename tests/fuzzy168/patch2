@@ -1,0 +1,17 @@
+--- a/f
++++ b/f
+@@ -6,3 +6,3 @@
+ P1_beta
+ quebec
+-romeo
++P2_romeo
+@@ -12,3 +12,3 @@
+ delta
+ echo1
+-mike
++P2_mike
+@@ -19,3 +19,3 @@
+ golf
+ hotel
+-november
++P2_november

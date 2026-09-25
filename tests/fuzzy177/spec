@@ -1,0 +1,7 @@
+# Patch1 adds lima at the top of f; patch2 adds foxtrot after bravo further
+# down. Neither patch quotes the other's insertion, and the report must keep
+# both: lima on patch1's side and foxtrot on patch2's side. One patch's edit
+# must not disappear just because the other patch's hunk found no counterpart.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

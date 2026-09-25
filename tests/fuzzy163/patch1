@@ -1,0 +1,18 @@
+--- a/f
++++ b/f
+@@ -1,14 +1,14 @@
+ alpha
+ bravo
+ charlie
+ delta4
+ mark X
+ mark Y
+ echo
+ foxtrot
+ golf
+ hotel
+ india
+ mark X
+ mark Y
+-juliet
++P1_juliet

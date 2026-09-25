@@ -1,0 +1,19 @@
+--- a/big
++++ b/big
+@@ -1,14 +1,5 @@
+ head 00000000
+- zz absentxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+-rr beta 00000000
+-junk 0 x
+-junk 1 x
+-junk 2 x
+-junk 3 x
+-junk 4 x
+-junk 5 x
+-junk 6 x
+-junk 7 x
++ pp gamma 00000000
+  ctx a 00000000
+- zz omega 00000000
++ pp gamma2 00000000
+  ctx b 00000000

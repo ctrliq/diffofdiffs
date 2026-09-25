@@ -1,0 +1,109 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Patch 1: patch1  ┃ Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the
+source lines quoted in the patches.
+
+═════════════════════════════════════
+*    DELTA DIFFERENCES              *
+═════════════════════════════════════
+Signs mark edits made by only that
+patch. A sign-less line with one
+number is an edit both patches make:
+a new number means both add it, an
+old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f        ┃ old new│f
+        │@@ L05   ┃        │@@ FA
+   5   5│L05      ┃        │
+   6   6│L06      ┃        │
+   7   7│FA       ┃   4   4│FA
+   8   8│FB       ┃-  5    │FB
+        │         ┃+      5│P2_FB
+   9   9│FC       ┃   6   6│FC
+  10  10│L10      ┃        │
+  11  11│L11      ┃        │
+  12  12│L12      ┃        │
+        │─────────╂────────┼─────────
+        │@@ FD    ┃        │@@ FD
+  13  13│FD       ┃   8   8│FD
+  14  14│FE       ┃-  9    │FE
+        │         ┃+      9│P2_FE
+  15  15│FF       ┃  10  10│FF
+  16  16│L16      ┃        │
+  17  17│L17      ┃        │
+  18  18│L18      ┃        │
+  19  19│L19      ┃        │
+  20  20│FG       ┃  11  11│FG
+  21  21│FH       ┃- 12    │FH
+        │         ┃+     12│P2_FH
+  22  22│FI       ┃  13  13│FI
+  23  23│L23      ┃        │
+- 24    │L24      ┃        │
++     24│P1_L24   ┃        │
+        │─────────╂────────┼─────────
+        │@@ CTXA1 ┃        │@@ CTXA1
+  30  30│CTXA1    ┃  33  33│CTXA1
+- 31    │T1       ┃  34  34│T1
++     31│P1_T1    ┃        │
+  32  32│CTXB1    ┃  35  35│CTXB1
+        │         ┃- 36    │Zdummy
+        │         ┃+     36│P2_Zdummy
+        │─────────╂────────┼─────────
+        │@@ CTXA2 ┃        │@@ CTXA2
+  40  40│CTXA2    ┃  45  45│CTXA2
+- 41    │T2       ┃  46  46│T2
++     41│P1_T2    ┃        │
+  42  42│CTXB2    ┃  47  47│CTXB2
+        │         ┃- 48    │Wdummy
+        │         ┃+     48│P2_Wdummy
+        │─────────╂────────┼─────────
+        │@@ CTXA3 ┃        │@@ CTXA3
+  50  50│CTXA3    ┃  59  59│CTXA3
+- 51    │T3       ┃  60  60│T3
++     51│P1_T3    ┃        │
+  52  52│CTXB3    ┃  61  61│CTXB3
+        │         ┃- 62    │Vdummy
+        │         ┃+     62│P2_Vdummy
+
+═════════════════════════════════════
+*    CONTEXT DIFFERENCES            *
+═════════════════════════════════════
+Signs mark lines present in only one
+result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f        ┃     new│f
+        │@@ FA    ┃        │@@ FA
+       7│FA       ┃       4│FA
+-      8│FB       ┃+      5│P2_FB
+       9│FC       ┃       6│FC
+        │─────────╂────────┼─────────
+        │@@ FD    ┃        │@@ FD
+      13│FD       ┃       8│FD
+-     14│FE       ┃+      9│P2_FE
+      15│FF       ┃      10│FF
+-     16│L16      ┃        │
+-     17│L17      ┃        │
+-     18│L18      ┃        │
+-     19│L19      ┃        │
+      20│FG       ┃      11│FG
+-     21│FH       ┃+     12│P2_FH
+      22│FI       ┃      13│FI
+        │─────────╂────────┼─────────
+        │@@ CTXA1 ┃        │@@ CTXA1
+      30│CTXA1    ┃      33│CTXA1
+-     31│P1_T1    ┃+     34│T1
+      32│CTXB1    ┃      35│CTXB1
+        │─────────╂────────┼─────────
+        │@@ CTXA2 ┃        │@@ CTXA2
+      40│CTXA2    ┃      45│CTXA2
+-     41│P1_T2    ┃+     46│T2
+      42│CTXB2    ┃      47│CTXB2
+        │─────────╂────────┼─────────
+        │@@ CTXA3 ┃        │@@ CTXA3
+      50│CTXA3    ┃      59│CTXA3
+-     51│P1_T3    ┃+     60│T3
+      52│CTXB3    ┃      61│CTXB3

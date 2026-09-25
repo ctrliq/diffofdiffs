@@ -1,0 +1,17 @@
+--- a/f
++++ b/f
+@@ -2,3 +2,3 @@
+ alpha
+-beta
++P1_beta
+ gamma
+@@ -9,3 +9,3 @@
+ delta
+-echo1
++P1_echo1
+ foxtrot
+@@ -16,3 +16,3 @@
+ golf
+-hotel
++P1_hotel
+ india

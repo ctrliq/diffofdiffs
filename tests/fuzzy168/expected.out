@@ -1,0 +1,37 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Patch 1: patch1   ┃  Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the
+source lines quoted in the patches.
+
+═════════════════════════════════════════
+*    DELTA DIFFERENCES                  *
+═════════════════════════════════════════
+Signs mark edits made by only that patch.
+A sign-less line with one number is an
+edit both patches make: a new number
+means both add it, an old number means
+both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f          ┃ old new│f
+        │@@ alpha   ┃        │@@ P1_beta
+   2   2│alpha      ┃        │
+-  3    │beta       ┃        │
++      3│P1_beta    ┃   6   6│P1_beta
+   4   4│gamma      ┃   7   7│quebec
+        │           ┃-  8    │romeo
+        │           ┃+      8│P2_romeo
+        │───────────╂────────┼───────────
+        │@@ delta   ┃        │@@ delta
+   9   9│delta      ┃  12  12│delta
+- 10    │echo1      ┃  13  13│echo1
++     10│P1_echo1   ┃- 14    │mike
+  11  11│foxtrot    ┃+     14│P2_mike
+        │───────────╂────────┼───────────
+        │@@ golf    ┃        │@@ golf
+  16  16│golf       ┃  19  19│golf
+- 17    │hotel      ┃  20  20│hotel
++     17│P1_hotel   ┃- 21    │november
+  18  18│india      ┃+     21│P2_november

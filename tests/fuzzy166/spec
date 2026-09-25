@@ -1,0 +1,6 @@
+# Repeated target text at different source positions is not a shared source
+# identity. Keep the known deletion without applying a later edit to the wrong
+# occurrence.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

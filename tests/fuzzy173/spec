@@ -1,0 +1,6 @@
+# The upstream source order does not identify the earlier line7 occurrence.
+# Neither that mismatch nor another failed edit justifies reversing unrelated
+# backport changes.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

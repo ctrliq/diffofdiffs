@@ -1,0 +1,36 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: patch1 ┃Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only
+the source lines quoted in the
+patches.
+
+═════════════════════════════════
+*    DELTA DIFFERENCES          *
+═════════════════════════════════
+Signs mark edits made by only
+that patch. A sign-less line with
+one number is an edit both
+patches make: a new number means
+both add it, an old number means
+both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f      ┃ old new│f
+        │@@ lima┃        │@@ char
+        │       ┃        │lie
++      1│lima   ┃        │
+   1   2│golf   ┃        │
+   2   3│delta  ┃        │
+   3   4│       ┃        │
+        │       ┃   8   8│charlie
+        │       ┃   9   9│kilo
+        │       ┃  10  10│bravo
+        │       ┃+     11│foxtrot
+        │       ┃  11  12│   
+        │───────╂────────┼───────
+        │@@ indi┃        │@@ indi
+        │a      ┃        │a
+   5   6│india  ┃  12  13│india
+        │       ┃  13  14│bravo

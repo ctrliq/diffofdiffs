@@ -1,0 +1,7 @@
+# Patch1 changes line3 and line10 of f to P1_line3 and P1_line10. Patch2 quotes
+# line3 and line4 unchanged and changes line5 to P2_line5. The report must show
+# patch1's line3 change beside patch2's unchanged line3, patch2's line5 change
+# on its side, and patch1's line10 change on its side alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

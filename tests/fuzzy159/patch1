@@ -1,0 +1,278 @@
+--- a/big
++++ b/big
+@@ -1,146 +1,132 @@
+ head 00000000
+-        qq alpha 00000000
+-rr beta 00000000
+-        j0 x
+-        j1 x
+-        j2 x
+-        j3 x
+-        j4 x
+-        j5 x
+-        j6 x
+-        j7 x
+-        j8 x
+-        j9 x
+-        j10 x
+-        j11 x
+-        j12 x
+-        j13 x
+-        j14 x
+-        j15 x
+-        j16 x
+-        j17 x
+-        j18 x
+-        j19 x
+-        j20 x
+-        j21 x
+-        j22 x
+-        j23 x
+-        j24 x
+-        j25 x
+-        j26 x
+-        j27 x
+-        j28 x
+-        j29 x
+-        j30 x
+-        j31 x
+-        j32 x
+-        j33 x
+-        j34 x
+-        j35 x
+-        j36 x
+-        j37 x
+-        j38 x
+-        j39 x
+-        j40 x
+-        j41 x
+-        j42 x
+-        j43 x
+-        j44 x
+-        j45 x
+-        j46 x
+-        j47 x
+-        j48 x
+-        j49 x
+-        j50 x
+-        j51 x
+-        j52 x
+-        j53 x
+-        j54 x
+-        j55 x
+-        j56 x
+-        j57 x
+-        j58 x
+-        j59 x
+-        j60 x
+-        j61 x
+-        j62 x
+-        j63 x
+-        j64 x
+-        j65 x
+-        j66 x
+-        j67 x
+-        j68 x
+-        j69 x
+-        j70 x
+-        j71 x
+-        j72 x
+-        j73 x
+-        j74 x
+-        j75 x
+-        j76 x
+-        j77 x
+-        j78 x
+-        j79 x
+-        j80 x
+-        j81 x
+-        j82 x
+-        j83 x
+-        j84 x
+-        j85 x
+-        j86 x
+-        j87 x
+-        j88 x
+-        j89 x
+-        j90 x
+-        j91 x
+-        j92 x
+-        j93 x
+-        j94 x
+-        j95 x
+-        j96 x
+-        j97 x
+-        j98 x
+-        j99 x
+-        j100 x
+-        j101 x
+-        j102 x
+-        j103 x
+-        j104 x
+-        j105 x
+-        j106 x
+-        j107 x
+-        j108 x
+-        j109 x
+-        j110 x
+-        j111 x
+-        j112 x
+-        j113 x
+-        j114 x
+-        j115 x
+-        j116 x
+-        j117 x
+-        j118 x
+-        j119 x
+-        j120 x
+-        j121 x
+-        j122 x
+-        j123 x
+-        j124 x
+-        j125 x
+-        j126 x
+-        j127 x
+-        j128 x
+-        j129 x
+-        j130 x
+-        j131 x
+-        j132 x
+-        j133 x
+-        j134 x
+-        j135 x
+-        j136 x
+-        j137 x
+-        j138 x
+-        j139 x
++       pp gamma 00000000
++	      pp gamma 00000000
++ 	     pp gamma 00000000
++		     pp gamma 00000000
++  	    pp gamma 00000000
++	 	    pp gamma 00000000
++ 		    pp gamma 00000000
++			    pp gamma 00000000
++   	   pp gamma 00000000
++	  	   pp gamma 00000000
++ 	 	   pp gamma 00000000
++		 	   pp gamma 00000000
++  		   pp gamma 00000000
++	 		   pp gamma 00000000
++ 			   pp gamma 00000000
++				   pp gamma 00000000
++    	  pp gamma 00000000
++	   	  pp gamma 00000000
++ 	  	  pp gamma 00000000
++		  	  pp gamma 00000000
++  	 	  pp gamma 00000000
++	 	 	  pp gamma 00000000
++ 		 	  pp gamma 00000000
++			 	  pp gamma 00000000
++   		  pp gamma 00000000
++	  		  pp gamma 00000000
++ 	 		  pp gamma 00000000
++		 		  pp gamma 00000000
++  			  pp gamma 00000000
++	 			  pp gamma 00000000
++ 				  pp gamma 00000000
++					  pp gamma 00000000
++     	 pp gamma 00000000
++	    	 pp gamma 00000000
++ 	   	 pp gamma 00000000
++		   	 pp gamma 00000000
++  	  	 pp gamma 00000000
++	 	  	 pp gamma 00000000
++ 		  	 pp gamma 00000000
++			  	 pp gamma 00000000
++   	 	 pp gamma 00000000
++	  	 	 pp gamma 00000000
++ 	 	 	 pp gamma 00000000
++		 	 	 pp gamma 00000000
++  		 	 pp gamma 00000000
++	 		 	 pp gamma 00000000
++ 			 	 pp gamma 00000000
++				 	 pp gamma 00000000
++    		 pp gamma 00000000
++	   		 pp gamma 00000000
++ 	  		 pp gamma 00000000
++		  		 pp gamma 00000000
++  	 		 pp gamma 00000000
++	 	 		 pp gamma 00000000
++ 		 		 pp gamma 00000000
++			 		 pp gamma 00000000
++   			 pp gamma 00000000
++	  			 pp gamma 00000000
++ 	 			 pp gamma 00000000
++		 			 pp gamma 00000000
++  				 pp gamma 00000000
++	 				 pp gamma 00000000
++ 					 pp gamma 00000000
++						 pp gamma 00000000
++      	pp gamma 00000000
++	     	pp gamma 00000000
++ 	    	pp gamma 00000000
++		    	pp gamma 00000000
++  	   	pp gamma 00000000
++	 	   	pp gamma 00000000
++ 		   	pp gamma 00000000
++			   	pp gamma 00000000
++   	  	pp gamma 00000000
++	  	  	pp gamma 00000000
++ 	 	  	pp gamma 00000000
++		 	  	pp gamma 00000000
++  		  	pp gamma 00000000
++	 		  	pp gamma 00000000
++ 			  	pp gamma 00000000
++				  	pp gamma 00000000
++    	 	pp gamma 00000000
++	   	 	pp gamma 00000000
++ 	  	 	pp gamma 00000000
++		  	 	pp gamma 00000000
++  	 	 	pp gamma 00000000
++	 	 	 	pp gamma 00000000
++ 		 	 	pp gamma 00000000
++			 	 	pp gamma 00000000
++   		 	pp gamma 00000000
++	  		 	pp gamma 00000000
++ 	 		 	pp gamma 00000000
++		 		 	pp gamma 00000000
++  			 	pp gamma 00000000
++	 			 	pp gamma 00000000
++ 				 	pp gamma 00000000
++					 	pp gamma 00000000
++     		pp gamma 00000000
++	    		pp gamma 00000000
++ 	   		pp gamma 00000000
++		   		pp gamma 00000000
++  	  		pp gamma 00000000
++	 	  		pp gamma 00000000
++ 		  		pp gamma 00000000
++			  		pp gamma 00000000
++   	 		pp gamma 00000000
++	  	 		pp gamma 00000000
++ 	 	 		pp gamma 00000000
++		 	 		pp gamma 00000000
++  		 		pp gamma 00000000
++	 		 		pp gamma 00000000
++ 			 		pp gamma 00000000
++				 		pp gamma 00000000
++    			pp gamma 00000000
++	   			pp gamma 00000000
++ 	  			pp gamma 00000000
++		  			pp gamma 00000000
++  	 			pp gamma 00000000
++	 	 			pp gamma 00000000
++ 		 			pp gamma 00000000
++			 			pp gamma 00000000
++   				pp gamma 00000000
++	  				pp gamma 00000000
++ 	 				pp gamma 00000000
++		 				pp gamma 00000000
++  					pp gamma 00000000
++	 					pp gamma 00000000
++ 						pp gamma 00000000
++							pp gamma 00000000
+         ctx a 00000000
+-        zz omega 00000000
++        pp gamma 00000000
+         ctx b 00000000

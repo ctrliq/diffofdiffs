@@ -1,0 +1,185 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      Patch 1: patch1       ┃      Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted
+in the patches.
+
+═════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                  *
+═════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less
+line with one number is an edit both patches make: a new
+number means both add it, an old number means both remove
+it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│big                ┃ old new│big
+        │@@ head 00000000   ┃        │@@
+   1   1│head 00000000      ┃        │
+-  2    │qq alpha 00000000  ┃        │
+-  3    │rr beta 00000000   ┃        │
+-  4    │ss delta 00000000  ┃        │
+-  5    │junk 0 x           ┃        │
+-  6    │junk 1 x           ┃        │
+-  7    │junk 2 x           ┃        │
+-  8    │junk 3 x           ┃        │
+-  9    │junk 4 x           ┃        │
+- 10    │junk 5 x           ┃        │
+- 11    │junk 6 x           ┃        │
+- 12    │junk 7 x           ┃        │
+- 13    │junk 8 x           ┃        │
+- 14    │junk 9 x           ┃        │
+- 15    │junk 10 x          ┃        │
+- 16    │junk 11 x          ┃        │
+- 17    │junk 12 x          ┃        │
+- 18    │junk 13 x          ┃        │
+- 19    │junk 14 x          ┃        │
+- 20    │junk 15 x          ┃        │
+- 21    │junk 16 x          ┃        │
+- 22    │junk 17 x          ┃        │
+- 23    │junk 18 x          ┃        │
+- 24    │junk 19 x          ┃        │
+- 25    │junk 20 x          ┃        │
+- 26    │junk 21 x          ┃        │
+- 27    │junk 22 x          ┃        │
+- 28    │junk 23 x          ┃        │
+- 29    │junk 24 x          ┃        │
+- 30    │junk 25 x          ┃        │
+- 31    │junk 26 x          ┃        │
+- 32    │junk 27 x          ┃        │
+- 33    │junk 28 x          ┃        │
+- 34    │junk 29 x          ┃        │
+- 35    │junk 30 x          ┃        │
+- 36    │junk 31 x          ┃        │
+- 37    │junk 32 x          ┃        │
+- 38    │junk 33 x          ┃        │
+- 39    │junk 34 x          ┃        │
+- 40    │junk 35 x          ┃        │
+- 41    │junk 36 x          ┃        │
+- 42    │junk 37 x          ┃        │
+- 43    │junk 38 x          ┃        │
+- 44    │junk 39 x          ┃        │
+- 45    │junk 40 x          ┃        │
+- 46    │junk 41 x          ┃        │
+- 47    │junk 42 x          ┃        │
+- 48    │junk 43 x          ┃        │
+- 49    │junk 44 x          ┃        │
+- 50    │junk 45 x          ┃        │
+- 51    │junk 46 x          ┃        │
+- 52    │junk 47 x          ┃        │
+- 53    │junk 48 x          ┃        │
+- 54    │junk 49 x          ┃        │
+- 55    │junk 50 x          ┃        │
+- 56    │junk 51 x          ┃        │
+- 57    │junk 52 x          ┃        │
+- 58    │junk 53 x          ┃        │
+- 59    │junk 54 x          ┃        │
+- 60    │junk 55 x          ┃        │
+- 61    │junk 56 x          ┃        │
+- 62    │junk 57 x          ┃        │
+- 63    │junk 58 x          ┃        │
+- 64    │junk 59 x          ┃        │
+- 65    │junk 60 x          ┃        │
+- 66    │junk 61 x          ┃        │
+- 67    │junk 62 x          ┃        │
+- 68    │junk 63 x          ┃        │
+- 69    │junk 64 x          ┃        │
+- 70    │junk 65 x          ┃        │
+- 71    │junk 66 x          ┃        │
+- 72    │junk 67 x          ┃        │
+- 73    │junk 68 x          ┃        │
+- 74    │junk 69 x          ┃        │
+- 75    │junk 70 x          ┃        │
+- 76    │junk 71 x          ┃        │
+- 77    │junk 72 x          ┃        │
+- 78    │junk 73 x          ┃        │
+- 79    │junk 74 x          ┃        │
+- 80    │junk 75 x          ┃        │
+- 81    │junk 76 x          ┃        │
+- 82    │junk 77 x          ┃        │
+- 83    │junk 78 x          ┃        │
+- 84    │junk 79 x          ┃        │
+- 85    │junk 80 x          ┃        │
+- 86    │junk 81 x          ┃        │
+- 87    │junk 82 x          ┃        │
+- 88    │junk 83 x          ┃        │
+- 89    │junk 84 x          ┃        │
+- 90    │junk 85 x          ┃        │
+- 91    │junk 86 x          ┃        │
+- 92    │junk 87 x          ┃        │
+- 93    │junk 88 x          ┃        │
+- 94    │junk 89 x          ┃        │
+- 95    │junk 90 x          ┃        │
+- 96    │junk 91 x          ┃        │
+- 97    │junk 92 x          ┃        │
+- 98    │junk 93 x          ┃        │
+- 99    │junk 94 x          ┃        │
+-100    │junk 95 x          ┃        │
+-101    │junk 96 x          ┃        │
+-102    │junk 97 x          ┃        │
+-103    │junk 98 x          ┃        │
+-104    │junk 99 x          ┃        │
+-105    │junk 100 x         ┃        │
+-106    │junk 101 x         ┃        │
+-107    │junk 102 x         ┃        │
+-108    │junk 103 x         ┃        │
+-109    │junk 104 x         ┃        │
+-110    │junk 105 x         ┃        │
+-111    │junk 106 x         ┃        │
+-112    │junk 107 x         ┃        │
+-113    │junk 108 x         ┃        │
+-114    │junk 109 x         ┃        │
+-115    │junk 110 x         ┃        │
+-116    │junk 111 x         ┃        │
+-117    │junk 112 x         ┃        │
+-118    │junk 113 x         ┃        │
+-119    │junk 114 x         ┃        │
+-120    │junk 115 x         ┃        │
+-121    │junk 116 x         ┃        │
+-122    │junk 117 x         ┃        │
+-123    │junk 118 x         ┃        │
+-124    │junk 119 x         ┃        │
+-125    │junk 120 x         ┃        │
+-126    │junk 121 x         ┃        │
+-127    │junk 122 x         ┃        │
+-128    │junk 123 x         ┃        │
+-129    │junk 124 x         ┃        │
+-130    │junk 125 x         ┃        │
+-131    │junk 126 x         ┃        │
+-132    │junk 127 x         ┃        │
+-133    │junk 128 x         ┃        │
+-134    │junk 129 x         ┃        │
+-135    │junk 130 x         ┃        │
+-136    │junk 131 x         ┃        │
+-137    │junk 132 x         ┃        │
+-138    │junk 133 x         ┃        │
+-139    │junk 134 x         ┃        │
+-140    │junk 135 x         ┃        │
+-141    │junk 136 x         ┃        │
+-142    │junk 137 x         ┃        │
+-143    │junk 138 x         ┃        │
+-144    │junk 139 x         ┃        │
++      2│ pp gamma 00000000 ┃        │
++      3│pp gamma 00000000  ┃        │
+ 145   4│ctx a 00000000     ┃   1   1│  ctx a 00000000
+-146    │zz omega 00000000  ┃-  2    │  qq alpha 00000000
+        │                   ┃-  3    │  rr beta 00000000
++      5│pp gamma2 00000000 ┃+      2│  pp gamma 00000000
+ 147   6│ctx b 00000000     ┃   4   3│  ctx b 00000000
+
+═════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                                *
+═════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, +
+patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│big                ┃     new│big
+        │@@ head 00000000   ┃        │@@
+-      1│head 00000000      ┃        │
+-      2│ pp gamma 00000000 ┃        │
+-      3│pp gamma 00000000  ┃        │
+-      4│ctx a 00000000     ┃+      1│  ctx a 00000000
+-      5│pp gamma2 00000000 ┃+      2│  pp gamma 00000000
+-      6│ctx b 00000000     ┃+      3│  ctx b 00000000

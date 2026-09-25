@@ -1,0 +1,10 @@
+# Patch1 quotes lines 1-24 of f whole and changes L24 to P1_L24, and changes T1,
+# T2, and T3 to P1_T1, P1_T2, and P1_T3 at lines 31, 41, and 51. Patch2 changes
+# FB, FE, and FH, lines patch1 quotes unchanged, at line numbers that don't
+# match patch1's, and in three more hunks quotes T1, T2, and T3 unchanged and
+# changes the Zdummy, Wdummy, and Vdummy lines below them. The report must pair
+# each region and show every change on its own patch's side, with patch1's L24
+# change alone, since patch2 never quotes line 24.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,6 @@
+--- a/lines.txt
++++ b/lines.txt
+@@ -5,3 +5,2 @@
+ line eight
+ line nine
+-line seven

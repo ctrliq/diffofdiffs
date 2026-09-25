@@ -1,0 +1,16 @@
+--- a/lines.txt
++++ b/lines.txt
+@@ -1,12 +1,12 @@
+ line one
+-line two
++line two changed
+ line three
+ line four
+ line five
+ line six
+ line seven
+ line eight
+ line nine
+ line ten
+ line eleven
+ line twelve

@@ -1,0 +1,11 @@
+--- a/f
++++ b/f
+@@ -4,3 +4,3 @@
+ line4 dd
+-line5 ee
++P2_line5
+ line6 ff
+@@ -7,3 +7,2 @@
+ line5 ee
+ line6 ff
+-line7 gg

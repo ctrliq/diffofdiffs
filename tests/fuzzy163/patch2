@@ -1,0 +1,10 @@
+--- a/f
++++ b/f
+@@ -4,3 +4,1 @@
+ delta4
+-mark X
+-mark Y
+@@ -8,2 +6,3 @@
+ mark X
++P2_NEW
+ mark Y

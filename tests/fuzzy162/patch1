@@ -1,0 +1,15 @@
+--- a/f
++++ b/f
+@@ -1,11 +1,11 @@
+ line1 qq
+ line2 rr
+ line3 ss
+ line4 dd
+ line5 ee
+ line6 ff
+ line7 gg
+ line8 hh
+ line9 aa
+-line10 bb
++P1_line10
+ line11 cc

@@ -1,0 +1,16 @@
+--- a/f
++++ b/f
+@@ -1,12 +1,12 @@
+ alpha one
+ target line
+ bravo two
+ drop me
+ charlie
+ delta
+ echo
+ foxtrot
+ golf
+ alpha one
+ target line
+-hotel
++P1_hotel
