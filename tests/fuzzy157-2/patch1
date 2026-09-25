@@ -1,0 +1,52 @@
+--- a/big
++++ b/big
+@@ -1,35 +1,15 @@
+ head 00000000
+-qq alpha 00000000
+-ff pad 0 00000000
+-ff pad 1 00000000
+-ff pad 2 00000000
+-ff pad 3 00000000
+-rr beta 00000000
+-ff pad 4 00000000
+-ff pad 5 00000000
+-ff pad 6 00000000
+-ff pad 7 00000000
+-    qq alpha 00000000
+-    rr beta 00000000
+-	   qq alpha 00000000
+-	   rr beta 00000000
+- 	  qq alpha 00000000
+- 	  rr beta 00000000
+-		  qq alpha 00000000
+-		  rr beta 00000000
+-  	 qq alpha 00000000
+-  	 rr beta 00000000
+-	 	 qq alpha 00000000
+-	 	 rr beta 00000000
+- 		 qq alpha 00000000
+- 		 rr beta 00000000
+-			 qq alpha 00000000
+-			 rr beta 00000000
+-   	qq alpha 00000000
+-   	rr beta 00000000
+-	  	qq alpha 00000000
+-	  	rr beta 00000000
+- 	 	qq alpha 00000000
+- 	 	rr beta 00000000
+-		 	qq alpha 00000000
+-		 	rr beta 00000000
++ pp gamma 00000000
++	pp gamma 00000000
++    pp gamma 00000000
++	   pp gamma 00000000
++ 	  pp gamma 00000000
++		  pp gamma 00000000
++  	 pp gamma 00000000
++	 	 pp gamma 00000000
++ 		 pp gamma 00000000
++			 pp gamma 00000000
++   	pp gamma 00000000
++	  	pp gamma 00000000
++ 	 	pp gamma 00000000
++		 	pp gamma 00000000
