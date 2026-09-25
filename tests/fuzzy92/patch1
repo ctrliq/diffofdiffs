@@ -1,0 +1,21 @@
+--- a/drivers/thing.c
++++ b/drivers/thing.c
+@@ -10,6 +10,18 @@ static inline int queue_id(struct queue *q)
+ 	return q - q->ctrl->queues;
+ }
+ 
++static inline bool pdu_supported(enum pdu_type type)
++{
++	switch (type) {
++	case c2h_data:
++	case r2t:
++	case rsp:
++		return true;
++	default:
++		return false;
++	}
++}
++
+ static inline struct tags *tagset(struct queue *q)
+ {
+ 	u32 idx = queue_id(q);

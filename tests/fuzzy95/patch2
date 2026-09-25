@@ -1,0 +1,17 @@
+--- a/crypto/authencesn.c
++++ b/crypto/authencesn.c
+@@ -262,11 +268,10 @@ static int crypto_authenc_esn_decrypt(struct aead_request *req)
+ 	if (assoclen < 8)
+ 		return -EINVAL;
+ 
+-	cryptlen -= authsize;
+-
+-	if (req->src != dst)
+-		memcpy_sglist(dst, req->src, assoclen + cryptlen);
++	if (!authsize)
++		goto tail;
+ 
++	cryptlen -= authsize;
+ 	scatterwalk_map_and_copy(ihash, req->src, assoclen + cryptlen,
+ 				 authsize, 0);
+ 

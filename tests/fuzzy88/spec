@@ -1,0 +1,5 @@
+# Shared added code bounds the differing p1tail and p2tail rows. Preserve the
+# actual result tail.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

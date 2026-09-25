@@ -1,0 +1,16 @@
+diff --git a/drivers/net/ethernet/intel/idpf/idpf_txrx.h b/drivers/net/ethernet/intel/idpf/idpf_txrx.h
+index 9565e4dc3514c..52753dff381c3 100644
+--- a/drivers/net/ethernet/intel/idpf/idpf_txrx.h
++++ b/drivers/net/ethernet/intel/idpf/idpf_txrx.h
+@@ -631,11 +598,7 @@ libeth_cacheline_set_assert(struct idpf_rx_queue, 64,
+  *		   only once at the end of the cleaning routine.
+  * @clean_budget: singleq only, queue cleaning budget
+  * @cleaned_pkts: Number of packets cleaned for the above said case
+- * @stash: Tx buffer stash for Flow-based scheduling mode
+  * @refillq: Pointer to refill queue
+- * @compl_tag_bufid_m: Completion tag buffer id mask
+- * @compl_tag_cur_gen: Used to keep track of current completion tag generation
+- * @compl_tag_gen_max: To determine when compl_tag_cur_gen should be reset
+  * @cached_tstamp_caps: Tx timestamp capabilities negotiated with the CP
+  * @tstamp_task: Work that handles Tx timestamp read
+  * @stats_sync: See struct u64_stats_sync

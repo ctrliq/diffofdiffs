@@ -1,0 +1,10 @@
+--- a/f.c
++++ b/f.c
+@@ -1,5 +1,5 @@
+ one
+ two
+ three
+-old_a_v2
+-old_last
++p2_head
++shared_line

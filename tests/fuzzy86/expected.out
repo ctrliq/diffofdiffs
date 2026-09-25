@@ -1,0 +1,37 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                          Patch 1: patch1                          ┃                          Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                 *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add
+it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│foo.c                                                     ┃ old new│foo.c
+        │@@ void teardown(struct queue *q, int idx)                ┃        │@@ void teardown(struct queue *q, int idx)
+      11│		union desc *tx;                            ┃      11│		union desc *tx;
+      12│                                                          ┃      12│
+      13│		tx = &q->flex[idx];                        ┃      13│		tx = &q->flex[idx];
++     14│		memset(tx, 0, sizeof(struct big_ctx_desc));┃+     14│		memset(tx, 0, sizeof(*tx));
+      15│	}                                                  ┃      15│	}
+  13  16│	if (idx == 0)                                      ┃  13  16│	if (!idx)
+  14  17│		idx = q->count;                            ┃  14  17│		idx = q->count;
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                           *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│foo.c                                                     ┃     new│foo.c
+        │@@ void teardown(struct queue *q, int idx)                ┃        │@@ void teardown(struct queue *q, int idx)
+      13│		tx = &q->flex[idx];                        ┃      13│		tx = &q->flex[idx];
+-     14│		memset(tx, 0, sizeof(struct big_ctx_desc));┃+     14│		memset(tx, 0, sizeof(*tx));
+      15│	}                                                  ┃      15│	}
+-     16│	if (idx == 0)                                      ┃+     16│	if (!idx)
+      17│		idx = q->count;                            ┃      17│		idx = q->count;
+      18│	idx--;                                             ┃      18│	idx--;

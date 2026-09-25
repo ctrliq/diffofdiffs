@@ -1,0 +1,19 @@
+--- a/drivers/thing.c
++++ b/drivers/thing.c
+@@ -5,16 +5,9 @@
+ static void keep_me(void)
+ {
+ 	tick();
+ }
+ 
+-static void doomed(int n)
+-{
+-	struct sk_buff *skb;
+-
+-	complete(skb);
+-}
+-
+ static void after(void)
+ {
+ 	done();
+ }

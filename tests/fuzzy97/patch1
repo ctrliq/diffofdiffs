@@ -1,0 +1,26 @@
+--- a/drivers/thing.c
++++ b/drivers/thing.c
+@@ -4,21 +4,10 @@
+ 
+ 	prepare(t);
+ 
+-	if (t->enc) {
+-		rc = copy_sgl(t->src, t->dst);
+-		if (rc)
+-			goto free;
+-		rc = encrypt(t);
+-	} else {
+-
+-		unmark(t->list, t->n);
+-		chain(t->list, t->n);
+-	}
+-	sync_state(t);
+-	notify(t);
++	handle_all(t);
+ 
+ free:
+ 	put_ref(t->list);
+-	release(t);
++	release_all(t);
+ 	return rc;
+ }

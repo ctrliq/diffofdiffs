@@ -1,0 +1,21 @@
+--- a/fs/thing.c
++++ b/fs/thing.c
+@@ -10,6 +10,18 @@
+ }
+ #endif
+ 
++static int validate_acl(struct cifs_acl *pacl, char *end)
++{
++	int i, hdr_size;
++	u32 num_aces;
++
++	if (!pacl)
++		return 0;
++
++	num_aces = le32_to_cpu(pacl->num_aces);
++	return num_aces;
++}
++
+ static void parse_acl(struct cifs_acl *pacl, char *end,
+ 		      struct cifs_sid *powner,
+ 		      struct cifs_fattr *fattr)

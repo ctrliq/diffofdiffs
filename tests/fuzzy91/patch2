@@ -1,0 +1,22 @@
+--- a/drivers/thing.c
++++ b/drivers/thing.c
+@@ -11,18 +11,7 @@
+ 
+ 	prepare(t);
+ 
+-	if (t->enc) {
+-		rc = memcpy_sgl(t->src, t->dst);
+-		if (rc)
+-			goto free;
+-		rc = encrypt(t);
+-	} else {
+-		rc = memcpy_sgl(t->dst, t->src);
+-		if (rc)
+-			goto free;
+-		rc = decrypt(t);
+-	}
+-	sync_state(t);
++	do_everything(t, 0);
+ 
+ free:
+ 	release(t);

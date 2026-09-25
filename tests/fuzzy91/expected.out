@@ -1,0 +1,33 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                     Patch 1: patch1                     ┃                     Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                             *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new
+number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│drivers/thing.c                                 ┃ old new│drivers/thing.c
+        │@@                                              ┃        │@@
+  12  12│	prepare(t);                              ┃  12  12│	prepare(t);
+  13  13│                                                ┃  13  13│
+  14    │	if (t->enc) {                            ┃  14    │	if (t->enc) {
+- 15    │		rc = copy_sgl(t->src, t->dst);   ┃- 15    │		rc = memcpy_sgl(t->src, t->dst);
+  16    │		if (rc)                          ┃  16    │		if (rc)
+  17    │			goto free;               ┃  17    │			goto free;
+  18    │		rc = encrypt(t);                 ┃  18    │		rc = encrypt(t);
+  19    │	} else {                                 ┃  19    │	} else {
+- 20    │		rc = copy_sgl(t->dst, t->src);   ┃- 20    │		rc = memcpy_sgl(t->dst, t->src);
+  21    │		if (rc)                          ┃  21    │		if (rc)
+  22    │			goto free;               ┃  22    │			goto free;
+  23    │		rc = decrypt(t);                 ┃  23    │		rc = decrypt(t);
+  24    │	}                                        ┃  24    │	}
+  25    │	sync_state(t);                           ┃  25    │	sync_state(t);
++     14│	handle_all(t);                           ┃+     14│	do_everything(t, 0);
+  26  15│                                                ┃  26  15│
+  27  16│free:                                           ┃  27  16│free:
+  28  17│	release(t);                              ┃  28  17│	release(t);

@@ -1,0 +1,46 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                         Patch 1: patch1                          ┃                         Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                               *
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add
+it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│fs/thing.c                                               ┃ old new│fs/thing.c
+        │@@                                                       ┃        │@@
+  10  10│}                                                        ┃  30  30│}
+  11  11│#endif                                                   ┃  31  31│#endif
+  12  12│                                                         ┃  32  32│
++     13│static int validate_acl(struct cifs_acl *pacl, char *end)┃+     33│static int validate_acl(struct smb_acl *pacl, char *end)
+      14│{                                                        ┃      34│{
+      15│	int i, hdr_size;                                  ┃      35│	int i, hdr_size;
++     16│	u32 num_aces;                                     ┃+     36│	u16 num_aces;
+      17│                                                         ┃      37│
+      18│	if (!pacl)                                        ┃      38│	if (!pacl)
+      19│		return 0;                                 ┃      39│		return 0;
+      20│                                                         ┃      40│
++     21│	num_aces = le32_to_cpu(pacl->num_aces);           ┃+     41│	num_aces = le16_to_cpu(pacl->num_aces);
+      22│	return num_aces;                                  ┃      42│	return num_aces;
+      23│}                                                        ┃      43│}
+      24│                                                         ┃      44│
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                         *
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│fs/thing.c                                               ┃     new│fs/thing.c
+        │@@ static int validate_acl(struct cifs_acl *pacl, char *e┃        │@@ static int validate_acl(struct smb_acl *pacl, char *en
+        │nd)                                                      ┃        │d)
+      22│	return num_aces;                                  ┃      42│	return num_aces;
+      23│}                                                        ┃      43│}
+      24│                                                         ┃      44│
+-     25│static void parse_acl(struct cifs_acl *pacl, char *end,  ┃+     45│static void parse_acl(struct smb_acl *pacl, char *end,
+-     26│		      struct cifs_sid *powner,            ┃+     46│		      struct smb_sid *powner,
+      27│		      struct cifs_fattr *fattr)           ┃      47│		      struct cifs_fattr *fattr)

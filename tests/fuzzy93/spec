@@ -1,0 +1,8 @@
+# Both patches insert validate_acl() into fs/thing.c, at lines 13 and 33, and
+# the inserted function differs in its parameter type (struct cifs_acl against
+# struct smb_acl), the width of num_aces and the conversion that reads it. The
+# differing lines, including the function's first line, must show side by side,
+# while the identical lines show as additions both patches make.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,44 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                     Patch 1: patch1                                     ┃                                     Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                                             *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│net/core/page_pool.c                                                            ┃ old new│net/core/page_pool.c
+        │@@ static bool page_pool_recycle_in_ring(struct page_pool *pool, struct page *pa┃        │@@ static bool page_pool_recycle_in_ring(struct page_pool *pool, netmem_ref netm
+        │ge)                                                                             ┃        │em)
+ 681    │	int ret;                                                                 ┃ 744    │	int ret;
+ 682    │	/* BH protection not needed if current is softirq */                     ┃ 745    │	/* BH protection not needed if current is softirq */
+ 683    │	if (in_softirq())                                                        ┃ 746    │	if (in_softirq())
+-684    │		ret = ptr_ring_produce(&pool->ring, page);                       ┃-747    │		ret = ptr_ring_produce(&pool->ring, (__force void *)netmem);
+ 685    │	else                                                                     ┃ 748    │	else
+-686    │		ret = ptr_ring_produce_bh(&pool->ring, page);                    ┃-749    │		ret = ptr_ring_produce_bh(&pool->ring, (__force void *)netmem);
+     681│	bool in_softirq, ret;                                                    ┃     744│	bool in_softirq, ret;
+ 687 682│                                                                                ┃ 750 745│
+ 688    │	if (!ret) {                                                              ┃ 751    │	if (!ret) {
+     683│	/* BH protection not needed if current is softirq */                     ┃     746│	/* BH protection not needed if current is softirq */
+     684│	in_softirq = page_pool_producer_lock(pool);                              ┃     747│	in_softirq = page_pool_producer_lock(pool);
++    685│	ret = !__ptr_ring_produce(&pool->ring, page);                            ┃+    748│	ret = !__ptr_ring_produce(&pool->ring, (__force void *)netmem);
+     686│	if (ret)                                                                 ┃     749│	if (ret)
+ 689 687│		recycle_stat_inc(pool, ring);                                    ┃ 752 750│		recycle_stat_inc(pool, ring);
+ 690    │		return true;                                                     ┃ 753    │		return true;
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                                                       *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│net/core/page_pool.c                                                            ┃     new│net/core/page_pool.c
+        │@@ void page_pool_return_page(struct page_pool *pool, struct page *page)        ┃        │@@ void page_pool_return_page(struct page_pool *pool, netmem_ref netmem)
+     678│                                                                                ┃     741│
+-    679│static bool page_pool_recycle_in_ring(struct page_pool *pool, struct page *page)┃+    742│static bool page_pool_recycle_in_ring(struct page_pool *pool, netmem_ref netmem)
+     680│{                                                                               ┃     743│{
+     681│	bool in_softirq, ret;                                                    ┃     744│	bool in_softirq, ret;
+     682│                                                                                ┃     745│

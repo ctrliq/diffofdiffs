@@ -1,0 +1,45 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                    Patch 1: patch1                                    ┃                                    Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                                         *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│drivers/net/ethernet/intel/idpf/idpf_txrx.h                                   ┃ old new│drivers/net/ethernet/intel/idpf/idpf_txrx.h
+        │@@ struct idpf_rx_queue {                                                     ┃        │@@ libeth_cacheline_set_assert(struct idpf_rx_queue, 64,
+        │                                                                              ┃ 631 598│ *		   only once at the end of the cleaning routine.
+        │                                                                              ┃ 632 599│ * @clean_budget: singleq only, queue cleaning budget
+ 696 663│ * @cleaned_pkts: Number of packets cleaned for the above said case           ┃ 633 600│ * @cleaned_pkts: Number of packets cleaned for the above said case
+        │                                                                              ┃-634    │ * @stash: Tx buffer stash for Flow-based scheduling mode
+        │──────────────────────────────────────────────────────────────────────────────╂────────┼──────────────────────────────────────────────────────────────────────────────
+        │@@ struct idpf_rx_queue {                                                     ┃        │@@ libeth_cacheline_set_assert(struct idpf_rx_queue, 64,
+ 698 665│ * @refillq: Pointer to refill queue                                          ┃ 635 601│ * @refillq: Pointer to refill queue
+ 699    │ * @compl_tag_bufid_m: Completion tag buffer id mask                          ┃ 636    │ * @compl_tag_bufid_m: Completion tag buffer id mask
+        │──────────────────────────────────────────────────────────────────────────────╂────────┼──────────────────────────────────────────────────────────────────────────────
+        │@@ struct idpf_rx_queue {                                                     ┃        │@@ libeth_cacheline_set_assert(struct idpf_rx_queue, 64,
+ 719 685│ *	This gives us 8*8160 = 65280 possible unique values.                   ┃        │
+ 720    │ * @compl_tag_cur_gen: Used to keep track of current completion tag generation┃ 637    │ * @compl_tag_cur_gen: Used to keep track of current completion tag generation
+ 721    │ * @compl_tag_gen_max: To determine when compl_tag_cur_gen should be reset    ┃ 638    │ * @compl_tag_gen_max: To determine when compl_tag_cur_gen should be reset
+-722    │ * @stash: Tx buffer stash for Flow-based scheduling mode                     ┃        │
+        │──────────────────────────────────────────────────────────────────────────────╂────────┼──────────────────────────────────────────────────────────────────────────────
+        │@@ struct idpf_rx_queue {                                                     ┃        │@@ libeth_cacheline_set_assert(struct idpf_rx_queue, 64,
+ 723 686│ * @stats_sync: See struct u64_stats_sync                                     ┃ 641 604│ * @stats_sync: See struct u64_stats_sync
+ 724 687│ * @q_stats: See union idpf_tx_queue_stats                                    ┃        │
+ 725 688│ * @q_id: Queue id                                                            ┃        │
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                                                   *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│drivers/net/ethernet/intel/idpf/idpf_txrx.h                                   ┃     new│drivers/net/ethernet/intel/idpf/idpf_txrx.h
+        │@@ struct idpf_rx_queue {                                                     ┃        │@@ libeth_cacheline_set_assert(struct idpf_rx_queue, 64,
+     663│ * @cleaned_pkts: Number of packets cleaned for the above said case           ┃     600│ * @cleaned_pkts: Number of packets cleaned for the above said case
+-    664│ * @tx_min_pkt_len: Min supported packet length                               ┃        │
+     665│ * @refillq: Pointer to refill queue                                          ┃     601│ * @refillq: Pointer to refill queue

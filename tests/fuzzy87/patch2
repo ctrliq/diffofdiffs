@@ -1,0 +1,15 @@
+--- a/foo.c
++++ b/foo.c
+@@ -5,10 +5,10 @@ static void unmap_all(struct fb *fb)
+ 	unsigned int i;
+ 
+ 	for (i = 0; i < 4; i++) {
+ 		if (!fb->obj[i])
+ 			continue;	/* nothing to unmap */
+-		dma_buf_map_clear(&map[i]);
+-		continue;
++		iosys_map_clear(&map[i]);
++		continue;
+ 	}
+ 	fb->mapped = false;
+ }

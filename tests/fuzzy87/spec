@@ -1,0 +1,5 @@
+# The added break and continue statements differ inside corresponding code.
+# Keep that real result difference.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

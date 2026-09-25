@@ -1,0 +1,5 @@
+# The corresponding additions differ between handle_all and do_everything.
+# Shared surrounding additions do not hide that difference.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

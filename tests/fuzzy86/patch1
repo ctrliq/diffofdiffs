@@ -1,0 +1,18 @@
+--- a/foo.c
++++ b/foo.c
+@@ -7,9 +7,12 @@
+ 
+ void teardown(struct queue *q, int idx)
+ {
+-	prep(q);
+-	drain(q);
+-	flush(q);
++	if (is_gso(q)) {
++		union desc *tx;
++
++		tx = &q->flex[idx];
++		memset(tx, 0, sizeof(struct big_ctx_desc));
++	}
+ 	if (idx == 0)
+ 		idx = q->count;
+ 	idx--;

@@ -1,0 +1,22 @@
+--- a/drivers/thing.c
++++ b/drivers/thing.c
+@@ -30,6 +30,19 @@ static inline int queue_id(struct queue *q)
+ 	return q - q->ctrl->queues;
+ }
+ 
++static inline bool pdu_supported(enum pdu_type type)
++{
++	switch (type) {
++	case c2h_term:
++	case c2h_data:
++	case r2t:
++	case rsp:
++		return true;
++	default:
++		return false;
++	}
++}
++
+ /*
+  * Check if the queue is TLS encrypted
+  */

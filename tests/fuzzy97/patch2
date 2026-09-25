@@ -1,0 +1,31 @@
+--- a/drivers/thing.c
++++ b/drivers/thing.c
+@@ -4,19 +4,7 @@
+ 
+ 	prepare(t);
+ 
+-	if (t->enc) {
+-		rc = memcpy_sgl(t->src, t->dst);
+-		if (rc)
+-			goto free;
+-		rc = encrypt(t);
+-	} else {
+-		struct sg *sg = t->sgt.sgl;
+-
+-		unmark(t->list, t->n);
+-		chain(t->list, t->n);
+-	}
+-	sync_state(t);
+-	notify(t);
++	do_everything(t, 0);
+ 
+ free:
+ 	put_ref(t->sgt.sgl);
+@@ -20,6 +8,6 @@
+ 
+ free:
+ 	put_ref(t->sgt.sgl);
+-	release(t);
++	release_all(t);
+ 	return rc;
+ }

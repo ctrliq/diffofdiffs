@@ -1,0 +1,10 @@
+--- a/f.c
++++ b/f.c
+@@ -1,5 +1,5 @@
+ one
+ two
+ three
+-old_a
+-old_last_v2
++shared_line
++p2_tail

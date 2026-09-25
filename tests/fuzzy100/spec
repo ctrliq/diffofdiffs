@@ -1,0 +1,6 @@
+# The added mapping check is shared. Only the backport adds the two
+# offset/count assignments inside it; surrounding declaration and call
+# differences belong in context.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
