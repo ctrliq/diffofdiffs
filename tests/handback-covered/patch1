@@ -1,0 +1,23 @@
+--- a/big
++++ b/big
+@@ -1,9 +1,11 @@
+ ctx 1
+ ctx 2
+-o0 orig zero
+-o1 orig one
++b0 line AAAA
++b1 line BBBB
++b2 line CCCC
++b3 line DDDD
+ mid anchor
+-p0 park zero
+-p1 park one
++c0 line EEEE
++c1 line FFFF
+ ctx 3
+ ctx 2
+ o0 orig zero
+ o1 orig one
+ p0 park zero
+ p1 park one
+ ctx 5

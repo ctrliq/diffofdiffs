@@ -1,0 +1,19 @@
+--- a/probe.c
++++ b/probe.c
+@@ -5,5 +5,8 @@
+ 	err = hw_init(d);
+ 	if (err < 0)
+ 		return err;
++	mutex_lock(&d->lock);
++	d->busy = 1;
++	mutex_unlock(&d->lock);
+ 	d->flags |= READY;
+ 	return 0;
+@@ -10,6 +13,6 @@
+ }
+ static void probe_arm(struct dev *d)
+ {
+-	d->epoch = 0;
++	d->epoch = 1;
+ 	spin_lock(&d->slock);
+ 	d->count++;

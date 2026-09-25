@@ -1,0 +1,5 @@
+# The lock block contains the actual trace_enter/trace_exit difference. The
+# later shared edit does not contribute a difference.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

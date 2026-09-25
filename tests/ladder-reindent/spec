@@ -1,0 +1,5 @@
+# The first original call change differs in indentation. The following arm
+# edit is shared and does not create a DELTA of its own.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

@@ -1,0 +1,12 @@
+# Patch1 and patch2 replace the first two calls in probe() in
+# drivers/net/probe.c, which differ between their versions: patch1 removes
+# legacy_reset() and legacy_start(), and patch2 removes old_reset() and
+# old_start(). Each adds eleven calls in their place, nine of them the same.
+# Where patch1 passes OLD_FLAG to set_flags(), patch2 passes NEW_FLAG, and where
+# patch1 adds report(d, "probe"), patch2 adds an extra enable_tx(d) indented by
+# two tabs before the usual one. The report must show the two pairs of removals
+# side by side, the matching additions as edits both patches make, and the two
+# differing additions side by side.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

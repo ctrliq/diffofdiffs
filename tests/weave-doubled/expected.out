@@ -1,0 +1,31 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           Patch 1: p1.patch           ┃           Patch 2: p2.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches         *
+═══════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is
+an edit both patches make: a new number means both add it, an old number means
+both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│drivers/net/probe.c           ┃ old new│drivers/net/probe.c
+        │@@ void probe(struct dev *d)  ┃        │@@
+   1   1│void probe(struct dev *d)     ┃        │
+   2   2│{                             ┃   2   2│{
+-  3    │	legacy_reset(d);       ┃-  3    │	old_reset(d);
+-  4    │	legacy_start(d);       ┃-  4    │	old_start(d);
+       3│	init_ring(d);          ┃       3│	init_ring(d);
+       4│	fill_ring(d);          ┃       4│	fill_ring(d);
+       5│	arm_ring(d);           ┃       5│	arm_ring(d);
++      6│	set_flags(d, OLD_FLAG);┃+      6│	set_flags(d, NEW_FLAG);
+       7│	map_bars(d);           ┃       7│	map_bars(d);
+       8│	claim_irq(d);          ┃       8│	claim_irq(d);
+       9│	start_queue(d);        ┃       9│	start_queue(d);
++     10│	report(d, "probe");    ┃+     10│		enable_tx(d);
+      11│	enable_tx(d);          ┃      11│	enable_tx(d);
+      12│	enable_rx(d);          ┃      12│	enable_rx(d);
+      13│	kick(d);               ┃      13│	kick(d);

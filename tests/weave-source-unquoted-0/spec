@@ -1,0 +1,6 @@
+# The flag and report changes are bounded by shared additions. An unquoted
+# wake row supplies no source for the independent change, which remains
+# unresolved.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

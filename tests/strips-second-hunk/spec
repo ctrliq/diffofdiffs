@@ -1,0 +1,5 @@
+# The register change precedes the extra upstream sync_state call. Both
+# differences retain their own source positions and context.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

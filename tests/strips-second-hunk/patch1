@@ -1,0 +1,18 @@
+--- a/drivers/net/thing/main.c
++++ b/drivers/net/thing/main.c
+@@ -8,5 +8,5 @@ static void thing_reset(struct thing *dev)
+ {
+ 
+-	val = read_reg(dev, REG_CTRL);
++	val = read_reg(dev, REG_STAT);
+ 	write_reg(dev, REG_CTRL, val);
+ }
+@@ -32,6 +32,8 @@ static int thing_probe(struct thing *dev)
+ 	int ret;
+ 
+ 	ret = setup_ring(dev);
++	flush_queue(dev);
++	drain_cache(dev);
+ 	arm_timer(dev);
+ 	return 0;
+ }

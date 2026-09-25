@@ -1,0 +1,11 @@
+--- a/mod.c
++++ b/mod.c
+@@ -10,4 +10,8 @@
+ 	lead_one();
+ 	lead_two();
+ 	charlie();
++	helper_one();
++	helper_two();
++	helper_five();
++	helper_six();
+ 	tail_one();

@@ -1,0 +1,40 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              Patch 1: p1.patch              ┃              Patch 2: p2.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                     *
+═══════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both
+patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│probe.c                             ┃ old new│probe.c
+        │@@                                  ┃        │@@
+   6   6│	if (err < 0)                 ┃        │
+   7   7│		return err;          ┃        │
+       8│	mutex_lock(&d->lock);        ┃       8│	mutex_lock(&d->lock);
++      9│	d->busy = 1;                 ┃        │
+      10│	mutex_unlock(&d->lock);      ┃       9│	mutex_unlock(&d->lock);
+   8  11│	d->flags |= READY;           ┃        │
+        │────────────────────────────────────╂────────┼────────────────────────────────────
+        │@@                                  ┃        │@@
+   9  12│	return 0;                    ┃   9  11│	return 0;
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches               *
+═══════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│probe.c                             ┃     new│probe.c
+        │@@                                  ┃        │@@
+       8│	mutex_lock(&d->lock);        ┃       8│	mutex_lock(&d->lock);
+-      9│	d->busy = 1;                 ┃        │
+      10│	mutex_unlock(&d->lock);      ┃       9│	mutex_unlock(&d->lock);
+-     11│	d->flags |= READY;           ┃+     10│	d->state = READY;
+      12│	return 0;                    ┃      11│	return 0;
+      13│}                                   ┃      12│}
+      14│static void probe_arm(struct dev *d)┃      13│static void probe_arm(struct dev *d)

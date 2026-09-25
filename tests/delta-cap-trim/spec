@@ -1,0 +1,7 @@
+# The real difference between the added runs remains visible with source context
+# from the backport result. Patch1 adds tx, a blank row, and extra before omega,
+# while patch2 adds only tx, after rx1 to rx3 and above a blank row its file
+# already has. Only the blank row and extra are patch1's own.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

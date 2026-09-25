@@ -1,0 +1,45 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            Patch 1: p1.patch            ┃            Patch 2: p2.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches             *
+═══════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an
+edit both patches make: a new number means both add it, an old number means both
+remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f.c                             ┃ old new│f.c
+        │@@                              ┃        │@@ static void setup(struct dev
+        │                                ┃        │*d)
+        │                                ┃   3   3│static void setup(struct dev *d)
+   4   4│{                               ┃   4   4│{
+   5   5│	if (d->quirk) {          ┃        │
+   6   6│		d->flags = 0;    ┃   5   5│	d->flags = 0;
+-  7    │		enable(d);       ┃-  6    │	enable(d);
++      7│		enable_locked(d);┃+      6│	enable_locked(d);
+   8   8│		d->ready = 1;    ┃   7   7│	d->ready = 1;
+   9   9│	}                        ┃   8   8│}
+        │────────────────────────────────╂────────┼────────────────────────────────
+        │@@ static void arm(struct dev *d┃        │@@ static void arm(struct dev *d
+        │)                               ┃        │)
+  10  10│static void arm(struct dev *d)  ┃  10  10│static void arm(struct dev *d)
+
+═══════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches       *
+═══════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f.c                             ┃     new│f.c
+        │@@                              ┃        │@@ static void setup(struct dev
+        │                                ┃        │*d)
+       4│{                               ┃       4│{
+-      5│	if (d->quirk) {          ┃        │
+-      6│		d->flags = 0;    ┃+      5│	d->flags = 0;
+-      7│		enable_locked(d);┃+      6│	enable_locked(d);
+-      8│		d->ready = 1;    ┃+      7│	d->ready = 1;
+-      9│	}                        ┃+      8│}

@@ -1,0 +1,17 @@
+--- a/drivers/net/probe.c
++++ b/drivers/net/probe.c
+@@ -2,3 +2,12 @@
+ {
+-	old_reset(d);
+-	old_start(d);
++	init_ring(d);
++	fill_ring(d);
++	arm_ring(d);
++	set_flags(d, NEW_FLAG);
++	map_bars(d);
++	claim_irq(d);
++	start_queue(d);
++		enable_tx(d);
++	enable_tx(d);
++	enable_rx(d);
++	kick(d);

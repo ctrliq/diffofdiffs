@@ -1,0 +1,7 @@
+void probe(struct dev *d)
+{
+	legacy_reset(d);
+	legacy_start(d);
+	sync_all(d);
+	wake_up(d);
+}

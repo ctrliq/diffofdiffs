@@ -1,0 +1,5 @@
+# The two insertions share flush_queue and drain_cache. The upstream
+# sync_state call between them is the real difference.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

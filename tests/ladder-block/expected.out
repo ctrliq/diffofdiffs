@@ -1,0 +1,43 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              Patch 1: p1.patch              ┃              Patch 2: p2.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                     *
+═══════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both
+patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│probe.c                             ┃ old new│probe.c
+        │@@                                  ┃        │@@
+   7   7│	err = hw_init(d);            ┃        │
+   8   8│	if (err < 0)                 ┃        │
+   9   9│		return err;          ┃   9   9│		return rc;
++     10│	trace_enter(d);              ┃        │
+      11│	d->busy = 1;                 ┃      10│	d->busy = 1;
+      12│	d->ready = 1;                ┃      11│	d->ready = 1;
+        │                                    ┃+     12│	trace_exit(d);
+  10  13│	dev_ready(d);                ┃  10  13│	dev_ready(d);
+        │                                    ┃  11  14│	d->state = LIVE;
+        │                                    ┃  12  15│	return 0;
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches               *
+═══════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│probe.c                             ┃     new│probe.c
+        │@@                                  ┃        │@@
+      11│	d->busy = 1;                 ┃        │
+      12│	d->ready = 1;                ┃      11│	d->ready = 1;
+        │                                    ┃+     12│	trace_exit(d);
+      13│	dev_ready(d);                ┃      13│	dev_ready(d);
+-     14│	d->flags |= LIVE;            ┃+     14│	d->state = LIVE;
+-     15│	return err;                  ┃+     15│	return 0;
+      16│}                                   ┃      16│}
+      17│static void probe_arm(struct dev *d)┃      17│static void probe_arm(struct dev *d)
+      18│{                                   ┃      18│{

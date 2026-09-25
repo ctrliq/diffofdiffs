@@ -1,0 +1,5 @@
+# The extra upstream helper_three and helper_four calls remain visible when no
+# later shared edit is present.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

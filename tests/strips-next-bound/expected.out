@@ -1,0 +1,32 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                Patch 1: patch1                ┃                Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                         *
+═══════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both
+patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│drivers/net/thing/main.c              ┃ old new│drivers/net/thing/main.c
+        │@@ static int thing_probe(struct thing┃        │@@ static int thing_probe(struct thing
+        │ *dev)                                ┃        │ *dev)
+  13  13│                                      ┃  23  23│
+  14  14│	ret = setup_ring(dev);         ┃  24  24│	ret = setup_ring(dev);
+      15│	flush_queue(dev);              ┃      25│	flush_queue(dev);
+        │                                      ┃+     26│	sync_state(dev);
+      16│	drain_cache(dev);              ┃      27│	drain_cache(dev);
+        │                                      ┃  25  28│	ret = arm_timer(dev);
+        │                                      ┃  26  29│	if (ret)
+        │──────────────────────────────────────╂────────┼──────────────────────────────────────
+        │@@ static void thing_reset(struct thin┃        │@@ static void thing_reset(struct thin
+        │g *dev)                               ┃        │g *dev)
+  60  62│{                                     ┃  70  73│{
+  61  63│                                      ┃  71  74│
+  62    │	val = read_reg(dev, REG_CTRL); ┃  72    │	val = read_reg(dev, REG_CTRL);
++     64│	val = read_reg(dev, REG_STAT); ┃+     75│	val = read_reg(dev, REG_MASK);
+  63  65│	write_reg(dev, REG_CTRL, val); ┃  73  76│	write_reg(dev, REG_CTRL, val);
+  64  66│}                                     ┃  74  77│}

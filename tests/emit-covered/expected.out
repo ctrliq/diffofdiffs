@@ -1,0 +1,24 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           Patch 1: p1.patch           ┃           Patch 2: p2.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches         *
+═══════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is
+an edit both patches make: a new number means both add it, an old number means
+both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│drivers/net/thing/main.c      ┃ old new│drivers/net/thing/main.c
+        │@@ static int thing_probe(stru┃        │@@ static int thing_probe(stru
+        │ct thing *dev)                ┃        │ct thing *dev)
+  33  33│                              ┃  43  43│
+  34  34│	ret = setup_ring(dev); ┃  44  44│	ret = setup_ring(dev);
+      35│	flush_queue(dev);      ┃      45│	flush_queue(dev);
+        │                              ┃+     46│	sync_state(dev);
+      36│	drain_cache(dev);      ┃      47│	drain_cache(dev);
+        │                              ┃  45  48│	ret = arm_timer(dev);
+        │                              ┃  46  49│	if (ret)

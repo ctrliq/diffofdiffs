@@ -1,0 +1,5 @@
+# Only the backport adds the busy assignment between the shared lock and
+# unlock calls, so DELTA removes that assignment.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

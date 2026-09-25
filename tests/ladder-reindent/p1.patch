@@ -1,0 +1,18 @@
+--- a/f.c
++++ b/f.c
+@@ -4,6 +4,6 @@
+ {
+ 	if (d->quirk) {
+ 		d->flags = 0;
+-		enable(d);
++		enable_locked(d);
+ 		d->ready = 1;
+ 	}
+@@ -10,6 +10,6 @@
+ static void arm(struct dev *d)
+ {
+ 	spin_lock(&d->slock);
+-	d->epoch = 0;
++	d->epoch = 1;
+ 	spin_unlock(&d->slock);
+ 	wake_up(&d->wq);

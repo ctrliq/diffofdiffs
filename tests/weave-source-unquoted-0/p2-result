@@ -1,0 +1,16 @@
+void probe(struct dev *d)
+{
+	init_ring(d);
+	fill_ring(d);
+	arm_ring(d);
+	set_flags(d, NEW_FLAG);
+	map_bars(d);
+	claim_irq(d);
+	start_queue(d);
+	report(d, "attach");
+	enable_tx(d);
+	enable_rx(d);
+	kick(d);
+	sync_all(d);
+	wake_more(d);
+}

@@ -1,0 +1,6 @@
+# The common inserted ring/queue calls surround the added flags check. The
+# flags check remains in DELTA while different surrounding source appears as
+# context.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

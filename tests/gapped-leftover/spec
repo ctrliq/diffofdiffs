@@ -1,0 +1,6 @@
+# Shared inserted helper calls identify the extra upstream helper_three and
+# helper_four calls. A different preceding source row and a later shared edit
+# do not erase them.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

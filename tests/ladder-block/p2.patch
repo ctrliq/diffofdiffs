@@ -1,0 +1,20 @@
+--- a/probe.c
++++ b/probe.c
+@@ -7,6 +7,9 @@
+ 	rc = init_hw(d);
+ 	if (rc)
+ 		return rc;
++	d->busy = 1;
++	d->ready = 1;
++	trace_exit(d);
+ 	dev_ready(d);
+ 	d->state = LIVE;
+ 	return 0;
+@@ -13,6 +16,6 @@
+ }
+ static void probe_arm(struct dev *d)
+ {
+-	d->epoch = 0;
++	d->epoch = 1;
+ 	spin_lock(&d->slock);
+ 	d->count++;

@@ -1,0 +1,13 @@
+--- a/drivers/net/attach.c
++++ b/drivers/net/attach.c
+@@ -12,6 +12,10 @@ static int dev_attach(struct dev *d)
+ 	int err;
+ 
+ 	err = probe_hw(d);
++	init_ring(d);
++	fill_ring(d);
++	start_queue(d);
++	kick(d);
+ 	finish_attach(d);
+ 	return err;
+ }

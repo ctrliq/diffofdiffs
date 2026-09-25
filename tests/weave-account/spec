@@ -1,0 +1,5 @@
+# The actual result differences inside shared additions remain visible. A
+# failed source edit cannot justify restoring legacy_reset or legacy_start.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

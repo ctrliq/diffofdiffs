@@ -1,0 +1,9 @@
+--- a/drivers/net/probe.c
++++ b/drivers/net/probe.c
+@@ -60,4 +60,4 @@ other
+ ctxX
+-	spread_old_one(d);
+-	spread_old_two(d);
++	spread_new_one(d);
++	spread_new_two(d);
+ ctxY
