@@ -2370,6 +2370,114 @@ struct label_file {
 	struct label_respell respells[5];
 };
 
+/*
+ * The label family behind the tree-label-* fixtures: nine files whose edits sit
+ * around the labels that name each hunk. One root carries every base text and
+ * four (bp, up) leg pairs fan out from it, each pair editing only its own
+ * fixture's files, so a spec picks its pair and prints nothing but those
+ * records. skip-bp/skip-up edit alpha.c, hdr.h, and top.c, where a tree run
+ * names the function above the label (a patch-mode run of the same text prints
+ * the label) and top.c, whose label is its first line, goes bare; only.c is
+ * edited by skip-up alone, so its record lands under ONLY IN PATCH2 as a byte
+ * copy of the assembled header and pins the assembler's own skip.
+ * kept-bp/kept-up edit kept.c, whose `out: rc = 1;` carries a statement and
+ * keeps naming its hunk while the bare `done:` in the second function is
+ * stepped over. gate-bp/gate-up edit the Makefile and entry.S, which no suffix
+ * gates, so their labels keep printing. inherit-bp/inherit-up pin the two
+ * label-triggered rules of the context diff's split walks, which need a context
+ * difference that legs sharing one pre-image can never show: this pair's up leg
+ * grows from a base of its own, the root with a few quoted rows respelled.
+ * ctx.c respells the first row bp quotes, three rows below b's definition, so
+ * the context diff's raw hunk opens on that definition with only filler above
+ * its piece; the raw tail is a() by way of the skipped `out:`, and the piece
+ * names b() from the real file instead of inheriting a(). islands.c respells
+ * the comment on row 1 so its raw hunk opens there with e's quoted definition
+ * inside it, and respells at most six rows apart pull e's rows and f's two
+ * islands into one raw hunk; f's definition is never quoted, so each of f's
+ * pieces would climb to e's definition, and the `out:` or `done:` its walk
+ * meets first ends the walk and lets the real file name f. The chosen respell
+ * positions exercise both naming rules while leaving the edits applicable.
+ */
+static const struct label_file label_files[] = {
+	{ "alpha.c", "skip",
+	  "static int alpha(int n)\n{\n\tint rc = 0;\n\n\tif (n < 0)\n"
+	  "\t\tgoto out;\n\trc = n;\nout:\n\trc += 1;\n\trc += 2;\n\trc += 3;\n"
+	  "\trc += 4;\n\trc += 5;\n\treturn rc;\n}\n",
+	  .edits = { { "\trc += 5;\n", "\trc += 55;\n", "\trc += 555;\n" } } },
+	{ "hdr.h", "skip",
+	  "int hdr(void)\n{\n\tint rc = 0;\n\ndone:\n\trc += 1;\n\trc += 2;\n"
+	  "\trc += 3;\n\trc += 4;\n\treturn rc;\n}\n",
+	  .edits = { { "\trc += 4;\n", "\trc += 44;\n", "\trc += 444;\n" } } },
+	{ "top.c", "skip",
+	  "retry:\n\ta = 1;\n\tb = 2;\n\tc = 3;\n\td = 4;\n\te = 5;\n"
+	  "\tf = 6;\n",
+	  .edits = { { "\te = 5;\n", "\te = 55;\n", "\te = 555;\n" } } },
+	{ "only.c", "skip",
+	  "static int only(void)\n{\n\tint rc = 0;\n\n\tgoto done;\ndone:\n"
+	  "\trc += 1;\n\trc += 2;\n\trc += 3;\n\trc += 4;\n\trc += 5;\n"
+	  "\treturn rc;\n}\n",
+	  .edits = { { "\trc += 5;\n", NULL, "\trc += 555;\n" } } },
+	{ "kept.c", "kept",
+	  "static int kept(void)\n{\n\tint rc = 0;\n\nout: rc = 1;\n"
+	  "\trc += 1;\n\trc += 2;\n\trc += 3;\n\trc += 4;\n\treturn rc;\n}\n\n"
+	  "static int freed(void)\n{\n\tint rc = 0;\n\ndone: /* free */\n"
+	  "\trc += 1;\n\trc += 2;\n\trc += 3;\n\trc += 8;\n\treturn rc;\n}\n",
+	  .edits = { { "\trc += 4;\n", "\trc += 44;\n", "\trc += 444;\n" },
+		     { "\trc += 8;\n", "\trc += 88;\n", "\trc += 888;\n" } } },
+	{ "Makefile", "gate",
+	  "all:\n\techo one\n\techo two\n\techo three\n\techo four\n"
+	  "\techo five\n",
+	  .edits = { { "\techo four\n", "\techo FOUR\n", "\techo FOUR4\n" } } },
+	{ "entry.S", "gate",
+	  "el1_sync:\n\tmov x0, #1\n\tmov x1, #2\n\tmov x2, #3\n\tmov x3, #4\n"
+	  "\tmov x4, #5\n",
+	  .edits = { { "\tmov x3, #4\n", "\tmov x3, #44\n",
+		       "\tmov x3, #444\n" } } },
+	{ "ctx.c", "inherit",
+	  "static int a(int n)\n{\n\tint rc = 0;\n\n\tif (n < 0)\n"
+	  "\t\tgoto out;\n\trc = n;\nout:\n\treturn rc;\n}\n\n"
+	  "static int b(void)\n{\n\tint rc = 0;\n\trc += 1;\n\trc += 2;\n"
+	  "\trc += 3;\n\trc += 4;\n\trc += 5;\n\trc += 6;\n\trc += 7;\n"
+	  "\treturn rc;\n}\n",
+	  .edits = { { "\trc += 4;\n", "\trc += 44;\n", "\trc += 444;\n" } },
+	  .respells = { { "\trc += 1;\n", "\trc += 10;\n" } } },
+	{ "islands.c", "inherit",
+	  "/* e stands above f */\nstatic int e(int n)\n{\n\tint m = n + 1;\n"
+	  "\tm += 2;\nout:\n\treturn m;\n}\n\n"
+	  "static int f(void)\n{\n\tint rc = 0;\n\tif (rc)\n\t\tgoto done;\n"
+	  "\trc += 3;\ndone:\n\trc += 4;\n\trc += 5;\n\trc += 6;\n\trc += 7;\n"
+	  "\trc += 8;\n\trc += 9;\n\trc += 10;\n\trc += 11;\n\trc += 12;\n"
+	  "\treturn rc;\n}\n",
+	  .edits = { { "\tint m = n + 1;\n", "\tint m = n + 11;\n",
+		       "\tint m = n + 111;\n" },
+		     { "\trc += 3;\n", "\trc += 33;\n", "\trc += 333;\n" },
+		     { "\trc += 10;\n", "\trc += 100;\n", "\trc += 1000;\n" } },
+	  .respells = { { "/* e stands above f */\n",
+			  "/* e stands above f, respelled */\n" },
+			{ "\treturn m;\n", "\treturn m + 1;\n" },
+			{ "\tint rc = 0;\n", "\tint rc = 1;\n" },
+			{ "\trc += 5;\n", "\trc += 50;\n" },
+			{ "\trc += 7;\n", "\trc += 70;\n" } } }
+};
+
+/* Rewrite the one row `row` spells in `buf` as the leg's spelling `leg` */
+static void label_edit_row(char *buf, size_t cap, const char *row,
+			   const char *leg)
+{
+	size_t rowlen = strlen(row), leglen = strlen(leg), rest;
+	char *at = strstr(buf, row);
+
+	if (!at)
+		die("the label family's edited row is missing from its text");
+
+	rest = strlen(at + rowlen) + 1;
+	if ((size_t)(at - buf) + leglen + rest > cap)
+		die("the label family's text overflows its buffer");
+
+	memmove(at + leglen, at + rowlen, rest);
+	memcpy(at, leg, leglen);
+}
+
 /* The states a label file's blobs are written in, the root's aside */
 enum label_state {
 	LABEL_BP, /* The bp leg: the root text with the bp edits */
@@ -2377,15 +2485,257 @@ enum label_state {
 	LABEL_UP /* The up leg: the respelled text with the up edits */
 };
 
+/*
+ * One state's blob for a label file: the root text with the up base's
+ * respellings applied for the two up-side states, then each edited row
+ * rewritten in the leg's spelling for the two leg states. A bp spelling of NULL
+ * keeps the root's row, so the file shows up in the up leg alone (and the blob
+ * written is the root's).
+ */
+static void label_state_blob(git_repository *repo, const struct label_file *f,
+			     enum label_state st, char *buf, size_t cap,
+			     git_oid *out)
+{
+	bool respell = st != LABEL_BP, edit = st != LABEL_UPBASE;
+
+	if (strlen(f->base) >= cap)
+		die("the label family's text overflows its buffer");
+
+	strcpy(buf, f->base);
+
+	for (size_t i = 0;
+	     respell && i < ARRAY_SIZE(f->respells) && f->respells[i].row;
+	     i++) {
+		label_edit_row(buf, cap, f->respells[i].row,
+			       f->respells[i].text);
+	}
+
+	for (size_t i = 0; edit && i < ARRAY_SIZE(f->edits) && f->edits[i].row;
+	     i++) {
+		const char *leg = st == LABEL_UP ? f->edits[i].up :
+						   f->edits[i].bp;
+
+		if (leg)
+			label_edit_row(buf, cap, f->edits[i].row, leg);
+	}
+
+	put_blob(repo, buf, strlen(buf), out);
+}
+
+static void build_label(const char *target)
+{
+	static const char *const pairs[] = { "skip", "kept", "gate",
+					     "inherit" };
+	git_oid base[ARRAY_SIZE(label_files)], bp[ARRAY_SIZE(label_files)],
+		upbase[ARRAY_SIZE(label_files)], up[ARRAY_SIZE(label_files)];
+	struct tree_spec ents[ARRAY_SIZE(label_files)];
+	git_repository *repo = NULL;
+	git_oid t, root;
+	char buf[1024];
+
+	if (git_repository_init(&repo, target, true))
+		die("cannot initialize a bare store at %s", target);
+
+	for (size_t i = 0; i < ARRAY_SIZE(label_files); i++) {
+		const struct label_file *f = &label_files[i];
+
+		put_blob(repo, f->base, strlen(f->base), &base[i]);
+		label_state_blob(repo, f, LABEL_BP, buf, sizeof(buf), &bp[i]);
+		label_state_blob(repo, f, LABEL_UPBASE, buf, sizeof(buf),
+				 &upbase[i]);
+		label_state_blob(repo, f, LABEL_UP, buf, sizeof(buf), &up[i]);
+		ents[i].name = f->name;
+		ents[i].mode = GIT_FILEMODE_BLOB;
+		ents[i].id = &base[i];
+	}
+
+	put_tree(repo, ents, ARRAY_SIZE(ents), &t);
+	put_commit(repo, "refs/heads/root", &t, NULL, "L0", &root);
+
+	for (size_t p = 0; p < ARRAY_SIZE(pairs); p++) {
+		const git_oid *up_parent = &root;
+		bool respelled = false;
+		git_oid pbase;
+
+		/*
+		 * A pair whose files respell rows grows its up leg from a base
+		 * of its own, so the two legs' patches quote the same rows in
+		 * two spellings.
+		 */
+		for (size_t i = 0; i < ARRAY_SIZE(label_files); i++) {
+			const struct label_file *f = &label_files[i];
+			bool mine = !strcmp(f->pair, pairs[p]);
+
+			if (mine && f->respells[0].row)
+				respelled = true;
+			ents[i].id = mine ? &upbase[i] : &base[i];
+		}
+
+		if (respelled) {
+			char ref[64], msg[64];
+
+			put_tree(repo, ents, ARRAY_SIZE(ents), &t);
+			snprintf(ref, sizeof(ref), "refs/heads/%s-base",
+				 pairs[p]);
+			snprintf(msg, sizeof(msg), "%s base", pairs[p]);
+			put_commit(repo, ref, &t, &root, msg, &pbase);
+			up_parent = &pbase;
+		}
+
+		for (int side = 0; side < 2; side++) {
+			const char *leg = side ? "up" : "bp";
+			char ref[64], msg[64];
+
+			for (size_t i = 0; i < ARRAY_SIZE(label_files); i++) {
+				const struct label_file *f = &label_files[i];
+
+				if (strcmp(f->pair, pairs[p]))
+					ents[i].id = &base[i];
+				else
+					ents[i].id = side ? &up[i] : &bp[i];
+			}
+
+			put_tree(repo, ents, ARRAY_SIZE(ents), &t);
+			snprintf(ref, sizeof(ref), "refs/heads/%s-%s", pairs[p],
+				 leg);
+			snprintf(msg, sizeof(msg), "%s %s", pairs[p], leg);
+			put_commit(repo, ref, &t, side ? up_parent : &root, msg,
+				   NULL);
+		}
+	}
+
+	if (git_repository_set_head(repo, "refs/heads/root"))
+		die("cannot point HEAD at refs/heads/root");
+
+	git_repository_free(repo);
+}
+
+/*
+ * Both patches replace one row with two, shifting the context difference down
+ * by one line. Those added rows belong to both tips, so the context hunk must
+ * carry them when its requested leading context reaches past the replacement.
+ */
+static void build_context_tip(const char *target)
+{
+	static const char *const refs[] = {
+		"refs/heads/bp-base",	       "refs/heads/bp",
+		"refs/heads/up-base",	       "refs/heads/up",
+		"refs/heads/mixed-bp-base",    "refs/heads/mixed-bp",
+		"refs/heads/mixed-up-base",    "refs/heads/mixed-up",
+		"refs/heads/rejected-bp-base", "refs/heads/rejected-bp",
+		"refs/heads/rejected-up-base", "refs/heads/rejected-up",
+		"refs/heads/repeated-bp-base", "refs/heads/repeated-bp",
+		"refs/heads/repeated-up-base", "refs/heads/repeated-up"
+	};
+	static const char *const text[] = {
+		"static void frame(void)\n{\n\tbefore();\n\told();\n\tone();\n\tbackport();\n\ttwo();\n\tthree();\n\tfour();\n\tlast();\n}\n",
+		"static void frame(void)\n{\n\tbefore();\n\tfirst();\n\tsecond();\n\tone();\n\tbackport();\n\ttwo();\n\tthree();\n\tfour();\n\tlast();\n}\n",
+		"static void frame(void)\n{\n\tbefore();\n\told();\n\tone();\n\tupstream();\n\ttwo();\n\tthree();\n\tfour();\n\tlast();\n}\n",
+		"static void frame(void)\n{\n\tbefore();\n\tfirst();\n\tsecond();\n\tone();\n\tupstream();\n\ttwo();\n\tthree();\n\tfour();\n\tlast();\n}\n",
+		"static void frame(void)\n{\n\tbefore();\n\told();\n\tone();\n\tbackport();\n\ttwo();\n\tthree();\n\tfour();\n\tlast();\n}\n",
+		"static void frame(void)\n{\n\tbefore();\n\tfirst();\n\tsecond();\n\tone_bp();\n\tbackport();\n\ttwo();\n\tthree();\n\tfour();\n\tlast();\n}\n",
+		"static void frame(void)\n{\n\tbefore();\n\told();\n\tone();\n\tupstream();\n\ttwo();\n\tthree();\n\tfour();\n\tlast();\n}\n",
+		"static void frame(void)\n{\n\tbefore();\n\tfirst();\n\tsecond();\n\tone_up();\n\tupstream();\n\ttwo();\n\tthree();\n\tfour();\n\tlast();\n}\n",
+		"static void frame(void)\n{\n\tbefore_bp();\n\told_bp();\n\tbackport();\n\tafter_bp();\n\tlast_bp();\n}\n",
+		"static void frame(void)\n{\n\tbefore_bp();\n\told_bp();\n\tcommon();\n\tbackport();\n\tafter_bp();\n\tlast_bp();\n}\n",
+		"static void frame(void)\n{\n\tbefore_up();\n\told_up();\n\tupstream();\n\tafter_up();\n\tlast_up();\n}\n",
+		"static void frame(void)\n{\n\tbefore_up();\n\told_up();\n\tcommon();\n\tupstream();\n\tafter_up();\n\tlast_up();\n}\n",
+		"static void frame(void)\n{\n\trepeat();\n\trepeat();\n\told();\n\tone();\n\tbackport();\n\ttwo();\n\tthree();\n\tfour();\n}\n",
+		"static void frame(void)\n{\n\trepeat();\n\tnew();\n\tone();\n\tbackport();\n\ttwo();\n\tthree();\n\tfour();\n}\n",
+		"static void frame(void)\n{\n\trepeat();\n\trepeat();\n\told();\n\tone();\n\tupstream();\n\ttwo();\n\tthree();\n\tfour();\n}\n",
+		"static void frame(void)\n{\n\trepeat();\n\tnew();\n\tone();\n\tupstream();\n\ttwo();\n\tthree();\n\tfour();\n}\n"
+	};
+	git_repository *repo = NULL;
+	git_oid parent, tree, blob;
+	struct tree_spec ent = { "frame.c", GIT_FILEMODE_BLOB, &blob };
+
+	if (git_repository_init(&repo, target, true))
+		die("cannot initialize a bare store at %s", target);
+
+	for (size_t i = 0; i < ARRAY_SIZE(text); i++) {
+		put_blob(repo, text[i], strlen(text[i]), &blob);
+		put_tree(repo, &ent, 1, &tree);
+		put_commit(repo, refs[i], &tree, i & 1 ? &parent : NULL,
+			   "context tip", i & 1 ? NULL : &parent);
+	}
+	if (git_repository_set_head(repo, refs[1]))
+		die("cannot point HEAD at %s", refs[1]);
+
+	git_repository_free(repo);
+}
+
+/* Use the fixture's full sources directly for its two commit pairs */
+static void build_recipe(const char *target, const char *filename,
+			 const char *other)
+{
+	static const char *const inputs[] = { "p1-source", "p1-result",
+					      "p2-source", "p2-result" };
+	static const char *const refs[] = { NULL, "refs/heads/bp", NULL,
+					    "refs/heads/up" };
+	git_repository *repo = NULL;
+	git_oid parent, tree, blob;
+
+	if (git_repository_init(&repo, target, true))
+		die("cannot initialize recipe store");
+
+	for (size_t i = 0; i < ARRAY_SIZE(inputs); i++) {
+		char *path __free(free) = NULL;
+
+		xasprintf(&path, "%s/../%s", target, inputs[i]);
+		if (git_blob_create_from_disk(&blob, repo, path))
+			die("cannot read recipe source %s", path);
+
+		put_tree1(repo, i < 2 ? filename : other, GIT_FILEMODE_BLOB,
+			  &blob, &tree);
+		put_commit(repo, refs[i], &tree, i & 1 ? &parent : NULL,
+			   "recipe", i & 1 ? NULL : &parent);
+	}
+	if (git_repository_set_head(repo, refs[1]))
+		die("cannot point HEAD at %s", refs[1]);
+
+	git_repository_free(repo);
+}
+
 /* Build the named fixture family as a bare store in the test arena */
 static void case_build_store(int argc, char **argv)
 {
 	if (argc != 2)
-		die("build-store wants a family and a target path");
+		die("build-store needs a family and a target directory");
+
 	if (!strcmp(argv[0], "tree4"))
 		build_tree4(argv[1]);
+	else if (!strcmp(argv[0], "label"))
+		build_label(argv[1]);
+	else if (!strcmp(argv[0], "context-tip"))
+		build_context_tip(argv[1]);
+	else if (!strcmp(argv[0], "recipe"))
+		build_recipe(argv[1], "f", "f");
+	else if (!strcmp(argv[0], "recipe-c"))
+		build_recipe(argv[1], "f.c", "f.c");
+	else if (!strcmp(argv[0], "recipe-moved"))
+		build_recipe(argv[1], "f.c", "g.c");
 	else
-		die("unknown family: %s", argv[0]);
+		die("unknown store family: %s", argv[0]);
+}
+
+/*
+ * Resolve command-line names in a caller-supplied repository and print one
+ * result per name. This is an optional integration probe; ordinary tests create
+ * their own repositories.
+ */
+static void case_probe(int argc, char **argv)
+{
+	struct gitread *gr;
+
+	if (argc < 1)
+		die("probe needs a repository directory");
+
+	gitread_open(&gr, argv[0]);
+
+	for (int i = 1; i < argc; i++)
+		print_resolved(gr, argv[i]);
+
+	gitread_close(&gr);
 }
 
 int main(int argc, char **argv)
@@ -2505,6 +2855,8 @@ int main(int argc, char **argv)
 		case_assemble_binary();
 	} else if (!strcmp(argv[1], "build-store")) {
 		case_build_store(argc - 2, argv + 2);
+	} else if (!strcmp(argv[1], "probe")) {
+		case_probe(argc - 2, argv + 2);
 	} else {
 		fprintf(stderr, "unknown case: %s\n", argv[1]);
 		return 2;
