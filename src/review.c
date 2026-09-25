@@ -320,6 +320,56 @@ static void match_function_interval(const struct udiff_image *images,
 	}
 }
 
+static void locate_edit_anchors(const struct comparison *quoted,
+				const struct udiff_image *images, int stage,
+				struct udiff_matches *anchors);
+
+/*
+ * Unique quoted source locates changed neighborhoods in complete parents.
+ * Repeated braces and delimiters cannot force unrelated functions together.
+ */
+static void match_complete(const struct comparison *quoted,
+			   const struct udiff_image *images,
+			   struct udiff_matches *matches)
+{
+	const struct source_view *other_view = &quoted->source[1].view[0];
+	const struct source_view *view = &quoted->source[0].view[0];
+	struct udiff_matches edit_anchors __free(udiff_matches) = {};
+	struct udiff_image window = { .lines = view->lines,
+				      .nlines = view->count };
+	const size_t *seed = quoted->matches[0].side[0];
+	struct line_occurrence *keys __free(free) = NULL;
+	size_t first[2] = {}, end[2], count = 0;
+
+	init_unmatched_lines(images, matches);
+	locate_edit_anchors(quoted, images, 0, &edit_anchors);
+	keys = collect_line_occurrences(images, &window, seed, &count);
+
+	/* Only located edits or globally unique quotations can anchor a file */
+	for (size_t i = 0; i < window.nlines; i++) {
+		size_t mate;
+
+		mate = seed[i];
+		if (mate == SIZE_MAX)
+			continue;
+
+		end[0] = quoted->source[0].rows[view->rows[i]].pos[0];
+		end[1] = quoted->source[1].rows[other_view->rows[mate]].pos[0];
+		if (edit_anchors.side[0][end[0]] == SIZE_MAX &&
+		    !line_is_unique_in_both(keys, count, &window.lines[i]))
+			continue;
+
+		match_interval(images, matches, first, end);
+		matches->side[0][end[0]] = end[1];
+		matches->side[1][end[1]] = end[0];
+		for (int leg = 0; leg < 2; leg++)
+			first[leg] = end[leg] + 1;
+	}
+	end[0] = images[0].nlines;
+	end[1] = images[1].nlines;
+	match_interval(images, matches, first, end);
+}
+
 /* A split-file edit can have its shared counterpart in another file pair */
 static bool edit_elsewhere(const struct comparison *review, int leg, size_t row)
 {
@@ -728,6 +778,83 @@ static void match_changes(struct comparison *review)
 	}
 }
 
+/*
+ * A located edit keeps its whole matched block, including repeated return
+ * statements and blank lines. A nonblank line unique in both complete images
+ * provides the location evidence; the other rows preserve the original edit.
+ */
+static void locate_edit_anchors(const struct comparison *quoted,
+				const struct udiff_image *images, int stage,
+				struct udiff_matches *anchors)
+{
+	const struct patch_source *source = &quoted->source[0];
+	const struct patch_source *other = &quoted->source[1];
+	const struct source_view *other_view = &other->view[stage];
+	const struct source_view *view = &source->view[stage];
+	struct udiff_image window = { .lines = view->lines,
+				      .nlines = view->count };
+	struct line_occurrence *keys __free(free) = NULL;
+	char sign = stage ? '+' : '-';
+	size_t count = 0;
+
+	init_unmatched_lines(images, anchors);
+	keys = collect_line_occurrences(images, &window,
+					quoted->matches[stage].side[0], &count);
+	for (size_t first = 0; first < view->count;) {
+		size_t previous = SIZE_MAX, end;
+		bool located = false;
+
+		/* A different sign or unknown row ends the native edit block */
+		for (end = first; end < view->count; end++) {
+			size_t row = view->rows[end];
+			size_t mate = quoted->edits[0][row];
+			size_t at;
+			bool separated = false;
+
+			if (source->rows[row].sign != sign)
+				break;
+
+			if (mate == SIZE_MAX)
+				continue;
+
+			at = other_view->index[mate];
+			if (previous != SIZE_MAX) {
+				for (size_t i = previous + 1; i < at; i++) {
+					size_t other_row = other_view->rows[i];
+
+					if (other->rows[other_row].sign !=
+					    sign) {
+						separated = true;
+						break;
+					}
+				}
+			}
+			if (separated)
+				break;
+
+			located |= line_is_unique_in_both(keys, count,
+							  &view->lines[end]);
+			previous = at;
+		}
+
+		/* Anchor indices address complete images, not quoted views */
+		for (size_t i = first; located && i < end; i++) {
+			size_t row = view->rows[i];
+			size_t mate, a, b;
+
+			mate = quoted->edits[0][row];
+			if (mate == SIZE_MAX)
+				continue;
+
+			a = source->rows[row].pos[stage];
+			b = other->rows[mate].pos[stage];
+			anchors->side[0][a] = b;
+			anchors->side[1][b] = a;
+		}
+		first = end == first ? first + 1 : end;
+	}
+}
+
 /* Retained parent boundaries prevent an edit from moving to another site */
 static void match_result_interval(const struct udiff_image *images,
 				  struct udiff_matches *matches,
@@ -784,6 +911,500 @@ struct scope_pairing {
 	size_t nlinks;
 };
 
+static void source_scopes_free(struct source_scopes *scopes)
+{
+	free(scopes->regions);
+	free(scopes->names);
+	free(scopes->owner);
+	free(scopes->mate);
+	free(scopes->guess);
+}
+
+static void scope_pairing_free(struct scope_pairing *pairing)
+{
+	for (int leg = 0; leg < 2; leg++)
+		source_scopes_free(&pairing->side[leg]);
+	free(pairing->links);
+}
+
+DEFINE_FREE(scope_pairing, struct scope_pairing, scope_pairing_free(&_T))
+
+static void read_scope_name(struct udiff_line *name,
+			    const struct udiff_line *line)
+{
+	const char *paren = memchr(line->ptr, '(', line->len);
+	size_t first, end;
+
+	*name = (typeof(*name)){};
+
+	/* Exclude variable initializers from candidate function names */
+	if (!line->len || !is_def_line(line->ptr) || !paren ||
+	    memchr(line->ptr, '=', paren - line->ptr))
+		return;
+
+	end = paren - line->ptr;
+	for (; end && isspace(line->ptr[end - 1]); end--)
+		;
+	first = end;
+	for (; first &&
+	       (isalnum(line->ptr[first - 1]) || line->ptr[first - 1] == '_');
+	     first--)
+		;
+	*name = (typeof(*name)){ .ptr = line->ptr + first, .len = end - first };
+}
+
+static void source_scopes_read(struct source_scopes *scopes,
+			       const struct udiff_image *image)
+{
+	size_t count = 0;
+
+	scopes->regions =
+		xmalloc_array(image->nlines, sizeof(*scopes->regions));
+	c_scan(image, SIZE_MAX, scopes->regions, &count);
+	scopes->names = xmalloc_array(count, sizeof(*scopes->names));
+	scopes->mate = xmalloc_array(count, sizeof(*scopes->mate));
+	scopes->guess = xmalloc_array(count, sizeof(*scopes->guess));
+	scopes->owner = xmalloc_array(image->nlines, sizeof(*scopes->owner));
+	for (size_t i = 0; i < image->nlines; i++)
+		scopes->owner[i] = SIZE_MAX;
+	for (size_t i = 0; i < count; i++) {
+		const struct c_scope *region = &scopes->regions[i];
+		size_t at = scopes->count;
+		struct udiff_line name;
+
+		read_scope_name(&name, &image->lines[region->name]);
+		if (!name.len)
+			continue;
+
+		for (size_t j = region->name; j < region->end; j++)
+			scopes->owner[j] = at;
+		scopes->names[at] = name;
+		scopes->regions[at] = *region;
+		scopes->regions[at].first = region->name;
+		scopes->mate[at] = scopes->guess[at] = SIZE_MAX;
+		scopes->count++;
+	}
+}
+
+static int scope_link_order(const void *a, const void *b)
+{
+	const struct scope_link *left = a, *right = b;
+
+	for (int leg = 0; leg < 2; leg++) {
+		if (left->owner[leg] != right->owner[leg])
+			return left->owner[leg] < right->owner[leg] ? -1 : 1;
+	}
+	return 0;
+}
+
+static bool same_scope(const struct scope_pairing *pairing, size_t a, size_t b)
+{
+	const struct source_scopes *scopes = pairing->side;
+	size_t owner[2] = { scopes[0].owner[a], scopes[1].owner[b] };
+	struct scope_link key = { .owner = { owner[0], owner[1] } };
+
+	if (owner[0] == SIZE_MAX || owner[1] == SIZE_MAX)
+		return owner[0] == owner[1];
+
+	if (scopes[0].mate[owner[0]] == owner[1])
+		return true;
+
+	if (scopes[0].mate[owner[0]] != SIZE_MAX ||
+	    scopes[1].mate[owner[1]] != SIZE_MAX)
+		return false;
+
+	return bsearch(&key, pairing->links, pairing->nlinks,
+		       sizeof(*pairing->links), scope_link_order);
+}
+
+static bool same_body(const struct source_scopes scopes[2],
+		      const struct udiff_image *images, size_t a, size_t b)
+{
+	const struct c_scope *right = &scopes[1].regions[b];
+	const struct c_scope *left = &scopes[0].regions[a];
+	size_t count = left->end - left->body;
+
+	if (count != right->end - right->body)
+		return false;
+
+	for (size_t i = 0; i < count; i++) {
+		if (!patch_row_equal(&images[0].lines[left->body + i],
+				     &images[1].lines[right->body + i]))
+			return false;
+	}
+	return true;
+}
+
+/* An exact body between paired neighbors can survive a function rename */
+static size_t pair_scope_gaps(struct source_scopes scopes[2],
+			      const struct udiff_image *images)
+{
+	size_t first[2] = {}, paired = 0;
+
+	for (size_t i = 0; i <= scopes[0].count; i++) {
+		size_t end;
+
+		end = i < scopes[0].count ? scopes[0].mate[i] : scopes[1].count;
+		if (end == SIZE_MAX)
+			continue;
+
+		if (i - first[0] == end - first[1]) {
+			for (size_t j = first[0]; j < i; j++) {
+				size_t mate = first[1] + j - first[0];
+
+				if (!same_body(scopes, images, j, mate))
+					continue;
+
+				scopes[0].mate[j] = mate;
+				scopes[1].mate[mate] = j;
+				paired++;
+			}
+		}
+		first[0] = i + 1;
+		first[1] = end + 1;
+	}
+	return paired;
+}
+
+/*
+ * Repeated function names retain occurrence order despite declaration changes.
+ */
+static void pair_scope_names(struct source_scopes scopes[2])
+{
+	/*
+	 * Duplicate names pair by occurrence only when both images have the
+	 * same count. A missing definition would otherwise shift later name
+	 * matches.
+	 */
+	for (size_t i = 0; i < scopes[0].count; i++) {
+		size_t occurrences[2] = {}, ordinal = 0, mate = SIZE_MAX;
+
+		for (int leg = 0; leg < 2; leg++) {
+			for (size_t j = 0; j < scopes[leg].count; j++) {
+				if (!patch_row_equal(&scopes[0].names[i],
+						     &scopes[leg].names[j]))
+					continue;
+
+				occurrences[leg]++;
+				if (!leg && j <= i)
+					ordinal++;
+				if (leg && occurrences[leg] == ordinal)
+					mate = j;
+			}
+		}
+		if (occurrences[0] == occurrences[1]) {
+			scopes[0].mate[i] = mate;
+			scopes[1].mate[mate] = i;
+		}
+	}
+}
+
+static size_t *scope_body_matches(const struct udiff_image *images,
+				  const struct udiff_matches *matches,
+				  const struct udiff_matches *retained)
+{
+	size_t *bodies = xmalloc_array(images[0].nlines, sizeof(*bodies));
+	struct line_occurrence *keys __free(free) = NULL;
+	size_t count = 0;
+
+	keys = collect_line_occurrences(images, &images[0], matches->side[0],
+					&count);
+	for (size_t i = 0; i < images[0].nlines; i++) {
+		size_t mate = matches->side[0][i];
+
+		/* Added copies cannot erase a surviving parent's identity */
+		if (mate != SIZE_MAX &&
+		    ((retained && retained->side[0][i] == mate) ||
+		     line_is_unique_in_both(keys, count, &images[0].lines[i])))
+			bodies[i] = mate;
+		else
+			bodies[i] = SIZE_MAX;
+	}
+	return bodies;
+}
+
+static void discard_conflicting_scope_names(struct source_scopes scopes[2],
+					    const struct udiff_image *images,
+					    const size_t *bodies,
+					    const struct udiff_matches *edits)
+{
+	/*
+	 * A split can move the relevant body into a differently named function.
+	 * Native edits, retained parent identities, and unique body lines
+	 * outweigh the retained name; the declaration itself cannot provide
+	 * independent body evidence.
+	 */
+	for (size_t i = 0; i < images[0].nlines; i++) {
+		size_t owner[2], mate;
+
+		mate = edits->side[0][i];
+		if (mate == SIZE_MAX)
+			mate = bodies[i];
+		if (mate == SIZE_MAX)
+			continue;
+
+		owner[0] = scopes[0].owner[i];
+		owner[1] = scopes[1].owner[mate];
+		if (owner[0] == SIZE_MAX || owner[1] == SIZE_MAX ||
+		    i == scopes[0].regions[owner[0]].name ||
+		    mate == scopes[1].regions[owner[1]].name)
+			continue;
+
+		for (int leg = 0; leg < 2; leg++) {
+			size_t paired = scopes[leg].mate[owner[leg]];
+
+			if (paired != SIZE_MAX && paired != owner[!leg]) {
+				scopes[!leg].mate[paired] = SIZE_MAX;
+				scopes[leg].mate[owner[leg]] = SIZE_MAX;
+			}
+		}
+	}
+}
+
+static void pair_scope_bodies(struct scope_pairing *pairing,
+			      const struct udiff_image *images,
+			      const size_t *bodies)
+{
+	struct source_scopes *scopes = pairing->side;
+
+	/* Keep body links even when a split prevents one-to-one ownership */
+	for (size_t i = 0; i < images[0].nlines; i++) {
+		size_t owner[2], mate;
+
+		mate = bodies[i];
+		if (mate == SIZE_MAX)
+			continue;
+
+		owner[0] = scopes[0].owner[i];
+		owner[1] = scopes[1].owner[mate];
+		if (owner[0] == SIZE_MAX || owner[1] == SIZE_MAX ||
+		    scopes[0].mate[owner[0]] != SIZE_MAX ||
+		    scopes[1].mate[owner[1]] != SIZE_MAX)
+			continue;
+
+		pairing->links[pairing->nlinks++] = (typeof(pairing->links[0])){
+			.owner = { owner[0], owner[1] }
+		};
+		for (int leg = 0; leg < 2; leg++) {
+			size_t *guess = &scopes[leg].guess[owner[leg]];
+
+			/* The count marks a guess with conflicting owners */
+			if (*guess == SIZE_MAX)
+				*guess = owner[!leg];
+			else if (*guess != owner[!leg])
+				*guess = scopes[!leg].count;
+		}
+	}
+	qsort(pairing->links, pairing->nlinks, sizeof(*pairing->links),
+	      scope_link_order);
+
+	/* Only mutual, unambiguous body candidates become function pairs */
+	for (size_t i = 0; i < scopes[0].count; i++) {
+		size_t mate = scopes[0].guess[i];
+
+		if (mate < scopes[1].count && scopes[1].guess[mate] == i) {
+			scopes[0].mate[i] = mate;
+			scopes[1].mate[mate] = i;
+		}
+	}
+}
+
+static size_t order_scope_pairs(struct source_scopes scopes[2])
+{
+	size_t *tails __free(free) =
+		xmalloc_array(scopes[0].count, sizeof(*tails));
+	size_t paired = 0, previous;
+
+	/*
+	 * An increasing chain partitions both images without reversing either
+	 * side's source order. For each chain length, tails holds the last left
+	 * scope of the chain whose right endpoint is earliest.
+	 */
+	for (size_t i = 0; i < scopes[0].count; i++) {
+		size_t mate = scopes[0].mate[i];
+		size_t first = 0, end = paired;
+
+		if (mate == SIZE_MAX)
+			continue;
+
+		while (first < end) {
+			size_t mid = first + (end - first) / 2;
+
+			if (scopes[0].mate[tails[mid]] < mate)
+				first = mid + 1;
+			else
+				end = mid;
+		}
+
+		/* Reuse guesses as predecessors in the increasing chain */
+		scopes[0].guess[i] = first ? tails[first - 1] : SIZE_MAX;
+		tails[first] = i;
+		if (first == paired)
+			paired++;
+	}
+
+	/* Backtrack the chosen chain and discard crossing function matches */
+	previous = paired ? tails[paired - 1] : SIZE_MAX;
+	for (size_t i = scopes[0].count; i--;) {
+		size_t mate;
+
+		mate = scopes[0].mate[i];
+		if (mate == SIZE_MAX)
+			continue;
+
+		if (i != previous) {
+			scopes[0].mate[i] = SIZE_MAX;
+			scopes[1].mate[mate] = SIZE_MAX;
+		} else {
+			previous = scopes[0].guess[i];
+		}
+	}
+	return paired;
+}
+
+static size_t pair_scopes(struct scope_pairing *pairing,
+			  const struct udiff_image *images,
+			  const size_t *bodies,
+			  const struct udiff_matches *edits)
+{
+	struct source_scopes *scopes = pairing->side;
+	size_t paired;
+
+	/*
+	 * Name conflicts must be cleared before bodies can claim their scopes.
+	 */
+	pair_scope_names(scopes);
+	discard_conflicting_scope_names(scopes, images, bodies, edits);
+	pair_scope_bodies(pairing, images, bodies);
+	paired = order_scope_pairs(scopes);
+	return paired ? paired + pair_scope_gaps(scopes, images) : 0;
+}
+
+/*
+ * Matching braces alone cannot identify a function. Keep each located body
+ * inside its own boundaries, then retain only correspondences between paired
+ * functions. Within those boundaries, unique lines locate repeated comments
+ * before the remaining delimiters are matched. Native edit anchors still govern
+ * matching within each body.
+ */
+static void match_scopes(struct comparison *review,
+			 const struct comparison *quoted,
+			 const struct udiff_image *images, int stage,
+			 const struct udiff_matches *retained)
+{
+	struct udiff_matches anchors __free(udiff_matches) = {};
+	struct scope_pairing pairing __free(scope_pairing) = {};
+	const struct source_scopes *right = &pairing.side[1];
+	const struct source_scopes *left = &pairing.side[0];
+	struct udiff_matches *matches = &review->matches[stage];
+	size_t *bodies __free(free) = NULL;
+	size_t first[2] = {}, end[2];
+
+	for (int leg = 0; leg < 2; leg++)
+		source_scopes_read(&pairing.side[leg], &images[leg]);
+	pairing.links = xmalloc_array(images[0].nlines, sizeof(*pairing.links));
+
+	/* Locate owners before repeated braces can choose an unrelated body */
+	bodies = scope_body_matches(images, matches, retained);
+	locate_edit_anchors(quoted, images, stage, &anchors);
+	if (!pair_scopes(&pairing, images, bodies, &anchors))
+		return;
+
+	/* Keep the same body evidence when rebuilding the paired functions */
+	for (size_t i = 0; i < images[0].nlines; i++) {
+		size_t mate = bodies[i];
+
+		if (mate != SIZE_MAX && same_scope(&pairing, i, mate)) {
+			anchors.side[0][i] = mate;
+			anchors.side[1][mate] = i;
+		}
+	}
+
+	/* Rebuild each paired function within its own source boundaries */
+	udiff_matches_free(matches);
+	init_unmatched_lines(images, matches);
+	for (size_t i = 0; i < left->count; i++) {
+		const struct c_scope *regions[2];
+		size_t mate;
+		bool equal;
+
+		mate = left->mate[i];
+		if (mate == SIZE_MAX)
+			continue;
+
+		regions[0] = &left->regions[i];
+		regions[1] = &right->regions[mate];
+		for (int leg = 0; leg < 2; leg++)
+			end[leg] = regions[leg]->first;
+		match_result_interval(images, matches, &anchors, first, end,
+				      false);
+		for (int leg = 0; leg < 2; leg++) {
+			first[leg] = end[leg];
+			end[leg] = regions[leg]->end - 1;
+		}
+
+		/* A function's closing row belongs to its matched owner */
+		equal = patch_row_equal(&images[0].lines[end[0]],
+					&images[1].lines[end[1]]);
+		if (!equal) {
+			end[0]++;
+			end[1]++;
+		}
+		match_result_interval(images, matches, &anchors, first, end,
+				      true);
+		if (equal) {
+			matches->side[0][end[0]] = end[1];
+			matches->side[1][end[1]] = end[0];
+		}
+		for (int leg = 0; leg < 2; leg++)
+			first[leg] = end[leg] + equal;
+	}
+	end[0] = images[0].nlines;
+	end[1] = images[1].nlines;
+	match_result_interval(images, matches, &anchors, first, end, false);
+
+	/* Matches outside paired functions still need compatible owners */
+	for (size_t i = 0; i < images[0].nlines; i++) {
+		size_t mate = matches->side[0][i];
+
+		if (mate != SIZE_MAX && !same_scope(&pairing, i, mate)) {
+			matches->side[0][i] = SIZE_MAX;
+			matches->side[1][mate] = SIZE_MAX;
+		}
+	}
+
+	/* Keep reindentation correspondence within each paired owner */
+	for (size_t i = 0; i < left->count; i++) {
+		size_t mate;
+
+		mate = left->mate[i];
+		if (mate == SIZE_MAX)
+			continue;
+
+		first[0] = left->regions[i].first;
+		first[1] = right->regions[mate].first;
+		end[0] = left->regions[i].end;
+		end[1] = right->regions[mate].end;
+		match_reindented_window(review, stage, images, first, end);
+	}
+}
+
+static void refine_source_matches(struct comparison *review,
+				  const struct comparison *quoted,
+				  const struct udiff_image *images, int stage,
+				  const struct udiff_matches *retained)
+{
+	size_t first[2] = {}, end[2] = { images[0].nlines, images[1].nlines };
+
+	/* Complete C source confines reindentation to located function pairs */
+	if (quoted && review->source[0].file && review->source[1].file &&
+	    path_names_c_source(patch_file_path(review->source[0].file)) &&
+	    path_names_c_source(patch_file_path(review->source[1].file)))
+		match_scopes(review, quoted, images, stage, retained);
+	else
+		match_reindented_window(review, stage, images, first, end);
+}
+
 /*
  * Unique retained parent rows keep their identity at the tips. Other matches
  * remain flexible around insertions and deletions. Hunk grouping contributes no
@@ -791,7 +1412,9 @@ struct scope_pairing {
  */
 static void match_results(struct comparison *review,
 			  const struct udiff_image *parents,
-			  const struct udiff_image *images)
+			  const struct udiff_image *images,
+			  const struct comparison *quoted,
+			  struct udiff_matches *retained)
 {
 	const struct source_view *parent = &review->source[0].view[0];
 	struct udiff_matches anchors __free(udiff_matches) = {};
@@ -801,7 +1424,11 @@ static void match_results(struct comparison *review,
 
 	keys = collect_line_occurrences(parents, &parents[0],
 					review->matches[0].side[0], &count);
+	if (quoted)
+		locate_edit_anchors(quoted, images, 1, &anchors);
 	init_unmatched_lines(images, matches);
+	if (retained)
+		init_unmatched_lines(images, retained);
 	for (size_t i = 0; i < parent->count; i++) {
 		size_t indexes[2], mate;
 		bool survives = true;
@@ -835,6 +1462,10 @@ static void match_results(struct comparison *review,
 				      false);
 		matches->side[0][end[0]] = end[1];
 		matches->side[1][end[1]] = end[0];
+		if (retained) {
+			retained->side[0][end[0]] = end[1];
+			retained->side[1][end[1]] = end[0];
+		}
 		for (int leg = 0; leg < 2; leg++)
 			first[leg] = end[leg] + 1;
 	}
@@ -911,6 +1542,9 @@ static void match_ambiguous_sources(struct comparison *review,
 
 static void compare_ordered(struct comparison *review)
 {
+	struct udiff_matches retained __free(udiff_matches) = {};
+	struct comparison quoted __free(comparison) = {};
+	bool complete = review->source[0].complete;
 	struct udiff_image images[2][2];
 
 	for (int stage = 0; stage < 2; stage++) {
@@ -929,20 +1563,25 @@ static void compare_ordered(struct comparison *review)
 		return;
 	}
 
-	udiff_match(&images[0][0], &images[0][1], &review->matches[0]);
-	{
-		size_t first[2] = {},
-		       end[2] = { images[0][0].nlines, images[0][1].nlines };
-
-		match_reindented_window(review, 0, images[0], first, end);
+	if (complete) {
+		/* Locate quoted edits before using surrounding source */
+		patch_source_read(&quoted.source[0], review->source[0].file,
+				  review->source[1].file, 0, false);
+		patch_source_read(&quoted.source[1], review->source[1].file,
+				  review->source[0].file, 1, false);
+		compare_sources(&quoted);
+		match_complete(&quoted, images[0], &review->matches[0]);
+	} else {
+		udiff_match(&images[0][0], &images[0][1], &review->matches[0]);
 	}
-	match_results(review, images[0], images[1]);
-	{
-		size_t first[2] = {},
-		       end[2] = { images[1][0].nlines, images[1][1].nlines };
+	refine_source_matches(review, complete ? &quoted : NULL, images[0], 0,
+			      NULL);
 
-		match_reindented_window(review, 1, images[1], first, end);
-	}
+	/* Carry retained parent identities forward before pairing new source */
+	match_results(review, images[0], images[1], complete ? &quoted : NULL,
+		      complete ? &retained : NULL);
+	refine_source_matches(review, complete ? &quoted : NULL, images[1], 1,
+			      complete ? &retained : NULL);
 	match_changes(review);
 }
 
