@@ -1,0 +1,72 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            Patch 1: patch1                            ┃                            Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                         *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old
+number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│foo.c                                                         ┃ old new│foo.c
+        │@@                                                            ┃        │@@
+  10  10│		if (alpha) {                                   ┃  10  10│	if (alpha) {
+  11  11│			int keep;                              ┃  11  11│		int keep;
+  12  12│                                                              ┃  12  12│
+- 13    │			if (check(bravo)) {                    ┃- 13    │		if (check(bravo)) {
+- 14    │				warn("bravo out of range\n",   ┃        │
+- 15    │				     bravo);                   ┃        │
++     13│			if (add_ovf(bravo, &off) ||            ┃+     13│		if (add_ovf(bravo, &off) ||
++     14│			    check2(off)) {                     ┃+     14│		    check2(off)) {
++     15│				warn_rl("bravo out of range\n",┃  14  15│			warn_rl("bravo out of range\n",
++     16│					bravo);                ┃  15  16│				bravo);
+  16  17│				goto bad;                      ┃  16  17│			goto bad;
+  17  18│			}                                      ┃        │
+  18  19│			use(keep);                             ┃        │
+        │──────────────────────────────────────────────────────────────╂────────┼──────────────────────────────────────────────────────────────
+        │@@                                                            ┃        │@@
+  40  41│		if (delta) {                                   ┃  40  41│	if (delta) {
+  41  42│			int hold;                              ┃  41  42│		int hold;
+  42  43│                                                              ┃  42  43│
+- 43    │			if (probe(echo)) {                     ┃- 43    │		if (probe(echo)) {
+- 44    │				warn("echo out of range\n",    ┃        │
+- 45    │				     echo);                    ┃        │
++     44│			if (add_ovf(echo, &pos) ||             ┃+     44│		if (add_ovf(echo, &pos) ||
++     45│			    probe2(pos)) {                     ┃+     45│		    probe2(pos)) {
++     46│				trace(pos);                    ┃        │
++     47│				warn_rl("echo out of range\n", ┃  44  46│			warn_rl("echo out of range\n",
++     48│					echo);                 ┃  45  47│				echo);
+  46  49│				goto bad;                      ┃  46  48│			goto bad;
+  47  50│			}                                      ┃        │
+  48  51│			use(hold);                             ┃        │
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                   *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│foo.c                                                         ┃     new│foo.c
+        │@@                                                            ┃        │@@
+-     10│		if (alpha) {                                   ┃+     10│	if (alpha) {
+-     11│			int keep;                              ┃+     11│		int keep;
+      12│                                                              ┃      12│
+-     13│			if (add_ovf(bravo, &off) ||            ┃+     13│		if (add_ovf(bravo, &off) ||
+-     14│			    check2(off)) {                     ┃+     14│		    check2(off)) {
+-     15│				warn_rl("bravo out of range\n",┃+     15│			warn_rl("bravo out of range\n",
+-     16│					bravo);                ┃+     16│				bravo);
+-     17│				goto bad;                      ┃+     17│			goto bad;
+        │──────────────────────────────────────────────────────────────╂────────┼──────────────────────────────────────────────────────────────
+        │@@                                                            ┃        │@@
+-     41│		if (delta) {                                   ┃+     41│	if (delta) {
+-     42│			int hold;                              ┃+     42│		int hold;
+      43│                                                              ┃      43│
+-     44│			if (add_ovf(echo, &pos) ||             ┃+     44│		if (add_ovf(echo, &pos) ||
+-     45│			    probe2(pos)) {                     ┃+     45│		    probe2(pos)) {
+-     46│				trace(pos);                    ┃        │
+-     47│				warn_rl("echo out of range\n", ┃+     46│			warn_rl("echo out of range\n",
+-     48│					echo);                 ┃+     47│				echo);
+-     49│				goto bad;                      ┃+     48│			goto bad;

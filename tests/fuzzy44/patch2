@@ -1,0 +1,16 @@
+--- a/foo.c
++++ b/foo.c
+@@ -7,2 +7,2 @@
+ shared
+-alpha
++BRAVO
+@@ -9,3 +9,3 @@
+-gamma
++GAMMA
+ aardvark
+ badger
+@@ -26,3 +26,3 @@
+-eta
++ETA
+ goose
+ grouse

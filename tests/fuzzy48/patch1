@@ -1,0 +1,10 @@
+--- a/foo.c
++++ b/foo.c
+@@ -5,2 +5,2 @@
+-alpha
++ALPHA
+ aardvark
+@@ -12,2 +12,2 @@
+-bravo
++BRAVO
+ shared

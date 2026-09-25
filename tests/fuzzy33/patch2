@@ -1,0 +1,22 @@
+--- a/foo.c
++++ b/foo.c
+@@ -10,7 +10,8 @@
+ 	if (alpha) {
+ 		int keep;
+ 
+-		if (check(bravo)) {
++		if (add_ovf(bravo, &off) ||
++		    check2(off)) {
+ 			warn_rl("bravo out of range\n",
+ 				bravo);
+ 			goto bad;
+@@ -40,7 +41,8 @@
+ 	if (delta) {
+ 		int hold;
+ 
+-		if (probe(echo)) {
++		if (add_ovf(echo, &pos) ||
++		    probe2(pos)) {
+ 			warn_rl("echo out of range\n",
+ 				echo);
+ 			goto bad;

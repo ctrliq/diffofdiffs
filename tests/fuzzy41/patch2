@@ -1,0 +1,9 @@
+--- a/foo.c
++++ b/foo.c
+@@ -12,5 +12,5 @@
+ 
+ kestrel
+ manatee
+ narwhal
+-omega
++OMEGA

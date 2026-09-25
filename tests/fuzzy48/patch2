@@ -1,0 +1,10 @@
+--- a/foo.c
++++ b/foo.c
+@@ -8,2 +8,2 @@
+-alpha
++ALPHA
+ ferret
+@@ -15,2 +15,2 @@
+-bravo
++BRAVO
+ shared

@@ -1,0 +1,22 @@
+--- a/foo.c
++++ b/foo.c
+@@ -7,2 +7,2 @@
+-golf
++GOLF
+ aardvark
+@@ -14,2 +14,2 @@
+-hotel
++HOTEL
+ shared
+@@ -20,4 +20,4 @@
+-india
++INDIA
+ old1
+ old2
+ old3
+@@ -40,4 +40,4 @@
+-juliet
++JULIET
+ old4
+ old5
+ old6

@@ -1,0 +1,22 @@
+--- a/foo.c
++++ b/foo.c
+@@ -10,2 +10,2 @@
+-golf
++GOLF
+ ferret
+@@ -17,2 +17,2 @@
+-hotel
++HOTEL
+ shared
+@@ -23,4 +23,4 @@
+-india
++INDIA
+ new1
+ new2
+ new3
+@@ -47,4 +47,4 @@
+-juliet
++JULIET
+ new4
+ new5
+ new6

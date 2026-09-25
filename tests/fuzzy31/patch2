@@ -1,0 +1,14 @@
+--- a/f.c
++++ b/f.c
+@@ -1,5 +1,6 @@
+ alpha
++added_one
+ bravo_p2
+ charlie
+ xray
+ yankee
+@@ -7,3 +8,4 @@
+ sierra
++added_two
+ tango_p2
+ uniform

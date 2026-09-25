@@ -1,0 +1,9 @@
+# Both patches edit f.c in two places. Near line 12, patch2 changes x = 1; to y
+# = 2;, while patch1, whose file already has y = 2;, changes a4 to a4p1, which
+# patch2 quotes unchanged. Near line 43 both change b4, patch1 to b4p1 and
+# patch2 to b4p2. The report must show patch1's a4 change and patch2's y = 2;
+# change each on its own side, and the two b4 changes side by side with the
+# removal shared.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

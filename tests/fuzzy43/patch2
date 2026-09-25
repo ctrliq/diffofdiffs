@@ -1,0 +1,13 @@
+--- a/foo.c
++++ b/foo.c
+@@ -10,4 +10,4 @@
+ shared
+-alpha
++BRAVO
+ ferret
+ gazelle
+@@ -19,3 +19,3 @@
+-omega
++CHARLIE
+ heron
+ ibex

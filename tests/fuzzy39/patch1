@@ -1,0 +1,11 @@
+--- a/f.c
++++ b/f.c
+@@ -10,7 +10,7 @@
+ c1
+ c2
+ c3
+-guard(old_limit);
++guard(new_limit);
+ report(sk, skb);
+ return -1;
+ c6

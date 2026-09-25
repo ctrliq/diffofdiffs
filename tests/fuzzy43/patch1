@@ -1,0 +1,13 @@
+--- a/foo.c
++++ b/foo.c
+@@ -10,4 +10,4 @@
+ shared
+-alpha
++ALPHA
+ aardvark
+ badger
+@@ -29,3 +29,3 @@
+-omega
++OMEGA
+ caribou
+ dolphin

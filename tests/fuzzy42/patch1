@@ -1,0 +1,16 @@
+--- a/foo.c
++++ b/foo.c
+@@ -10,6 +10,6 @@
+-alpha
++ALPHA
+ aardvark
+ badger
+ caribou
+ dolphin
+ emu
+@@ -30,4 +30,4 @@
+ tapir
+ urchin
+ vulture
+-walrus
++WALRUS

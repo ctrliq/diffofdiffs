@@ -1,0 +1,66 @@
+--- a/fs/eventpoll.c
++++ b/fs/eventpoll.c
+@@ -13,17 +13,33 @@
+ 
+ static int helper_one(void)
+ {
+ 	return 1;
+ }
+ 
+ static int helper_two(void)
+ {
+-	return 2;
++	return 22;
++}
++
++/*
++ * The ffd.file pointer may be in the process of being torn down due to
++ * being closed, but we may not have finished releasing it yet. Hold a
++ * reference across the poll so the file cannot go away underneath us,
++ * and hand back NULL when the count has already reached zero.
++ */
++static struct file *epi_fget(const struct epitem *epi)
++{
++	struct file *file;
++
++	file = epi->ffd.file;
++	if (!count_get(&file->f_count))
++		file = NULL;
++	return file;
+ }
+ 
+ static int helper_three(void)
+ {
+ 	return 3;
+ }
+ 
+ static int helper_four(void)
+@@ -36,28 +52,12 @@
+ 	return 5;
+ }
+ 
+ static int ep_poll(void)
+ {
+ 	return 0;
+ }
+ 
+-/*
+- * The ffd.file pointer may be in the process of being torn down due to
+- * being closed, but we may not have finished releasing it yet. Hold a
+- * reference across the poll so the file cannot go away underneath us,
+- * and hand back NULL when the count has already reached zero.
+- */
+-static struct file *epi_fget(const struct epitem *epi)
+-{
+-	struct file *file;
+-
+-	file = epi->ffd.file;
+-	if (!count_get(&file->f_count))
+-		file = NULL;
+-	return file;
+-}
+-
+ static int helper_six(void)
+ {
+ 	return 6;
+ }

@@ -1,0 +1,16 @@
+--- a/foo.c
++++ b/foo.c
+@@ -10,6 +10,6 @@
+-alpha
++OMEGA
+ ferret
+ dolphin
+ gazelle
+ heron
+ ibex
+@@ -30,4 +30,4 @@
+ tapir
+ urchin
+ vulture
+-walrus
++WOMBAT

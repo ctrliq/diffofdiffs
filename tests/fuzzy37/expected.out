@@ -1,0 +1,63 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                Patch 1: patch1                                 ┃                                Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                           *
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both
+remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│fs/eventpoll.c                                                         ┃ old new│fs/eventpoll.c
+        │@@ static int helper_one(void)                                         ┃        │@@
+  18  18│                                                                       ┃  18  18│
+  19  19│static int helper_two(void)                                            ┃  19  19│static int helper_two(void)
+  20  20│{                                                                      ┃  20  20│{
+- 21    │	return 2;                                                       ┃  21  21│	return 2;
++     21│	return 22;                                                      ┃        │
++     22│}                                                                      ┃  22  22│}
++     23│                                                                       ┃  23  23│
+      24│/*                                                                     ┃      24│/*
+      25│ * The ffd.file pointer may be in the process of being torn down due to┃      25│ * The ffd.file pointer may be in the process of being torn down due to
+      26│ * being closed, but we may not have finished releasing it yet. Hold a ┃      26│ * being closed, but we may not have finished releasing it yet. Hold a
+        │───────────────────────────────────────────────────────────────────────╂────────┼───────────────────────────────────────────────────────────────────────
+        │@@ static struct file *epi_fget(const struct epitem *epi)              ┃        │@@ static struct file *epi_fget(const struct epitem *epi)
+      32│	struct file *file;                                              ┃      32│	struct file *file;
+      33│                                                                       ┃      33│
+      34│	file = epi->ffd.file;                                           ┃      34│	file = epi->ffd.file;
++     35│	if (!count_get(&file->f_count))                                 ┃+     35│	if (!ref_get(&file->f_ref))
+      36│		file = NULL;                                            ┃      36│		file = NULL;
+      37│	return file;                                                    ┃      37│	return file;
+  22  38│}                                                                      ┃+     38│}
+  23  39│                                                                       ┃+     39│
+  24  40│static int helper_three(void)                                          ┃  24  40│static int helper_three(void)
+  25  41│{                                                                      ┃  25  41│{
+  26  42│	return 3;                                                       ┃  26  42│	return 3;
+        │───────────────────────────────────────────────────────────────────────╂────────┼───────────────────────────────────────────────────────────────────────
+        │@@ static struct file *epi_fget(const struct epitem *epi)              ┃        │@@ static struct file *epi_fget(const struct epitem *epi)
+  52    │	struct file *file;                                              ┃  52    │	struct file *file;
+  53    │                                                                       ┃  53    │
+  54    │	file = epi->ffd.file;                                           ┃  54    │	file = epi->ffd.file;
+- 55    │	if (!count_get(&file->f_count))                                 ┃- 55    │	if (!ref_get(&file->f_ref))
+  56    │		file = NULL;                                            ┃  56    │		file = NULL;
+  57    │	return file;                                                    ┃  57    │	return file;
+  58    │}                                                                      ┃  58    │}
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                                     *
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│fs/eventpoll.c                                                         ┃     new│fs/eventpoll.c
+        │@@ static int helper_one(void)                                         ┃        │@@
+      18│                                                                       ┃      18│
+      19│static int helper_two(void)                                            ┃      19│static int helper_two(void)
+      20│{                                                                      ┃      20│{
+-     21│	return 22;                                                      ┃+     21│	return 2;
+      22│}                                                                      ┃      22│}
+      23│                                                                       ┃      23│
+      24│/*                                                                     ┃      24│/*

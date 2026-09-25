@@ -1,0 +1,33 @@
+--- a/net/socket.c
++++ b/net/socket.c
+@@ -10,7 +10,7 @@
+ static void io_setup(struct io_ring_ctx *ctx)
+ {
+ 	ctx->flags |= IORING_SETUP_CQE32;
+-	ctx->limit = old_limit(ctx);
++	ctx->limit = new_limit(ctx);
+ 	ctx->users++;
+ 	init_waitqueue_head(&ctx->wait);
+ }
+@@ -40,20 +40,20 @@
+ 	if (ret < min_ret) {
+ 		if (ret > 0 && io_net_retry(sock, flags)) {
+ 			req->flags |= REQ_F_BL_NO_RECYCLE;
+-			return -EAGAIN;
++			return IOU_RETRY;
+ 		}
+ 		if (ret == -ERESTARTSYS)
+ 			ret = -EINTR;
+ 		req_set_fail(req);
+ 	}
+ 	if (ret >= 0)
+ 		ret += sr->done_io;
+ 	else if (sr->done_io)
+ 		ret = sr->done_io;
+ 	io_req_msg_cleanup(req, issue_flags);
+ 	if (kmsg->msg.msg_inq)
+ 		cflags |= IORING_CQE_F_SOCK_NONEMPTY;
+ 	io_req_set_res(req, ret, cflags);
+ 	return old_finish(req, ret);
+ 	return IOU_OK;
+ }

@@ -1,0 +1,9 @@
+--- a/foo.c
++++ b/foo.c
+@@ -1,5 +1,5 @@
+-alpha
++ALPHA
+ 
+ aardvark
+ capybara
+ dingo

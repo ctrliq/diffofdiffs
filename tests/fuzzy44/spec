@@ -1,0 +1,8 @@
+# Both patches change alpha at line 8 of foo.c, patch1 to ALPHA and patch2 to
+# BRAVO. Patch1 also changes beta, delta, and epsilon at lines 13, 26, and 27;
+# patch2 changes gamma at line 9 and eta at line 26, which patch1 quotes as
+# delta. The report must show the two alpha changes side by side with the
+# removal shared, and every other change on its own patch's side alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
