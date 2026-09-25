@@ -1,0 +1,7 @@
+# Patch1 changes only the mode of g.c, while patch2 renames f.c to g.c
+# and gives it a different terminal mode. Their complete block names prove
+# the common destination, so the modes compare and patch2 retains the rename
+# that patch1 never performs.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

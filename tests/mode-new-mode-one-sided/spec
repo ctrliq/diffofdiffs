@@ -1,0 +1,7 @@
+# Patch1's mode-only block changes f.c's mode, a file patch2 never touches;
+# patch2 edits only zz.c. The report must show f.c's mode note on patch1's side
+# and zz.c's edit on patch2's side, mirroring what patch2's mode-only blocks get
+# in fileop-only-in-patch2.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,7 @@
+# Both operands are the same lone block: a diff --git line followed only by `new
+# mode 100755`. A lone new mode line doesn't complete a block, so the reader
+# drops the block as message text and each operand holds no patch at all. The
+# tool must refuse patch1, checked first, at exit 1.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

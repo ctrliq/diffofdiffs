@@ -1,0 +1,8 @@
+# The z.c mode-only blocks match raw on both sides, but they carry
+# synthetic git-b names rather than authored header names, so they sit
+# out the strip-depth vote. The depth settles at one, where the
+# mixed-prefix f.c pair matches and its real content delta prints; the
+# z.c stories agree and stay silent.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

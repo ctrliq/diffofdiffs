@@ -1,0 +1,6 @@
+# Patch1 edits only keep.c. Patch2's block renames old.c to new.c, changes its
+# mode, and edits its content. The report must show keep.c on patch1's side and,
+# for old.c, patch2's mode and rename notes together with its content change.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

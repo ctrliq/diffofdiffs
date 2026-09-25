@@ -1,0 +1,7 @@
+# Patch1 changes f.bin's mode from 100644 to 100700 with no payload; patch2
+# changes it to 100755 and carries a GIT binary patch with both a forward and a
+# reverse literal run. The report must show both mode notes side by side, with
+# patch2's binary file note and neither base85 run.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

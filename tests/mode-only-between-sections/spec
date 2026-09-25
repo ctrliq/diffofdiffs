@@ -1,0 +1,11 @@
+# patch2 places a mode-only git block for m.sh, with no --- line, between its
+# a.c and b.c blocks, and patch1 never names m.sh. Both patches change a.c and
+# b.c differently. A block with mode lines and no hunk still counts as patch
+# content, recorded under the name from its diff --git line.
+#
+# The report must pair a.c and b.c normally and show m.sh's mode change on
+# patch2's side alone. The mode-only block must end at b.c's own diff --git line
+# rather than swallowing it.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

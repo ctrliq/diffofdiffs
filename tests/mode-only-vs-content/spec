@@ -1,0 +1,6 @@
+# Patch1 only changes f.c's mode; patch2 only changes f.c's content. The report
+# must show f.c once, with patch1's mode note on its side and patch2's content
+# change on the other, rather than dropping either.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

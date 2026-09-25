@@ -1,0 +1,7 @@
+# Patch1 carries two mode-only blocks for f.c, 100644 to 100755 and then 100755
+# to 100700, while patch2 carries only the first. The first blocks agree and are
+# left out. The second must show as patch1's mode change for f.c beside patch2's
+# f.c, not as a file patch2 never touches.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,12 @@
+# An operand whose only content is a hunkless git block still holds a patch: a
+# diff --git line followed by mode lines counts as patch content, while the same
+# two mode lines without the diff --git line above them would be refused as
+# containing no patch.
+#
+# patch2 only changes m.sh's mode, so its block runs from the operand's first
+# byte to its end with no next block to stop at. Patch1 changes only a.c. The
+# report must show a.c's edit on patch1's side and m.sh's mode change on
+# patch2's side.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

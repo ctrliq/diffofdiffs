@@ -1,0 +1,23 @@
+diff --git a/a.c b/a.c
+index 1111111..3333333 100644
+--- a/a.c
++++ b/a.c
+@@ -1,4 +1,4 @@
+ one
+-two
++SECOND
+ three
+ four
+diff --git a/m.sh b/m.sh
+old mode 100644
+new mode 100755
+diff --git a/b.c b/b.c
+index 4444444..6666666 100644
+--- a/b.c
++++ b/b.c
+@@ -1,4 +1,4 @@
+ alpha
+-beta
++SECONDBETA
+ gamma
+ delta

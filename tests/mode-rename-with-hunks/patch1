@@ -1,0 +1,6 @@
+diff --git a/keep.c b/keep.c
+--- a/keep.c
++++ b/keep.c
+@@ -1 +1 @@
+-k1
++k2

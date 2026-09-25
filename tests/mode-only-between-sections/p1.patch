@@ -1,0 +1,20 @@
+diff --git a/a.c b/a.c
+index 1111111..2222222 100644
+--- a/a.c
++++ b/a.c
+@@ -1,4 +1,4 @@
+ one
+-two
++TWO
+ three
+ four
+diff --git a/b.c b/b.c
+index 4444444..5555555 100644
+--- a/b.c
++++ b/b.c
+@@ -1,4 +1,4 @@
+ alpha
+-beta
++BETA
+ gamma
+ delta

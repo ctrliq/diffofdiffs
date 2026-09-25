@@ -1,0 +1,7 @@
+# The two patches agree on f.c's terminal mode and its content but
+# disagree about the starting mode. The whole effective pair is the
+# comparison basis, so the disagreement is a real difference and both
+# halves note.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
