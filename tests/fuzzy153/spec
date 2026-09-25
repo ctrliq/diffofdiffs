@@ -1,0 +1,10 @@
+# A running-time case. Patch1 changes big throughout one 6002-line hunk, and
+# patch2 makes 1200 small hunks over the same lines, each removing a line (zz
+# absent) that patch1 quotes only once. The timeout catches a comparison whose
+# running time blows up on this input, and plain and ASAN builds both finish
+# inside its 30 seconds.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+timeout: 30
+exit: 0
+stdout-sha1: 8b1d760d7b1a497aeda94727e63bead79d5503be

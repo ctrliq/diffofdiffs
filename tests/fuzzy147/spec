@@ -1,0 +1,11 @@
+# A running-time case with the sizes of fuzzy143 and different content in
+# patch1's hunk. Patch1 changes big throughout one 6000-line hunk, and patch2
+# makes 1200 small hunks over the same lines, each removing a line (zz absent)
+# that patch1 never quotes. The timeout catches a comparison whose running time
+# blows up on this input, and plain and ASAN builds both finish inside its
+# 30 seconds.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+timeout: 30
+exit: 0
+stdout-sha1: 563310f316984a1a27a5ac0547a938bbd019bcdb

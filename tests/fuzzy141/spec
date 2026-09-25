@@ -1,0 +1,10 @@
+# A running-time case. Patch1 changes big throughout one 5000-line hunk and
+# patch2 makes 1000 small hunks over the same lines. The timeout catches a
+# comparison whose running time blows up on this input. Plain builds get
+# 30 seconds, and ASAN builds, which run far slower, get 60.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+timeout: 30
+timeout-asan: 60
+exit: 0
+stdout-sha1: dca8260d75541fda5699c9078c1d165ec87524d5
