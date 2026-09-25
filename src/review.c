@@ -337,6 +337,290 @@ struct reindentation {
 	size_t nkeys;
 };
 
+static void reindentation_free(struct reindentation *indent)
+{
+	udiff_matches_free(&indent->matches);
+	for (int leg = 0; leg < 2; leg++)
+		free(indent->lines[leg]);
+	free(indent->keys);
+}
+
+DEFINE_FREE(reindentation, struct reindentation, reindentation_free(&_T))
+
+static void read_reindented_lines(struct reindentation *indent,
+				  const struct udiff_image *images,
+				  const size_t *first, const size_t *end)
+{
+	struct udiff_image bodies[2];
+
+	for (int leg = 0; leg < 2; leg++) {
+		indent->count[leg] = end[leg] - first[leg];
+		indent->lines[leg] = xmalloc_array(indent->count[leg],
+						   sizeof(*indent->lines[leg]));
+		for (size_t i = 0; i < indent->count[leg]; i++) {
+			const struct udiff_line *line =
+				&images[leg].lines[first[leg] + i];
+			size_t at;
+
+			for (at = 0; at < line->len && (line->ptr[at] == ' ' ||
+							line->ptr[at] == '\t');
+			     at++)
+				;
+
+			/* A whitespace-only final row must not disappear */
+			if (at == line->len)
+				at = 0;
+			indent->lines[leg][i] = (typeof(*indent->lines[leg])){
+				.ptr = line->ptr + at, .len = line->len - at
+			};
+		}
+		bodies[leg] =
+			(typeof(bodies[0])){ .lines = indent->lines[leg],
+					     .nlines = indent->count[leg] };
+	}
+	udiff_match_unique(&bodies[0], &bodies[1], &indent->matches);
+	indent->keys = collect_line_occurrences(bodies, &bodies[0], NULL,
+						&indent->nkeys);
+}
+
+static void unpair_line(struct udiff_matches *matches, int leg, size_t row)
+{
+	size_t mate;
+
+	mate = matches->side[leg][row];
+	if (mate == SIZE_MAX)
+		return;
+
+	matches->side[leg][row] = SIZE_MAX;
+	matches->side[!leg][mate] = SIZE_MAX;
+}
+
+/*
+ * Reindentation cannot cross an existing unique exact word match. The caller
+ * must confine each window row's exact mate to the opposite window first.
+ */
+static void bound_reindented_matches(struct reindentation *indent,
+				     const struct udiff_matches *exact,
+				     const size_t *offset)
+{
+	size_t first[2] = {};
+
+	for (size_t i = 0; i <= indent->count[0]; i++) {
+		size_t mate = indent->count[1];
+
+		if (i < indent->count[0]) {
+			mate = exact->side[0][offset[0] + i];
+			if (mate == SIZE_MAX ||
+			    !line_has_word(&indent->lines[0][i]) ||
+			    !line_is_unique_in_both(indent->keys, indent->nkeys,
+						    &indent->lines[0][i]))
+				continue;
+
+			mate -= offset[1];
+		}
+		for (size_t j = first[0]; j < i; j++) {
+			size_t other = indent->matches.side[0][j];
+
+			if (other != SIZE_MAX &&
+			    (other < first[1] || other >= mate))
+				unpair_line(&indent->matches, 0, j);
+		}
+		if (i == indent->count[0])
+			break;
+
+		unpair_line(&indent->matches, 0, i);
+		unpair_line(&indent->matches, 1, mate);
+		indent->matches.side[0][i] = mate;
+		indent->matches.side[1][mate] = i;
+		first[0] = i + 1;
+		first[1] = mate + 1;
+	}
+}
+
+static size_t indentation_columns(const struct udiff_line *line)
+{
+	size_t columns = 0;
+
+	for (size_t i = 0; i < line->len; i++) {
+		if (line->ptr[i] == '\t')
+			columns += TAB_WIDTH - columns % TAB_WIDTH;
+		else if (line->ptr[i] == ' ')
+			columns++;
+		else
+			break;
+	}
+	return columns;
+}
+
+static bool known_source_interval(const struct comparison *review, int stage,
+				  const size_t *first, const size_t *end)
+{
+	for (int leg = 0; leg < 2; leg++) {
+		const struct patch_source *source = &review->source[leg];
+		const struct source_view *view = &source->view[stage];
+
+		for (size_t i = first[leg]; i < end[leg]; i++) {
+			if (source->rows[view->rows[i]].sign == '?')
+				return false;
+		}
+	}
+	return true;
+}
+
+static bool select_reindented_run(bool *selected, size_t first, size_t end,
+				  size_t witnesses)
+{
+	if (witnesses < 2)
+		return false;
+
+	for (size_t i = first; i < end; i++)
+		selected[i] = true;
+	return true;
+}
+
+/* Two unique word lines must support the same indentation shift */
+static bool select_reindented_runs(const struct comparison *review, int stage,
+				   const struct udiff_image *images,
+				   const struct reindentation *indent,
+				   const size_t *offset, bool *selected)
+{
+	size_t previous[2] = { offset[0], offset[1] };
+	size_t first = SIZE_MAX, witnesses = 0;
+	ptrdiff_t shift = 0;
+	bool found = false;
+
+	for (size_t i = 0; i < indent->count[0]; i++) {
+		ptrdiff_t difference = shift;
+		size_t end[2], mate;
+		bool content;
+
+		mate = indent->matches.side[0][i];
+		if (mate == SIZE_MAX)
+			continue;
+
+		end[0] = offset[0] + i + 1;
+		end[1] = offset[1] + mate + 1;
+		content = line_has_content(&indent->lines[0][i]);
+
+		/* Blank lines inherit the shift but cannot establish one */
+		if (content) {
+			difference = indentation_columns(
+				&images[0].lines[end[0] - 1]);
+			difference -= (ptrdiff_t)indentation_columns(
+				&images[1].lines[end[1] - 1]);
+		}
+
+		/* Unquoted gaps break otherwise compatible runs */
+		if (difference != shift ||
+		    !known_source_interval(review, stage, previous, end)) {
+			found |= select_reindented_run(selected, first, i,
+						       witnesses);
+			first = SIZE_MAX;
+			witnesses = 0;
+		}
+		previous[0] = end[0];
+		previous[1] = end[1];
+		shift = difference;
+		if (!shift || (first == SIZE_MAX && !content))
+			continue;
+
+		if (first == SIZE_MAX)
+			first = i;
+		if (line_has_word(&indent->lines[0][i]) &&
+		    line_is_unique_in_both(indent->keys, indent->nkeys,
+					   &indent->lines[0][i]))
+			witnesses++;
+	}
+	return select_reindented_run(selected, first, indent->count[0],
+				     witnesses) ||
+	       found;
+}
+
+static void merge_reindented_matches(struct comparison *review, int stage,
+				     const struct udiff_image *images,
+				     const struct reindentation *indent,
+				     const size_t *offset, const bool *selected)
+{
+	struct udiff_matches *layout = &review->alignment[stage];
+	struct udiff_matches *exact = &review->matches[stage];
+	size_t *old __free(free) =
+		xmalloc_array(indent->count[0], sizeof(*old));
+	size_t first[2] = {};
+
+	/* Clone exact matches only when layout needs its own correspondence */
+	if (!layout->side[0]) {
+		for (int leg = 0; leg < 2; leg++) {
+			layout->side[leg] = xmalloc_array(
+				images[leg].nlines, sizeof(*layout->side[leg]));
+			memcpy(layout->side[leg], exact->side[leg],
+			       images[leg].nlines * sizeof(*layout->side[leg]));
+		}
+	}
+	memcpy(old, exact->side[0] + offset[0],
+	       indent->count[0] * sizeof(*old));
+	for (size_t i = 0; i < indent->count[0]; i++) {
+		unpair_line(exact, 0, offset[0] + i);
+		unpair_line(layout, 0, offset[0] + i);
+	}
+	for (size_t i = 0; i <= indent->count[0]; i++) {
+		size_t mate = indent->count[1];
+		size_t left, right;
+
+		if (i < indent->count[0]) {
+			mate = indent->matches.side[0][i];
+			if (!selected[i] || mate == SIZE_MAX)
+				continue;
+		}
+
+		/* Keep exact pairs between accepted correspondences */
+		for (size_t j = first[0]; j < i; j++) {
+			left = offset[0] + j;
+			right = old[j];
+			if (right == SIZE_MAX || right < offset[1] + first[1] ||
+			    right >= offset[1] + mate)
+				continue;
+
+			exact->side[0][left] = layout->side[0][left] = right;
+			exact->side[1][right] = layout->side[1][right] = left;
+		}
+		if (i == indent->count[0])
+			break;
+
+		left = offset[0] + i;
+		right = offset[1] + mate;
+		layout->side[0][left] = right;
+		layout->side[1][right] = left;
+
+		/* Only original source bytes can establish shared edits */
+		if (patch_row_equal(&images[0].lines[left],
+				    &images[1].lines[right])) {
+			exact->side[0][left] = right;
+			exact->side[1][right] = left;
+		}
+		first[0] = i + 1;
+		first[1] = mate + 1;
+	}
+}
+
+static void match_reindented_window(struct comparison *review, int stage,
+				    const struct udiff_image *images,
+				    const size_t *first, const size_t *end)
+{
+	struct reindentation indent __free(reindentation) = {};
+	bool *selected __free(free) = NULL;
+
+	if (first[0] == end[0] || first[1] == end[1])
+		return;
+
+	read_reindented_lines(&indent, images, first, end);
+	bound_reindented_matches(&indent, &review->matches[stage], first);
+	selected = xzalloc_array(indent.count[0], sizeof(*selected));
+	if (select_reindented_runs(review, stage, images, &indent, first,
+				   selected))
+		merge_reindented_matches(review, stage, images, &indent, first,
+					 selected);
+}
+
 static bool blank_neighbors_correspond(const struct comparison *review,
 				       const struct udiff_matches *matches,
 				       const size_t *rows, int direction)
@@ -646,7 +930,19 @@ static void compare_ordered(struct comparison *review)
 	}
 
 	udiff_match(&images[0][0], &images[0][1], &review->matches[0]);
+	{
+		size_t first[2] = {},
+		       end[2] = { images[0][0].nlines, images[0][1].nlines };
+
+		match_reindented_window(review, 0, images[0], first, end);
+	}
 	match_results(review, images[0], images[1]);
+	{
+		size_t first[2] = {},
+		       end[2] = { images[1][0].nlines, images[1][1].nlines };
+
+		match_reindented_window(review, 1, images[1], first, end);
+	}
 	match_changes(review);
 }
 
