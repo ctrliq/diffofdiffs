@@ -182,6 +182,11 @@ raw mode before descent. Equal subtrees are skipped; changed entries retain
 the existing ordering, raw-mode handling, and diagnostics. Empty comparisons
 need no entry sorting. No checkout or index operation is involved.
 
+Parent identities come from stored commit headers because libgit2 hides parsed
+parents at shallow boundaries. Those boundaries do not change the patch: a
+missing selected parent is an error, while unavailable older ancestors or
+unselected merge parents do not prevent comparison.
+
 The independent Python checker validates displayed source, coordinates,
 original signs, final newlines, and edit accounting. These checks cannot prove
 every correspondence. The suite also uses independently chosen locations,

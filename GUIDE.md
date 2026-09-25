@@ -79,6 +79,12 @@ tree. To select another parent, use `BASE..TIP` as an operand, where `BASE`
 must be a parent of `TIP`. This notation selects one commit's change against
 that parent, not a series of commits.
 
+Shallow repositories are supported. Comparisons need the selected commits,
+their chosen parents, and the trees and blobs containing their files; older
+history is not needed. Fetching each input commit with `git fetch --depth=2`
+includes its parents. If a required object is missing, diffofdiffs reports an
+error.
+
 Tree mode handles regular text files, symbolic links, and submodule entries.
 It stops with an error on changed files containing NUL bytes, paths containing
 tabs or newlines, and unsupported entry modes. To compare binary changes, use

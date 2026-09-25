@@ -48,7 +48,8 @@ char *gitread_commit_subject(struct gitread *gr,
 			     const struct gitread_oid *commit);
 
 /*
- * Return the parent count and optionally copy the first parent's ID. A root
+ * Return the stored parent count and optionally copy the first parent's ID,
+ * including at shallow boundaries where the parents may be unavailable. A root
  * commit returns 0 and leaves first_parent untouched.
  */
 int gitread_commit_parents(struct gitread *gr, const struct gitread_oid *commit,

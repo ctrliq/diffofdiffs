@@ -704,6 +704,122 @@ def create_git_store(name):
     return repo, git
 
 
+def shallow_history_cases():
+    """A comparison needs its selected parent, not the parent's ancestors."""
+    global CHECKS
+    repo, git = create_git_store('shallow-history')
+    before = b'head\nold\ntail\n'
+    after = [b'head\nleft\ntail\n', b'head\nright\ntail\n']
+
+    def commit(text, *parents):
+        blob = git('hash-object', '-w', '--stdin', data=text).strip().decode()
+        tree = git('mktree', data=f'100644 blob {blob}\tf.c\n'.encode()).strip().decode()
+        args = [arg for parent in parents for arg in ('-p', parent)]
+        return git('commit-tree', tree, *args, data=b'Change source\n').strip().decode()
+
+    def clone(name, depth, branch=None):
+        target = repo.parent / name
+        shutil.rmtree(target, ignore_errors=True)
+        selection = ['--branch', branch] if branch else ['--no-single-branch']
+        git('clone', '--quiet', '--bare', f'--depth={depth}', *selection,
+            repo.as_uri(), str(target))
+        assert (target / 'shallow').is_file(), name
+        return target
+
+    def has_commit(store, revision):
+        result = subprocess.run(['git', '-C', store, 'cat-file', '-e', revision],
+                                env=ENV, capture_output=True)
+        return result.returncode == 0
+
+    def reports(store, revisions, old, new):
+        global CHECKS
+        patches = [patch(lines(source), lines(result)) for source, result in zip(old, new)]
+        sources = [{'f.c': [dict(enumerate(lines(source))),
+                            dict(enumerate(lines(result)))]}
+                   for source, result in zip(old, new)]
+        outputs = {}
+        for reverse in (False, True):
+            order = [1, 0] if reverse else [0, 1]
+            operands = [revisions[leg] for leg in order]
+            originals = [patches[leg] for leg in order]
+            for html in (False, True):
+                options = ['--html'] if html else ['--color=never']
+                result = subprocess.run([BINARY, *options, f'--git-tree={store}', *operands],
+                                        env=ENV, capture_output=True, timeout=20)
+                assert result.returncode == 0 and not result.stderr, (store, result.stderr)
+                assert result.stdout, (store, 'missing differences')
+                if not html:
+                    report = check_review(originals, result.stdout,
+                                          [sources[leg] for leg in order], context=3)
+                    edits = [Counter((row.sign, row.text) for row in side)
+                             for side in report['edits']]
+                    assert edits == expected(*originals), (store, edits)
+                outputs[reverse, html] = result.stdout
+                CHECKS += 1
+        return outputs
+
+    def missing_parent(store, revisions, parent):
+        global CHECKS
+        for html in (False, True):
+            options = ['--html'] if html else ['--color=never']
+            result = subprocess.run([BINARY, *options, f'--git-tree={store}', *revisions],
+                                    env=ENV, capture_output=True, timeout=20)
+            assert result.returncode != 0 and not result.stdout, (store, result)
+            assert result.stderr == f'diffofdiffs: cannot read the commit {parent}\n'.encode(), (
+                store, result.stderr)
+            CHECKS += 1
+
+    ancestor = commit(b'earlier source\n')
+    parent = commit(before, ancestor)
+    revisions = [commit(text, parent) for text in after]
+    for name, revision in zip(('left', 'right'), revisions):
+        git('update-ref', f'refs/heads/{name}', revision)
+    git('symbolic-ref', 'HEAD', 'refs/heads/left')
+    full = reports(repo, revisions, [before, before], after)
+
+    # A file URL forces Git to honor the requested clone depth
+    limited = clone('depth-two', 2)
+    assert has_commit(limited, parent) and not has_commit(limited, ancestor)
+    assert reports(limited, revisions, [before, before], after) == full
+
+    # Fetches can leave a boundary marker after its parent's object is available
+    (limited / 'shallow').write_text('\n'.join(revisions) + '\n')
+    assert reports(limited, revisions, [before, before], after) == full
+
+    # A missing parent must never turn an ordinary commit into a root addition
+    incomplete = clone('depth-one', 1)
+    assert not has_commit(incomplete, parent)
+    missing_parent(incomplete, revisions, parent)
+
+    # An explicit merge parent needs no objects from the other parent's history
+    merged = b'head\nmerged\ntail\n'
+    merge = commit(merged, *revisions)
+
+    # Later extension headers, signatures, and messages cannot add merge parents
+    header, message = git('cat-file', 'commit', merge).split(b'\n\n', 1)
+    signature = (f'\ngpgsig -----BEGIN PGP SIGNATURE-----\n parent {ancestor}\n'
+                 ' -----END PGP SIGNATURE-----\n').encode()
+    raw = (header + signature + f'parent {ancestor}\n\n'.encode() + message +
+           f'\nparent {ancestor}\n'.encode())
+    merge = git('hash-object', '-t', 'commit', '-w', '--stdin', data=raw).strip().decode()
+    result = subprocess.run([BINARY, f'--git-tree={repo}',
+                             f'{ancestor}..{merge}', revisions[1]],
+                            env=ENV, capture_output=True, timeout=20)
+    assert result.returncode != 0 and not result.stdout, result
+    assert b'is not a parent of' in result.stderr, result.stderr
+    CHECKS += 1
+    git('update-ref', 'refs/heads/merge', merge)
+    operands = [f'{revisions[1]}..{merge}', revisions[1]]
+    original = [after[1], before]
+    results = [merged, after[1]]
+    full = reports(repo, operands, original, results)
+    limited = clone('merge-parent', 1, 'merge')
+    git(f'--git-dir={limited}', 'fetch', '--quiet', '--depth=2', repo.as_uri(), revisions[1])
+    assert not has_commit(limited, revisions[0]) and has_commit(limited, revisions[1])
+    assert reports(limited, operands, original, results) == full
+    missing_parent(limited, [merge, revisions[1]], revisions[0])
+
+
 def gitlink_cases():
     """Gitlink IDs describe submodule commits, not blobs in the parent store."""
     global CHECKS
@@ -2008,6 +2124,7 @@ def main():
     title_cases()
     stream_title_cases()
     tree_cases()
+    shallow_history_cases()
     gitlink_cases()
     directory_transition_cases()
     corpus_cases()

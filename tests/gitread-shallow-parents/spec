@@ -1,0 +1,6 @@
+# Shallow markers hide parent links during Git history traversal, but the
+# comparison must retain the parents recorded in each stored commit. Exercise
+# the first parent, both merge parents, and a genuine root behind those markers.
+bin: GITREAD_UNIT
+args: shallow-parents
+exit: 0

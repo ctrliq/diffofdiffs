@@ -1,6 +1,5 @@
-# An info/grafts file rewrites parenthood that libgit2 reads only from the
-# commit objects themselves, so a grafted store refuses at open rather than
-# report parents git itself would override.
+# Refuse grafted history so a comparison always uses the parent relationships
+# stored in the commit objects, independent of local history overrides.
 bin: GITREAD_UNIT
 args: fail-grafts
 exit: 1

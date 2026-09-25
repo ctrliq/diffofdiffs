@@ -107,9 +107,8 @@ static int spot_replace_ref(const char *name, void *payload)
 }
 
 /*
- * Grafts and replacement references change the history Git reports. Shallow
- * repositories omit parents still named by their boundary commits. Reading only
- * the stored commits would ignore those conditions.
+ * Grafts and replacement references change the history Git reports. Reading the
+ * stored commits alone would ignore those changes.
  */
 static void check_history_guards(git_repository *repo, const char *dir)
 {
@@ -117,10 +116,6 @@ static void check_history_guards(git_repository *repo, const char *dir)
 	bool replaced = false;
 	struct stat st;
 	int ret;
-
-	if (git_repository_is_shallow(repo))
-		die("the git repository at %s is shallow; its history is incomplete by design",
-		    dir);
 
 	xasprintf(&grafts, "%sinfo/grafts", git_repository_commondir(repo));
 	ret = stat(grafts, &st);
@@ -482,15 +477,36 @@ char *gitread_commit_subject(struct gitread *gr,
 	return subject;
 }
 
+/*
+ * libgit2 hides the parents of shallow boundary commits, but its raw header
+ * retains the validated parent records. Start after the tree record and stop at
+ * the first non-parent record so later header text cannot become a parent.
+ */
+static bool next_stored_parent(const char **header, struct gitread_oid *parent)
+{
+	git_oid oid;
+
+	if (strncmp(*header, "parent ", sizeof("parent ") - 1))
+		return false;
+
+	git_oid_fromstr(&oid, *header + sizeof("parent ") - 1);
+	oid_from_libgit2(parent, &oid);
+	*header = strchr(*header, '\n') + 1;
+	return true;
+}
+
 int gitread_commit_parents(struct gitread *gr, const struct gitread_oid *commit,
 			   struct gitread_oid *first_parent)
 {
 	git_commit *c = lookup_commit(gr, commit);
+	const char *header = strchr(git_commit_raw_header(c), '\n') + 1;
+	struct gitread_oid parent;
 	int n;
 
-	n = git_commit_parentcount(c);
-	if (n > 0 && first_parent)
-		oid_from_libgit2(first_parent, git_commit_parent_id(c, 0));
+	for (n = 0; next_stored_parent(&header, &parent); n++) {
+		if (!n && first_parent)
+			*first_parent = parent;
+	}
 
 	git_commit_free(c);
 	return n;
@@ -500,16 +516,12 @@ bool gitread_commit_parent_of(struct gitread *gr, const struct gitread_oid *tip,
 			      const struct gitread_oid *candidate)
 {
 	git_commit *c = lookup_commit(gr, tip);
+	const char *header = strchr(git_commit_raw_header(c), '\n') + 1;
+	struct gitread_oid parent;
 	bool found = false;
-	unsigned int n;
 
-	n = git_commit_parentcount(c);
-	for (unsigned int i = 0; !found && i < n; i++) {
-		struct gitread_oid parent;
-
-		oid_from_libgit2(&parent, git_commit_parent_id(c, i));
+	while (!found && next_stored_parent(&header, &parent))
 		found = !memcmp(parent.raw, candidate->raw, GITREAD_OID_RAWSZ);
-	}
 
 	git_commit_free(c);
 	return found;

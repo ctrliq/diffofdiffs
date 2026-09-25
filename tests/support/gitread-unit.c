@@ -673,10 +673,7 @@ static void case_fail_loud(const char *which)
 	git_oid_tostr(hex_a, sizeof(hex_a), &a);
 	git_oid_tostr(hex_b, sizeof(hex_b), &b);
 
-	if (!strcmp(which, "shallow")) {
-		xasprintf(&line, "%s\n", hex_b);
-		write_text("s/.git/shallow", line);
-	} else if (!strcmp(which, "grafts")) {
+	if (!strcmp(which, "grafts")) {
 		xasprintf(&line, "%s\n", hex_b);
 		write_text("s/.git/info/grafts", line);
 	} else if (!strcmp(which, "replace")) {
@@ -821,9 +818,12 @@ static void case_blob_over_ceiling(void)
  * Parent walks: the root prints 0, the tip prints 1 with A as its first parent,
  * and a merge of the tip and the root prints 2 with the tip first.
  */
-static void case_parents(void)
+static void case_parents(bool shallow)
 {
 	static const char *const names[] = { "x~", "x", "m" };
+	struct gitread_oid resolved[ARRAY_SIZE(names)];
+	char ids[ARRAY_SIZE(names)][GITREAD_OID_HEXSZ + 1];
+	char *boundaries __free(free) = NULL;
 	struct gitread_oid commit, parent;
 	char hex[GITREAD_OID_HEXSZ + 1];
 	const git_commit *parents[2];
@@ -854,8 +854,19 @@ static void case_parents(void)
 	git_commit_free(ac);
 	git_commit_free(bc);
 	git_repository_free(repo);
+	git_oid_tostr(ids[0], sizeof(ids[0]), &a);
+	git_oid_tostr(ids[1], sizeof(ids[1]), &b);
+	git_oid_tostr(ids[2], sizeof(ids[2]), &m);
+
+	/* The stored objects remain available even across shallow boundaries */
+	if (shallow) {
+		xasprintf(&boundaries, "%s\n%s\n%s\n", ids[0], ids[1], ids[2]);
+		write_text("s/.git/shallow", boundaries);
+	}
 
 	gitread_open(&gr, "s");
+	for (size_t i = 0; i < ARRAY_SIZE(names); i++)
+		gitread_resolve_commit(gr, ids[i], &resolved[i]);
 
 	for (size_t i = 0; i < ARRAY_SIZE(names); i++) {
 		const char *name = names[i];
@@ -882,6 +893,14 @@ static void case_parents(void)
 		}
 
 		printf("\n");
+
+		/* A merge's second parent must survive the boundary as well */
+		for (size_t j = 0; j < ARRAY_SIZE(names); j++) {
+			if (gitread_commit_parent_of(gr, &commit,
+						     &resolved[j]) != (j < i))
+				die("unexpected parent membership for %s and %s",
+				    name, names[j]);
+		}
 	}
 
 	gitread_close(&gr);
@@ -2800,7 +2819,9 @@ int main(int argc, char **argv)
 	} else if (!strcmp(argv[1], "blob-over-ceiling")) {
 		case_blob_over_ceiling();
 	} else if (!strcmp(argv[1], "parents")) {
-		case_parents();
+		case_parents(false);
+	} else if (!strcmp(argv[1], "shallow-parents")) {
+		case_parents(true);
 	} else if (!strcmp(argv[1], "treediff-ops")) {
 		case_treediff_ops();
 	} else if (!strcmp(argv[1], "treediff-order")) {
