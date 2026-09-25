@@ -1,0 +1,33 @@
+--- a/f.c
++++ b/f.c
+@@ -1,7 +1,7 @@
+ alpha
+ bravo
+ charlie
+-x_old
++x_new
+ delta_l
+ echo
+ foxtrot
+@@ -12,6 +12,8 @@
+ kilo
+ lima
+ mike
++wombat_one
++wombat_two
+ november
+ oscar
+ papa
+@@ -30,9 +32,11 @@
+ tango
+ uniform
+ victor
++zulu_one
++zulu_two
+ whiskey
+ xray
+-yankee_old
++yankee_new
+ zeta
+ eta
+ theta

@@ -1,0 +1,26 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Patch 1: patch1    ┃    Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source
+lines quoted in the patches.
+
+═══════════════════════════════════════════════
+*    DELTA DIFFERENCES                        *
+═══════════════════════════════════════════════
+Signs mark edits made by only that patch. A
+sign-less line with one number is an edit both
+patches make: a new number means both add it,
+an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│mod.c         ┃ old new│mod.c
+        │@@            ┃        │@@
+        │              ┃  30  30│omega();
+        │              ┃  31  31│sigma();
+        │              ┃  32  32│tau();
+        │              ┃- 33    │legacy_call();
+        │              ┃+     33│modern_call();
+        │              ┃  34  34│upsilon();
+        │              ┃  35  35│phi();
+        │              ┃  36  36│chi();

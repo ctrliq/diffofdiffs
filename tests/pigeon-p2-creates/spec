@@ -1,0 +1,7 @@
+# The mirror of pigeon-p1-creates: patch1 edits line 8 of an existing f.c while
+# patch2 creates f.c with six lines. The two never pair: the report must show
+# patch1's edit on its side and patch2's creation with its create-file note on
+# the other.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

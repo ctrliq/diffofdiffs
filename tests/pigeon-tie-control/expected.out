@@ -1,0 +1,29 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                             Patch 1: patch1                                             ┃                                             Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                                                                             *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│fs/cifs/transport.c                                                                           ┃  old  new│fs/cifs/transport.c
+          │@@ cifs_pick_channel(struct cifs_ses *ses)                                                    ┃          │@@ compound_send_recv(const unsigned int xid, struct cifs_ses *ses,
+          │                                                                                              ┃ 1190 1190│	if ((ses->ses_status == SES_NEW) || (optype & CIFS_NEG_OP) || (optype & CIFS_SESS_OP)) {
+          │                                                                                              ┃ 1191 1191│		spin_unlock(&cifs_tcp_ses_lock);
+          │                                                                                              ┃ 1192 1192│
+          │                                                                                              ┃-1193     │		mutex_lock(&server->srv_mutex);
+          │                                                                                              ┃+     1193│		cifs_server_lock(server);
+          │                                                                                              ┃ 1194 1194│		smb311_update_preauth_hash(ses, server, rqst[0].rq_iov, rqst[0].rq_nvec);
+          │                                                                                              ┃-1195     │		mutex_unlock(&server->srv_mutex);
+          │                                                                                              ┃+     1195│		cifs_server_unlock(server);
+          │                                                                                              ┃ 1196 1196│
+          │                                                                                              ┃ 1197 1197│		spin_lock(&cifs_tcp_ses_lock);
+          │                                                                                              ┃ 1198 1198│	}
+ 2000 2000│	unsigned int i, start, index;                                                            ┃          │
+-2001     │	int probe_rc = 0;                                                                        ┃          │
++     2001│	int probe_rc = -EINVAL;                                                                  ┃          │
+ 2002 2002│	start = atomic_inc_return(&ses->chan_seq);                                               ┃          │

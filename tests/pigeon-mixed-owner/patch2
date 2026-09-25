@@ -1,0 +1,18 @@
+--- a/f.c
++++ b/f.c
+@@ -1,13 +1,13 @@
+ c1
+ c2
+ c3
+-alpha_old
++alpha_new
+ c4
+ c5
+ c6
+ c7
+ c8
+-beta_old
++beta_new
+ c9
+ c10
+ c11

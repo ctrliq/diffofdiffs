@@ -1,0 +1,42 @@
+--- a/discharge.c
++++ b/discharge.c
+@@ -5,6 +5,7 @@
+ c05
+ c06
+ c07
++add_one
+ c08
+ c09
+ c10
+@@ -20,6 +20,7 @@
+ c20
+ c21
+ c22
++add_two
+ c23
+ c24
+ c25
+@@ -34,6 +34,7 @@
+ c34
+ c35
+ c36
++add_three
+ c37
+ c38
+ c39
+--- a/residue.c
++++ b/residue.c
+@@ -1,3 +1,3 @@
+ c01
+-old02
++new02
+ c03
+--- /dev/null
++++ b/walk.c
+@@ -0,0 +1,6 @@
++n01
++n02
++n03
++n04
++n05
++n06

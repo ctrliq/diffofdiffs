@@ -1,0 +1,7 @@
+# Patch1 creates f.c with eight lines. Patch2 edits an existing f.c: it inserts
+# top_a and top_b at the top with no context and rewrites lines 23 and 43. The
+# two never pair: the report must show patch1's creation with its create-file
+# note and patch2's three hunks on patch2's side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

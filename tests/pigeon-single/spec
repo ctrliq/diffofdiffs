@@ -1,0 +1,6 @@
+# Both patches insert add_one and add_two into f.c at the same places. Patch2
+# also inserts add_three at line 37, where patch1 quotes nothing. The shared
+# insertions must be left out and add_three must show on patch2's side alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

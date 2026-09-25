@@ -1,0 +1,28 @@
+--- a/mod.c
++++ b/mod.c
+@@ -9,11 +9,10 @@
+ 	bbb();
+ 	lead_one();
+ 	lead_two();
+-	old_call();
++	new_call();
+ 	dog();
+ 	tail_one();
+ 	tail_two();
+-	helper_three();
+ 	tail_four();
+ 	tail_five();
+ 	tail_six();
+@@ -31,6 +30,12 @@
+ 	lead_one();
+ 	lead_two();
+ 	old_call_two();
++	helper_one();
++	helper_two();
++	helper_three();
++	helper_four();
++	helper_five();
++	helper_six();
+ 	dog();
+ 	tail_one();
+ 	tail_two();

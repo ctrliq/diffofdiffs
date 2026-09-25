@@ -1,0 +1,7 @@
+# pigeon-retired-refuses with patch2's zulu_one and zulu_two added after victor
+# in a hunk with no other edit, and a fourth patch2 hunk that changes delta2_old
+# at line 43 to delta2_new. The report must still show each patch's zulu lines
+# on its own side, and the change at line 43 on patch2's side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

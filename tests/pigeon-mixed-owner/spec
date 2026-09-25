@@ -1,0 +1,8 @@
+# Patch1 changes alpha_old in a hunk quoting lines 1-7. Patch2 makes the same
+# alpha change and also changes beta_old, in one hunk quoting lines 1-13. The
+# shared alpha change must be left out, and patch2's beta change must show on
+# its side alone with its context, even though it shares a hunk with the change
+# both patches make.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

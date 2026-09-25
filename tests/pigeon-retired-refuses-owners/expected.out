@@ -1,0 +1,57 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Patch 1: patch1  ┃  Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the
+source lines quoted in the patches.
+
+═══════════════════════════════════════
+*    DELTA DIFFERENCES                *
+═══════════════════════════════════════
+Signs mark edits made by only that
+patch. A sign-less line with one number
+is an edit both patches make: a new
+number means both add it, an old number
+means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f.c       ┃ old new│f.c
+        │@@        ┃        │@@
+   3   3│charlie   ┃   3   3│charlie
+   4    │x_old     ┃   4    │x_old
+       4│x_new     ┃       4│x_new
++      5│zulu_one  ┃        │
++      6│zulu_two  ┃        │
+   5   7│delta_l   ┃   5   5│delta_l
+   6   8│echo      ┃   6   6│echo
+   7   9│foxtrot   ┃   7   7│foxtrot
+        │──────────╂────────┼──────────
+        │@@        ┃        │@@
+  12  14│kilo      ┃  12  12│kilo
+  13  15│lima      ┃  13  13│lima
+  14  16│mike      ┃  14  14│mike
+        │          ┃+     15│wombat_one
+        │          ┃+     16│wombat_two
+  15  17│november  ┃  15  17│november
+  16  18│oscar     ┃  16  18│oscar
+  17  19│papa      ┃  17  19│papa
+        │──────────╂────────┼──────────
+        │@@        ┃        │@@
+        │          ┃  30  32│tango
+        │          ┃  31  33│uniform
+        │          ┃  32  34│victor
+        │          ┃+     35│zulu_one
+        │          ┃+     36│zulu_two
+        │          ┃  33  37│whiskey
+        │          ┃  34  38│xray
+        │          ┃  35  39│yankee
+        │──────────╂────────┼──────────
+        │@@        ┃        │@@
+        │          ┃  40  44│alfa2
+        │          ┃  41  45│bravo2
+        │          ┃  42  46│charlie2
+        │          ┃- 43    │delta2_old
+        │          ┃+     47│delta2_new
+        │          ┃  44  48│echo2
+        │          ┃  45  49│foxtrot2
+        │          ┃  46  50│golf2

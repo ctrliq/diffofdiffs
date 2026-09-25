@@ -1,0 +1,7 @@
+# Both patches change line 8 of f.c identically. Patch2 also changes lines 33
+# and 37 in one hunk, where patch1 quotes nothing. The shared change must be
+# left out and patch2's hunk must show whole on its side, as one block holding
+# both changes.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

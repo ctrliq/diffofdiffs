@@ -1,0 +1,66 @@
+diff --git a/fs/cifs/transport.c b/fs/cifs/transport.c
+index 6644016846e05..25537ea1f3dcc 100644
+--- a/fs/cifs/transport.c
++++ b/fs/cifs/transport.c
+@@ -798,14 +798,14 @@ cifs_call_async(struct TCP_Server_Info *server, struct smb_rqst *rqst,
+ 	 * return -EAGAIN in such cases to let callers handle it.
+ 	 */
+ 	if (instance != server->reconnect_instance) {
+-		mutex_unlock(&server->srv_mutex);
++		cifs_server_unlock(server);
+ 		add_credits_and_wake_if(server, &credits, optype);
+ 		return -EAGAIN;
+ 	}
+ 
+ 	mid = server->ops->setup_async_request(server, rqst);
+ 	if (IS_ERR(mid)) {
+-		mutex_unlock(&server->srv_mutex);
++		cifs_server_unlock(server);
+ 		add_credits_and_wake_if(server, &credits, optype);
+ 		return PTR_ERR(mid);
+ 	}
+@@ -1088,7 +1088,7 @@ compound_send_recv(const unsigned int xid, struct cifs_ses *ses,
+ 	 * handle it.
+ 	 */
+ 	if (instance != server->reconnect_instance) {
+-		mutex_unlock(&server->srv_mutex);
++		cifs_server_unlock(server);
+ 		for (j = 0; j < num_rqst; j++)
+ 			add_credits(server, &credits[j], optype);
+ 		return -EAGAIN;
+@@ -1349,7 +1349,7 @@ SendReceive(const unsigned int xid, struct cifs_ses *ses,
+ 
+ 	rc = cifs_sign_smb(in_buf, server, &midQ->sequence_number);
+ 	if (rc) {
+-		mutex_unlock(&server->srv_mutex);
++		cifs_server_unlock(server);
+ 		goto out;
+ 	}
+ 
+@@ -1479,18 +1479,18 @@ SendReceiveBlockingLock(const unsigned int xid, struct cifs_tcon *tcon,
+ 	   and avoid races inside tcp sendmsg code that could cause corruption
+ 	   of smb data */
+ 
+-	mutex_lock(&server->srv_mutex);
++	cifs_server_lock(server);
+ 
+ 	rc = allocate_mid(ses, in_buf, &midQ);
+ 	if (rc) {
+-		mutex_unlock(&server->srv_mutex);
++		cifs_server_unlock(server);
+ 		return rc;
+ 	}
+ 
+ 	rc = cifs_sign_smb(in_buf, server, &midQ->sequence_number);
+ 	if (rc) {
+ 		cifs_delete_mid(midQ);
+-		mutex_unlock(&server->srv_mutex);
++		cifs_server_unlock(server);
+ 		return rc;
+ 	}
+ 
+@@ -2000,3 +2000,3 @@ cifs_pick_channel(struct cifs_ses *ses)
+ 	unsigned int i, start, index;
+-	int probe_rc = 0;
++	int probe_rc = -EINVAL;
+ 	start = atomic_inc_return(&ses->chan_seq);

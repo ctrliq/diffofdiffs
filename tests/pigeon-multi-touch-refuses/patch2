@@ -1,0 +1,28 @@
+--- a/mod.c
++++ b/mod.c
+@@ -17,8 +17,6 @@
+ line17();
+ line18();
+ line19();
+-line20();
+-line21();
+ line22();
+ line23();
+ line24();
+@@ -28,7 +28,7 @@
+ line28();
+ line29();
+ line30();
+-line31();
++fresh31();
+ line32();
+ line33();
+ line34();
+@@ -35,6 +35,6 @@
+ line35();
+ line36();
+-line37();
++fresh37();
+ line38();
+ line39();
+ line40();

@@ -1,0 +1,8 @@
+# Tree mode. The parents of pig1 and pig2 differ only in lines 30-34 of the file
+# pigeon. Both revisions insert the same two lines after lines 5 and 15, and
+# pig2 also reworks line 32, inside the lines where the parents differ. The
+# shared insertions must be left out, pig2's rework must show on its side alone,
+# and the context section must show the lines only pig2's result holds.
+bin: DIFFOFDIFFS
+args: --git-tree=repo pig1 pig2
+exit: 0

@@ -1,0 +1,73 @@
+diff --git a/fs/cifs/transport.c b/fs/cifs/transport.c
+index 05eca41e3b1e0..bfc9bd55870a0 100644
+--- a/fs/cifs/transport.c
++++ b/fs/cifs/transport.c
+@@ -830,14 +830,14 @@ cifs_call_async(struct TCP_Server_Info *server, struct smb_rqst *rqst,
+ 	 * return -EAGAIN in such cases to let callers handle it.
+ 	 */
+ 	if (instance != server->reconnect_instance) {
+-		mutex_unlock(&server->srv_mutex);
++		cifs_server_unlock(server);
+ 		add_credits_and_wake_if(server, &credits, optype);
+ 		return -EAGAIN;
+ 	}
+ 
+ 	mid = server->ops->setup_async_request(server, rqst);
+ 	if (IS_ERR(mid)) {
+-		mutex_unlock(&server->srv_mutex);
++		cifs_server_unlock(server);
+ 		add_credits_and_wake_if(server, &credits, optype);
+ 		return PTR_ERR(mid);
+ 	}
+@@ -1119,7 +1119,7 @@ compound_send_recv(const unsigned int xid, struct cifs_ses *ses,
+ 	 * handle it.
+ 	 */
+ 	if (instance != server->reconnect_instance) {
+-		mutex_unlock(&server->srv_mutex);
++		cifs_server_unlock(server);
+ 		for (j = 0; j < num_rqst; j++)
+ 			add_credits(server, &credits[j], optype);
+ 		return -EAGAIN;
+@@ -1190,9 +1190,9 @@ compound_send_recv(const unsigned int xid, struct cifs_ses *ses,
+ 	if ((ses->ses_status == SES_NEW) || (optype & CIFS_NEG_OP) || (optype & CIFS_SESS_OP)) {
+ 		spin_unlock(&cifs_tcp_ses_lock);
+ 
+-		mutex_lock(&server->srv_mutex);
++		cifs_server_lock(server);
+ 		smb311_update_preauth_hash(ses, server, rqst[0].rq_iov, rqst[0].rq_nvec);
+-		mutex_unlock(&server->srv_mutex);
++		cifs_server_unlock(server);
+ 
+ 		spin_lock(&cifs_tcp_ses_lock);
+ 	}
+@@ -1397,7 +1397,7 @@ SendReceive(const unsigned int xid, struct cifs_ses *ses,
+ 
+ 	rc = cifs_sign_smb(in_buf, server, &midQ->sequence_number);
+ 	if (rc) {
+-		mutex_unlock(&server->srv_mutex);
++		cifs_server_unlock(server);
+ 		goto out;
+ 	}
+ 
+@@ -1530,18 +1530,18 @@ SendReceiveBlockingLock(const unsigned int xid, struct cifs_tcon *tcon,
+ 	   and avoid races inside tcp sendmsg code that could cause corruption
+ 	   of smb data */
+ 
+-	mutex_lock(&server->srv_mutex);
++	cifs_server_lock(server);
+ 
+ 	rc = allocate_mid(ses, in_buf, &midQ);
+ 	if (rc) {
+-		mutex_unlock(&server->srv_mutex);
++		cifs_server_unlock(server);
+ 		return rc;
+ 	}
+ 
+ 	rc = cifs_sign_smb(in_buf, server, &midQ->sequence_number);
+ 	if (rc) {
+ 		cifs_delete_mid(midQ);
+-		mutex_unlock(&server->srv_mutex);
++		cifs_server_unlock(server);
+ 		return rc;
+ 	}
+ 

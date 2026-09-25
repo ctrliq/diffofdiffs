@@ -1,0 +1,7 @@
+# The upstream source retains the first call site without the backport
+# helpers. Reverse those backport additions and report the upstream helpers at
+# their separate original call site. Equal helper text does not merge the two
+# sites.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

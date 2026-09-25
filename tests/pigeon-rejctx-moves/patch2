@@ -1,0 +1,16 @@
+--- a/mod.c
++++ b/mod.c
+@@ -10,11 +10,11 @@
+ keep10();
+ keep11();
+ keep12();
+-old13();
++new13();
+ keep14();
+ keep15v2();
+ keep16();
+-old17();
++new17();
+ keep18();
+ keep19();
+ keep20();

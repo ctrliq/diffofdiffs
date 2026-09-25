@@ -1,0 +1,62 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        Patch 1: patch1        ┃        Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the
+patches.
+
+═══════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                        *
+═══════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with
+one number is an edit both patches make: a new number means
+both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│mod.c                 ┃ old new│mod.c
+        │@@                    ┃        │@@
+  11  11│	lead_two();    ┃  11  11│	lead_two();
+  12    │	old_call();    ┃  12    │	old_call();
+      12│	new_call();    ┃      12│	new_call();
++     13│	helper_one();  ┃        │
++     14│	helper_two();  ┃        │
++     15│	helper_five(); ┃        │
++     16│	helper_six();  ┃        │
+  13  17│	dog();         ┃  13  13│	dog();
+  14  18│	tail_one();    ┃  14  14│	tail_one();
+  15  19│	tail_two();    ┃  15  15│	tail_two();
+  16  20│	helper_three();┃- 16    │	helper_three();
+  17  21│	tail_four();   ┃  17  16│	tail_four();
+  18  22│	tail_five();   ┃  18  17│	tail_five();
+  19  23│	tail_six();    ┃  19  18│	tail_six();
+        │──────────────────────╂────────┼──────────────────────
+        │@@                    ┃        │@@
+        │                      ┃  31  30│	lead_one();
+        │                      ┃  32  31│	lead_two();
+        │                      ┃  33  32│	old_call_two();
+        │                      ┃+     33│	helper_one();
+        │                      ┃+     34│	helper_two();
+        │                      ┃+     35│	helper_three();
+        │                      ┃+     36│	helper_four();
+        │                      ┃+     37│	helper_five();
+        │                      ┃+     38│	helper_six();
+        │                      ┃  34  39│	dog();
+        │                      ┃  35  40│	tail_one();
+        │                      ┃  36  41│	tail_two();
+
+═══════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                                      *
+═══════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, +
+patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│mod.c                 ┃     new│mod.c
+        │@@                    ┃        │@@
+      17│	dog();         ┃      13│	dog();
+      18│	tail_one();    ┃      14│	tail_one();
+      19│	tail_two();    ┃      15│	tail_two();
+-     20│	helper_three();┃        │
+      21│	tail_four();   ┃      16│	tail_four();
+      22│	tail_five();   ┃      17│	tail_five();
+      23│	tail_six();    ┃      18│	tail_six();

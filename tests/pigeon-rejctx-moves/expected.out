@@ -1,0 +1,44 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Patch 1: patch1   ┃  Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the
+source lines quoted in the patches.
+
+═════════════════════════════════════════
+*    DELTA DIFFERENCES                  *
+═════════════════════════════════════════
+Signs mark edits made by only that patch.
+A sign-less line with one number is an
+edit both patches make: a new number
+means both add it, an old number means
+both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│mod.c      ┃ old new│mod.c
+        │@@         ┃        │@@
+  14  14│keep14();  ┃  14  14│keep14();
+        │           ┃  15  15│keep15v2();
+        │───────────╂────────┼───────────
+        │@@         ┃        │@@
+  16  16│keep16();  ┃  16  16│keep16();
+        │           ┃- 17    │old17();
+        │           ┃+     17│new17();
+        │           ┃  18  18│keep18();
+        │           ┃  19  19│keep19();
+        │           ┃  20  20│keep20();
+
+═════════════════════════════════════════
+*    CONTEXT DIFFERENCES                *
+═════════════════════════════════════════
+Signs mark lines present in only one
+result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│mod.c      ┃     new│mod.c
+        │@@         ┃        │@@
+      12│keep12();  ┃      12│keep12();
+      13│new13();   ┃      13│new13();
+      14│keep14();  ┃      14│keep14();
+-     15│keep15();  ┃+     15│keep15v2();
+      16│keep16();  ┃      16│keep16();

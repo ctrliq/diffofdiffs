@@ -1,0 +1,9 @@
+# Patch1 edits walk.c and then discharge.c. Patch2 lists discharge.c, residue.c,
+# and walk.c, in that order: it makes patch1's two discharge.c insertions plus a
+# third, edits residue.c, which patch1 never names, and creates walk.c from
+# nothing. The report must list the files as walk.c, discharge.c, residue.c:
+# patch1's files in patch1's order, then the files only patch2 names. That order
+# differs from patch2's own order, its reverse, and alphabetical order.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

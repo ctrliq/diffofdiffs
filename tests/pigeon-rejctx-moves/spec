@@ -1,0 +1,8 @@
+# Both patches replace old13() with new13(). Patch2 also replaces old17() with
+# new17(), below the lines patch1 quotes, and quotes keep15v2() where patch1
+# quotes keep15(). The shared replacement must be left out, patch2's old17()
+# replacement must show on its side alone, and the context section must show
+# keep15() against keep15v2().
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

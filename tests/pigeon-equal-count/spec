@@ -1,0 +1,7 @@
+# Both patches rewrite line 8 of f.c identically. Patch1 also rewrites line 23;
+# patch2 instead rewrites line 43, where patch1 quotes nothing. The shared
+# line-8 change must be left out, and the line-23 and line-43 rewrites must each
+# show on their own patch's side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

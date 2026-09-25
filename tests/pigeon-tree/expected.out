@@ -1,0 +1,46 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        Commit 1: pig1         ┃        Commit 2: pig2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and after each
+commit.
+
+═══════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                        *
+═══════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with
+one number is an edit both patches make: a new number means
+both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│pigeon                ┃ old new│pigeon
+        │@@                    ┃        │@@ pigeon row 29
+        │                      ┃  29  31│pigeon row 29
+        │                      ┃  30  32│pigeon row 30 leg two
+        │                      ┃  31  33│pigeon row 31 leg two
+        │                      ┃- 32    │pigeon row 32 leg two
+        │                      ┃+     34│pigeon row 32 reworked
+        │                      ┃  33  35│pigeon row 33 leg two
+        │                      ┃  34  36│pigeon row 34 leg two
+        │                      ┃  35  37│pigeon row 35
+
+═══════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                                      *
+═══════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, +
+patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│pigeon                ┃     new│pigeon
+        │@@                    ┃        │@@ pigeon row 27
+        │                      ┃      29│pigeon row 27
+        │                      ┃      30│pigeon row 28
+        │                      ┃      31│pigeon row 29
+        │                      ┃+     32│pigeon row 30 leg two
+        │                      ┃+     33│pigeon row 31 leg two
+        │                      ┃+     34│pigeon row 32 reworked
+        │                      ┃+     35│pigeon row 33 leg two
+        │                      ┃+     36│pigeon row 34 leg two
+        │                      ┃      37│pigeon row 35
+        │                      ┃      38│pigeon row 36
+        │                      ┃      39│pigeon row 37

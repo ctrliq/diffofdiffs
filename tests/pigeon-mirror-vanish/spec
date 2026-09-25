@@ -1,0 +1,7 @@
+# Both patches rewrite legacy_call() to modern_call() at line 13. Patch2 makes
+# the same rewrite again at line 33, in lines patch1 never quotes. The shared
+# line-13 rewrite must be left out, and patch2's second rewrite must show on its
+# side alone rather than pairing with patch1's identical hunk.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

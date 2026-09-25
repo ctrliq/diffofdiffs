@@ -1,0 +1,8 @@
+# Patch1 adds lineY() and replaces line21() with lineX() in one hunk at line 17.
+# Patch2 removes line20() and line21() there and also rewrites line31() and
+# line37() further down, where patch1 quotes nothing. Both changes near line 17
+# must show side by side, patch2's later rewrites on its side alone, and the
+# context section must show how the two results differ around line 20.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

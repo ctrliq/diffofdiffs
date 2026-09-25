@@ -1,0 +1,11 @@
+--- a/f.c
++++ b/f.c
+@@ -1,7 +1,7 @@
+ c1
+ c2
+ c3
+-alpha_old
++alpha_new
+ c4
+ c5
+ c6

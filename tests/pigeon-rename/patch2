@@ -1,0 +1,22 @@
+diff --git a/old.c b/new.c
+similarity index 92%
+rename from old.c
+rename to new.c
+--- a/old.c
++++ b/new.c
+@@ -5,6 +5,7 @@
+ c05
+ c06
+ c07
++add_one
+ c08
+ c09
+ c10
+@@ -34,6 +34,7 @@
+ c34
+ c35
+ c36
++add_three
+ c37
+ c38
+ c39

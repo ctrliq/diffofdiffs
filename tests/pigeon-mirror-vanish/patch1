@@ -1,0 +1,11 @@
+--- a/mod.c
++++ b/mod.c
+@@ -10,7 +10,7 @@
+ alpha();
+ beta();
+ gamma();
+-legacy_call();
++modern_call();
+ delta();
+ epsilon();
+ zeta();

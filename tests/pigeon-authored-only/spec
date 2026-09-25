@@ -1,0 +1,8 @@
+# Both patches change old08 at line 8 of f.c to new08. Patch1 also changes old12
+# to new12 in the same hunk, and patch2 changes old43 to new43 in a second hunk.
+# The report must leave out the identical change at line 8 and show the change
+# at line 12 on patch1's side and the one at line 43 on patch2's side, each with
+# the context its patch quotes.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

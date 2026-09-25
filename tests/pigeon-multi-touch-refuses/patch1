@@ -1,0 +1,13 @@
+--- a/mod.c
++++ b/mod.c
+@@ -17,8 +17,9 @@
+ line17();
+ line18();
+ line19();
++lineY();
+ line20();
+-line21();
++lineX();
+ line22();
+ line23();
+ line24();

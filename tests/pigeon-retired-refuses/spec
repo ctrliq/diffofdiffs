@@ -1,0 +1,10 @@
+# Both patches change x_old at line 4 of f.c to x_new. Patch1 adds zulu_one and
+# zulu_two right after it. Patch2 adds wombat_one and wombat_two after mike, and
+# adds the same zulu_one and zulu_two after victor in a hunk that also changes
+# yankee_old to yankee_new. The report must show the change at line 4 as an edit
+# both patches make, patch1's zulu lines on its side, and patch2's wombat lines,
+# zulu lines, and yankee change on its side: the same text added at two
+# different places doesn't pair.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

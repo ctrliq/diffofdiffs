@@ -1,0 +1,7 @@
+# Patch1 inserts add_one into old.c. Patch2 renames old.c to new.c, makes the
+# same insertion, and adds add_three at line 37, where patch1 quotes nothing.
+# The shared insertion must be left out, and the section must show patch2's
+# rename note and its add_three insertion on patch2's side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

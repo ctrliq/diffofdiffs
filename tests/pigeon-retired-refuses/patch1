@@ -1,0 +1,26 @@
+--- a/f.c
++++ b/f.c
+@@ -1,20 +1,22 @@
+ alpha
+ bravo
+ charlie
+-x_old
++x_new
++zulu_one
++zulu_two
+ delta_l
+ echo
+ foxtrot
+ golf
+ hotel
+ india
+ juliet
+ kilo
+ lima
+ mike
+ november
+ oscar
+ papa
+ quebec
+ romeo
+ sierra
