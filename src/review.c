@@ -1474,6 +1474,96 @@ static void match_results(struct comparison *review,
 	match_result_interval(images, matches, &anchors, first, end, false);
 }
 
+static size_t next_focused_edit(const struct comparison *review, int leg,
+				size_t first)
+{
+	const struct patch_source *source = &review->source[leg];
+
+	for (size_t i = first; i < source->nrows; i++) {
+		const struct patch_row *row = &source->rows[i];
+
+		if ((row->sign == '-' || row->sign == '+') &&
+		    row->move == review->focus[leg])
+			return i;
+	}
+	return source->nrows;
+}
+
+/* Find a source line or the insertion gap before it in either kind of view */
+static size_t source_position(const struct patch_source *source, int stage,
+			      size_t position)
+{
+	const struct source_view *view = &source->view[stage];
+	size_t first = 0, end = view->count;
+
+	while (first < end) {
+		size_t mid = first + (end - first) / 2;
+
+		if (source->rows[view->rows[mid]].pos[stage] < position)
+			first = mid + 1;
+		else
+			end = mid;
+	}
+	return first;
+}
+
+/*
+ * An exact cross-file edit signature supplies both locations, including gaps on
+ * the stage where an edit has no row. Compare surrounding source inside those
+ * boundaries; matching another part of either file cannot move the edit.
+ */
+static void match_moved(struct comparison *review,
+			const struct udiff_image images[2][2])
+{
+	for (int stage = 0; stage < 2; stage++) {
+		struct udiff_matches *matches = &review->matches[stage];
+		size_t first[2] = {}, at[2] = {}, end[2];
+
+		init_unmatched_lines(images[stage], matches);
+
+		/*
+		 * Both move signatures contain the same signs, bytes, and
+		 * count.
+		 */
+		for (;;) {
+			bool present;
+
+			for (int leg = 0; leg < 2; leg++) {
+				at[leg] =
+					next_focused_edit(review, leg, at[leg]);
+			}
+			if (at[0] == review->source[0].nrows)
+				break;
+
+			present = review->source[0].rows[at[0]].sign ==
+				  (stage ? '+' : '-');
+
+			for (int leg = 0; leg < 2; leg++) {
+				const struct patch_source *source =
+					&review->source[leg];
+
+				end[leg] = source_position(
+					source, stage,
+					source->rows[at[leg]].pos[stage]);
+			}
+			match_interval(images[stage], matches, first, end);
+
+			/* An absent stage supplies a gap, not a row match */
+			if (present) {
+				matches->side[0][end[0]] = end[1];
+				matches->side[1][end[1]] = end[0];
+			}
+			for (int leg = 0; leg < 2; leg++) {
+				first[leg] = end[leg] + present;
+				at[leg]++;
+			}
+		}
+		end[0] = images[stage][0].nlines;
+		end[1] = images[stage][1].nlines;
+		match_interval(images[stage], matches, first, end);
+	}
+}
+
 /*
  * Matching ties must not depend on which operand the command lists first. Order
  * by known source bytes and original row roles; gap labels are local
@@ -1559,6 +1649,13 @@ static void compare_ordered(struct comparison *review)
 	}
 	if (review->source[0].ambiguous || review->source[1].ambiguous) {
 		match_ambiguous_sources(review, images);
+		match_changes(review);
+		return;
+	}
+
+	/* A cross-file move supplies its own edit locations on both sides */
+	if (review->focus[0]) {
+		match_moved(review, images);
 		match_changes(review);
 		return;
 	}
@@ -2656,9 +2753,12 @@ static char *format_file_metadata(const struct patch_file *file, bool show_id)
 
 static void review_file_build(struct review_file *file,
 			      const struct patch_file *a,
-			      const struct patch_file *b)
+			      const struct patch_file *b,
+			      const struct patch_move *focus_a,
+			      const struct patch_move *focus_b)
 {
-	struct comparison review __free(comparison) = {};
+	struct comparison review __free(
+		comparison) = { .focus = { focus_a, focus_b } };
 	const struct iomem_slice absent = {};
 	bool shared_deletion;
 	bool show_id = false;
@@ -2675,7 +2775,8 @@ static void review_file_build(struct review_file *file,
 			  same_blob(&a->story.index_pre, &b->story.index_pre);
 	select_delta(&review, max_context, shared_deletion);
 
-	for (int section = 0; section < 2; section++) {
+	/* Moved matches add context; edits keep their original files */
+	for (int section = !!focus_a; section < 2; section++) {
 		struct paired_rows pairs __free(paired_rows) = {};
 
 		pair_rows(&review, &pairs, section);
@@ -2690,11 +2791,14 @@ static void review_file_build(struct review_file *file,
 
 		file->path[leg] = file_label(source, &review.source[!leg]);
 		file->ambiguous |= source->ambiguous;
-		if (source->file && source->file->empty[1] &&
+		if (!focus_a && source->file && source->file->empty[1] &&
 		    !source->file->nhunks && !shared_deletion)
 			file->note[leg] = xstrdup(
 				"This patch deletes the whole file without quoting its source.\n");
 	}
+	if (focus_a)
+		return;
+
 	/* Original file comparisons own operations and blob metadata */
 	if (a && b) {
 		show_id =
@@ -2779,7 +2883,11 @@ void review_report_build(struct review_report *report,
 	patch_document_read(&docs[0], a, &files_in_patch1, "patch #1");
 	patch_document_read(&docs[1], b, &files_in_patch2, "patch #2");
 
+	/* Discover moved edit ownership before ordinary file comparisons */
+	patch_match_moved(docs);
 	capacity = docs[0].nfiles + docs[1].nfiles;
+	for (size_t i = 0; i < docs[0].nfiles; i++)
+		capacity += docs[0].files[i].nmoves;
 	report->files = xzalloc_array(capacity, sizeof(*report->files));
 
 	/* Emit pairs from the left and remaining files from the right */
@@ -2801,7 +2909,7 @@ void review_report_build(struct review_report *report,
 			}
 			saved = &report->files[report->count++];
 			review_file_build(saved, leg ? NULL : file,
-					  leg ? file : pair);
+					  leg ? file : pair, NULL, NULL);
 			if (!pair) {
 				char *note = patch_related_change(
 					file, &docs[!leg], ignore_components);
@@ -2814,6 +2922,19 @@ void review_report_build(struct review_report *report,
 		}
 	}
 
+	/* Moved edits get a separate context view without duplicating delta */
+	for (size_t i = 0; i < docs[0].nfiles; i++) {
+		const struct patch_file *file = &docs[0].files[i];
+
+		for (size_t m = 0; m < file->nmoves; m++) {
+			const struct patch_move *move = &file->moves[m];
+			const struct patch_file *partner = move->partner_file;
+
+			review_file_build(&report->files[report->count++], file,
+					  partner, move,
+					  &partner->moves[move->partner_move]);
+		}
+	}
 	patch_document_free(&docs[0]);
 	patch_document_free(&docs[1]);
 	file_list_free(&files_in_patch1);
