@@ -410,3 +410,262 @@ struct change_match {
 	int leg;
 	bool consumed;
 };
+
+static void append_source_row(struct patch_source *source,
+			      const struct patch_row *row)
+{
+	if (source->nrows == 2 * LINE_CEILING)
+		die("too many source lines in a comparison");
+
+	if (source->nrows == source->capacity) {
+		source->capacity = source->capacity ? source->capacity * 2 :
+						      128;
+		source->rows = xrealloc_array(source->rows, source->capacity,
+					      sizeof(*source->rows));
+	}
+	source->rows[source->nrows++] = *row;
+}
+
+static void append_source_gap(struct patch_source *source, const size_t *pos,
+			      int leg)
+{
+	/* Neither valid source nor the other operand can match this sentinel */
+	static const char gaps[2][11] = { "\0unknown0\n", "\0unknown1\n" };
+	struct patch_row row = { .text = { .ptr = gaps[leg],
+					   .len = sizeof(gaps[0]) - 1 },
+				 .pos = { pos[0], pos[1] },
+				 .hunk = SIZE_MAX,
+				 .sign = '?' };
+
+	append_source_row(source, &row);
+}
+
+static void blob_lines(const struct iomem_buf *blob, struct source_view *view)
+{
+	size_t n = 0;
+
+	for (size_t pos = 0; pos < blob->len; n++) {
+		const char *lf =
+			memchr(blob->base + pos, '\n', blob->len - pos);
+
+		pos = lf ? (size_t)(lf - blob->base) + 1 : blob->len;
+	}
+	if (n > LINE_CEILING)
+		die("too many lines in a source file");
+
+	view->lines = xmalloc_array(n, sizeof(*view->lines));
+	for (size_t pos = 0; pos < blob->len;) {
+		const char *lf =
+			memchr(blob->base + pos, '\n', blob->len - pos);
+		size_t end = lf ? (size_t)(lf - blob->base) + 1 : blob->len;
+
+		view->lines[view->count++] =
+			(typeof(view->lines[0])){ .ptr = blob->base + pos,
+						  .len = end - pos };
+		pos = end;
+	}
+}
+
+static void source_view_free(struct source_view *view)
+{
+	free(view->lines);
+	free(view->rows);
+	free(view->index);
+	*view = (typeof(*view)){};
+}
+
+static bool view_at_eof(const struct source_view *view)
+{
+	const struct udiff_line *last;
+
+	if (!view->count)
+		return false;
+
+	last = &view->lines[view->count - 1];
+	return last->len && last->ptr[last->len - 1] != '\n';
+}
+
+static void source_views(struct patch_source *source)
+{
+	for (int s = 0; s < 2; s++) {
+		struct source_view *view = &source->view[s];
+		char absent_sign = s ? '-' : '+';
+
+		view->lines =
+			xmalloc_array(source->nrows, sizeof(*view->lines));
+		view->rows = xmalloc_array(source->nrows, sizeof(*view->rows));
+		view->index =
+			xmalloc_array(source->nrows, sizeof(*view->index));
+
+		/*
+		 * Each stage omits the opposite edit sign. The view stores
+		 * indices into source->rows; index maps those source rows back
+		 * into the view, leaving SIZE_MAX for rows excluded from it.
+		 */
+		for (size_t i = 0; i < source->nrows; i++) {
+			view->index[i] = SIZE_MAX;
+			if (source->rows[i].sign == absent_sign)
+				continue;
+
+			/* EOF leaves no unknown tail for a gap to represent */
+			if (source->rows[i].sign == '?' &&
+			    ((source->file && source->file->empty[s]) ||
+			     view_at_eof(view)))
+				continue;
+
+			if (view_at_eof(view))
+				source->ambiguous = true;
+			if (!source->rows[i].text.len)
+				source->ambiguous = true;
+			view->index[i] = view->count;
+			view->lines[view->count] = source->rows[i].text;
+			view->rows[view->count++] = i;
+		}
+	}
+}
+
+static void source_unchanged(struct patch_source *source,
+			     const struct source_view *blobs, size_t *pos,
+			     const size_t *end)
+{
+	if (pos[0] > end[0] || pos[1] > end[1] ||
+	    end[0] - pos[0] != end[1] - pos[1])
+		die("derived patch has inconsistent source coordinates");
+
+	for (; pos[0] < end[0]; pos[0]++, pos[1]++) {
+		struct patch_row row = { .text = blobs[0].lines[pos[0]],
+					 .pos = { pos[0], pos[1] },
+					 .hunk = SIZE_MAX,
+					 .sign = ' ' };
+
+		if (!patch_row_equal(&row.text, &blobs[1].lines[pos[1]]))
+			die("derived patch omits a source change");
+
+		append_source_row(source, &row);
+	}
+}
+
+static void append_hunk(struct patch_source *source,
+			const struct patch_file *file,
+			const struct patch_hunk *hunk)
+{
+	/* First removal in the current exact self-replacement */
+	size_t neutral_first = hunk->first;
+
+	for (size_t i = hunk->first; i < hunk->first + hunk->count; i++) {
+		struct patch_row row = file->rows[i];
+
+		if (!row.neutral || row.sign == '+')
+			neutral_first = i + 1;
+		if (row.neutral) {
+			if (row.sign == '+')
+				continue;
+
+			/*
+			 * An exact self-replacement contributes one retained
+			 * row to each image. Removed rows share the insertion
+			 * point, so restore each row's result position within
+			 * the run.
+			 */
+			row.pos[1] += i - neutral_first;
+			row.sign = ' ';
+		}
+		append_source_row(source, &row);
+	}
+}
+
+/*
+ * Validation counted these rows, and patch_source_read checked their extents
+ * against both Git images. A mismatch here is an inconsistent derived patch.
+ */
+static void check_quotation(const struct patch_file *file,
+			    const struct patch_hunk *hunk,
+			    const struct source_view *blobs)
+{
+	for (size_t i = hunk->first; i < hunk->first + hunk->count; i++) {
+		const struct patch_row *row = &file->rows[i];
+
+		for (int stage = 0; stage < 2; stage++) {
+			char absent_sign = stage ? '-' : '+';
+			const struct udiff_line *actual;
+
+			if (row->sign == absent_sign)
+				continue;
+
+			actual = &blobs[stage].lines[row->pos[stage]];
+			if (!patch_row_equal(&row->text, actual))
+				die("derived patch disagrees with the source file");
+		}
+	}
+}
+
+void patch_source_read(struct patch_source *source,
+		       const struct patch_file *file,
+		       const struct patch_file *other, int leg, bool complete)
+{
+	struct source_view blobs[2] = {};
+	size_t pos[2] = {}, end[2] = {};
+
+	source->file = file;
+	source->complete = complete;
+
+	/* The other operand supplies the path when this patch omits the file */
+	if (source->complete) {
+		for (int s = 0; s < 2; s++) {
+			const struct patch_file *named = file ? file : other;
+
+			if (!file || !file->empty[s])
+				gittree_source_bytes(leg,
+						     patch_file_path(named), s,
+						     &source->blobs[s]);
+			blob_lines(&source->blobs[s], &blobs[s]);
+			end[s] = blobs[s].count;
+		}
+	}
+	if (file) {
+		for (size_t h = 0; h < file->nhunks; h++) {
+			const struct patch_hunk *hunk = &file->hunks[h];
+
+			/*
+			 * Tree objects supply every row between hunks. Verify
+			 * the quoted rows too, so complete images and native
+			 * edit coordinates cannot silently disagree.
+			 */
+			if (source->complete) {
+				for (int s = 0; s < 2; s++) {
+					if (hunk->pos[s] + hunk->lines[s] >
+					    end[s])
+						die("derived patch quotes beyond the source file");
+				}
+				source_unchanged(source, blobs, pos, hunk->pos);
+				check_quotation(file, hunk, blobs);
+			} else if (pos[0] != hunk->pos[0] ||
+				   pos[1] != hunk->pos[1]) {
+				/* A gap's source bytes remain unknown */
+				source->ambiguous |= pos[0] > hunk->pos[0] ||
+						     pos[1] > hunk->pos[1];
+				append_source_gap(source, pos, leg);
+			}
+			append_hunk(source, file, hunk);
+			for (int s = 0; s < 2; s++)
+				pos[s] = hunk->pos[s] + hunk->lines[s];
+		}
+	}
+	if (source->complete)
+		source_unchanged(source, blobs, pos, end);
+	else if (!file || !file->empty[0] || !file->empty[1])
+		append_source_gap(source, pos, leg);
+	source_view_free(&blobs[0]);
+	source_view_free(&blobs[1]);
+	source_views(source);
+}
+
+void patch_source_free(struct patch_source *source)
+{
+	for (int s = 0; s < 2; s++) {
+		source_view_free(&source->view[s]);
+		iomem_buf_free(&source->blobs[s]);
+	}
+	free(source->rows);
+	*source = (typeof(*source)){};
+}
