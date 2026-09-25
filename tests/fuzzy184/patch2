@@ -1,0 +1,29 @@
+--- a/edited.txt
++++ b/edited.txt
+@@ -2,4 +2,4 @@
+ beta
+ gamma
+ delta
+-epsilon
++EPSILON
+--- a/p2only.txt
++++ b/p2only.txt
+@@ -1,3 +1,3 @@
+ uno
+-dos
++DOS
+ tres
+--- /dev/null
++++ b/created.txt
+@@ -0,0 +1,2 @@
++newA
++newB2
+--- a/reject.txt
++++ b/reject.txt
+@@ -1,5 +1,5 @@
+ zzzzzzz1
+ zzzzzzz2
+-nonexistentline
++REPLACEMENT
+ zzzzzzz4
+ zzzzzzz5

@@ -1,0 +1,30 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: patch1┃Patch 2: patch2
+       a       ┃       a
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use
+only the source lines quoted in
+the patches.
+
+═══════════════════════════════
+*    DELTA DIFFERENCES        *
+═══════════════════════════════
+Signs mark edits made by only
+that patch. A sign-less line
+with one number is an edit both
+patches make: a new number
+means both add it, an old
+number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│file  ┃ old new│file
+        │@@ myd┃        │@@ myd
+        │ef(x) ┃        │ef(x)
+   6   6│4pad  ┃   6   6│4pad
+   7   7│5pad  ┃   7   7│5pad
+   8    │target┃   8    │target
++      8│AAA   ┃+      8│BBB
+   9   9│6pad  ┃   9   9│6pad
+  10  10│7pad  ┃  10  10│7pad
+  11  11│8pad  ┃  11  11│8pad

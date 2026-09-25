@@ -1,0 +1,14 @@
+--- file
++++ file
+@@ -2,10 +2,10 @@
+ mydef(x)
+ 1pad
+ 2pad
+ 3pad
+ 4pad
+ 5pad
+-target
++AAA
+ 6pad
+ 7pad
+ 8pad

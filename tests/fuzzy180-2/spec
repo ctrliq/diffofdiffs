@@ -1,0 +1,6 @@
+# Both patches open with a context line spelled with a leading tab rather than a
+# space. Patch1 carries a NUL byte inside its added line P1_line4, so the tool
+# must refuse it with "patch #1 carries an embedded NUL byte" and exit 1.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

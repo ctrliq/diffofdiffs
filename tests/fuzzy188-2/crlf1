@@ -1,0 +1,16 @@
+--- file
++++ file
+@@ -10,5 +10,5 @@
+ crdefA(x) junk
+   padA1
+   padA2
+   padA3
+-  oldA
++  p1A
+@@ -30,5 +30,5 @@
+ crdef2(b)
+   padB1
+   padB2
+   padB3
+-  oldB
++  p1B

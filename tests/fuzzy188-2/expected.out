@@ -1,0 +1,31 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Patch 1: crlf1   ┃   Patch 2: crlf2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the
+source lines quoted in the patches.
+
+═════════════════════════════════════════
+*    DELTA DIFFERENCES                  *
+═════════════════════════════════════════
+Signs mark edits made by only that patch.
+A sign-less line with one number is an
+edit both patches make: a new number
+means both add it, an old number means
+both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│file       ┃ old new│file
+        │@@ crdefA(x┃        │@@ crdefA(x
+        │)\x0d junk ┃        │)\x0d junk
+  12  12│  padA2    ┃  12  12│  padA2
+  13  13│  padA3\x0d┃  13  13│  padA3\x0d
+  14    │  oldA     ┃  14    │  oldA
++     14│  p1A      ┃+     14│  p2A
+        │───────────╂────────┼───────────
+        │@@ crdef2(b┃        │@@ crdef2(b
+        │)          ┃        │)
+  32  32│  padB2    ┃  32  32│  padB2
+  33  33│  padB3    ┃  33  33│  padB3
+  34    │  oldB     ┃  34    │  oldB
++     34│  p1B      ┃+     34│  p2B

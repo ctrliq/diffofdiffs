@@ -1,0 +1,15 @@
+--- file
++++ file
+@@ -10,11 +10,11 @@
+ alpha_one(x)
+     stmt_a;
+     stmt_b;
+     stmt_c;
+ beta_two(y)
+     stmt_d;
+     stmt_e;
+-    old_value = 1;
++    new_value = 222;
+     tail_a;
+     tail_b;
+     tail_c;

@@ -1,0 +1,11 @@
+--- file
++++ file
+@@ -5,7 +5,7 @@
+ 3pad
+ 4pad
+ 5pad
+-target
++BBB
+ 6pad
+ 7pad
+ 8pad

@@ -1,0 +1,10 @@
+--- file
++++ file
+@@ -10,2 +10,2 @@
+ superduperextremelyverylongfunctionnamethatkeepsgoing_and_going_and_going(alpha, beta, gamma)
+-  a11
++  c11
+@@ -15,2 +15,2 @@
+-  a15
++  c15
+  q16

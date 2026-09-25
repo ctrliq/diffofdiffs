@@ -1,0 +1,5 @@
+# Patch2 carries a NUL byte inside its added line P2_added, so the tool must
+# refuse it with "patch #2 carries an embedded NUL byte" and exit 1.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1

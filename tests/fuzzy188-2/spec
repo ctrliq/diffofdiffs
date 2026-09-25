@@ -1,0 +1,7 @@
+# The header pair ends in bare LF, so the two CRLF rows in the first hunk are
+# damage rather than half an ending: they stay content and print with their
+# CR (GNU patch decides CR stripping per file section from the section's
+# header lines, and this section says LF).
+bin: DIFFOFDIFFS
+args: crlf1 crlf2
+exit: 0

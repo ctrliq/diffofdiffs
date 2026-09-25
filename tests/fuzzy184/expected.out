@@ -1,0 +1,74 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Patch 1: patch1     ┃    Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines
+quoted in the patches.
+
+═════════════════════════════════════════════════
+*    DELTA DIFFERENCES                          *
+═════════════════════════════════════════════════
+Signs mark edits made by only that patch. A
+sign-less line with one number is an edit both
+patches make: a new number means both add it, an
+old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│edited.txt     ┃ old new│edited.txt
+        │@@ alpha       ┃        │@@ beta
+   1   1│alpha          ┃        │
+   2   2│beta           ┃   2   2│beta
+-  3    │gamma          ┃   3   3│gamma
++      3│GAMMA          ┃        │
+   4   4│delta          ┃   4   4│delta
+   5   5│epsilon        ┃-  5    │epsilon
+        │               ┃+      5│EPSILON
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│p1only.txt     ┃ old new│p1only.txt
+        │@@ one         ┃        │@@
+   1   1│one            ┃        │
+-  2    │two            ┃        │
++      2│TWO            ┃        │
+   3   3│three          ┃        │
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│b/created.txt  ┃ old new│b/created.txt
+        │@@ newA        ┃        │@@ newA
+       1│newA           ┃       1│newA
++      2│newB           ┃+      2│newB2
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│reject.txt     ┃ old new│reject.txt
+        │@@ r8          ┃        │@@ zzzzzzz1
+        │               ┃   1   1│zzzzzzz1
+        │               ┃   2   2│zzzzzzz2
+        │               ┃-  3    │nonexistentline
+        │               ┃+      3│REPLACEMENT
+        │               ┃   4   4│zzzzzzz4
+        │               ┃   5   5│zzzzzzz5
+   8   8│r8             ┃        │
+-  9    │r9             ┃        │
++      9│R9             ┃        │
+  10  10│r10            ┃        │
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│p2only.txt     ┃ old new│p2only.txt
+        │@@             ┃        │@@ uno
+        │               ┃   1   1│uno
+        │               ┃-  2    │dos
+        │               ┃+      2│DOS
+        │               ┃   3   3│tres
+
+═════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES                        *
+═════════════════════════════════════════════════
+Signs mark lines present in only one result: -
+patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│edited.txt     ┃     new│edited.txt
+        │@@ beta        ┃        │@@ beta
+       2│beta           ┃       2│beta
+-      3│GAMMA          ┃+      3│gamma
+       4│delta          ┃       4│delta

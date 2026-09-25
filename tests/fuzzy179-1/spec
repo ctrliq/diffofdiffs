@@ -1,0 +1,7 @@
+# Patch1 carries a NUL byte inside the context line line2, so the tool must
+# refuse it with "patch #1 carries an embedded NUL byte" and exit 1. The message
+# always starts with the fixed prefix `diffofdiffs: `, whatever the program's
+# path, which lets expected.err match without normalization.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 1
