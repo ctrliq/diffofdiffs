@@ -37,6 +37,11 @@ struct gitread {
 	git_odb *odb;
 };
 
+static void oid_from_libgit2(struct gitread_oid *out, const git_oid *oid)
+{
+	memcpy(out->raw, oid->id, GITREAD_OID_RAWSZ);
+}
+
 static void oid_to_libgit2(git_oid *out, const struct gitread_oid *oid)
 {
 	git_oid_fromraw(out, oid->raw);
@@ -341,6 +346,173 @@ void gitread_close(struct gitread **gr)
 	free(*gr);
 	*gr = NULL;
 	git_libgit2_shutdown();
+}
+
+/*
+ * Git requires at least four hex digits for an abbreviated object ID. Longer
+ * names must still fit a complete ID before taking the object lookup path.
+ */
+static bool name_is_hex_prefix(const char *name, size_t *len)
+{
+	size_t n = strlen(name);
+
+	if (n < 4 || n > GITREAD_OID_HEXSZ)
+		return false;
+
+	for (size_t i = 0; i < n; i++) {
+		if (!isxdigit(name[i]))
+			return false;
+	}
+
+	*len = n;
+	return true;
+}
+
+void gitread_resolve_commit(struct gitread *gr, const char *name,
+			    struct gitread_oid *out)
+{
+	git_object *peeled = NULL;
+	git_object *obj = NULL;
+	size_t len;
+	int ret;
+
+	if (name_is_hex_prefix(name, &len)) {
+		git_oid full, prefix;
+
+		ret = git_oid_fromstrp(&prefix, name);
+		if (ret)
+			die("cannot parse %s as an object id", name);
+
+		ret = git_odb_exists_prefix(&full, gr->odb, &prefix, len);
+		if (ret == GIT_EAMBIGUOUS)
+			die("%s names more than one object; give a longer prefix",
+			    name);
+
+		/*
+		 * A missing object permits a branch named with hex digits.
+		 * Other failures must not be mistaken for a missing object.
+		 */
+		if (ret && ret != GIT_ENOTFOUND) {
+			dbg_last_error("object-store search");
+			die("cannot search the object store for %s", name);
+		}
+
+		if (!ret) {
+			ret = git_object_lookup(&obj, gr->repo, &full,
+						GIT_OBJECT_ANY);
+			if (ret) {
+				dbg_last_error("object lookup");
+				die("cannot read the object %s names", name);
+			}
+		}
+	}
+
+	if (!obj) {
+		git_reference *resolved = NULL;
+		git_reference *ref = NULL;
+
+		ret = git_reference_dwim(&ref, gr->repo, name);
+		if (ret) {
+			dbg_last_error("name resolution");
+			die("cannot resolve %s to an object or reference in the repository",
+			    name);
+		}
+
+		ret = git_reference_resolve(&resolved, ref);
+		git_reference_free(ref);
+		if (ret) {
+			dbg_last_error("symbolic-reference chase");
+			die("cannot resolve the symbolic reference %s names",
+			    name);
+		}
+
+		ret = git_object_lookup(&obj, gr->repo,
+					git_reference_target(resolved),
+					GIT_OBJECT_ANY);
+		git_reference_free(resolved);
+		if (ret) {
+			dbg_last_error("object lookup");
+			die("cannot read the object %s names", name);
+		}
+	}
+
+	ret = git_object_peel(&peeled, obj, GIT_OBJECT_COMMIT);
+	git_object_free(obj);
+	if (ret)
+		die("%s does not name a commit", name);
+
+	oid_from_libgit2(out, git_object_id(peeled));
+	git_object_free(peeled);
+}
+
+static git_commit *lookup_commit(struct gitread *gr,
+				 const struct gitread_oid *commit)
+{
+	char hex[GITREAD_OID_HEXSZ + 1];
+	git_commit *c = NULL;
+	git_oid oid;
+	int ret;
+
+	oid_to_libgit2(&oid, commit);
+	ret = git_commit_lookup(&c, gr->repo, &oid);
+	if (ret) {
+		gitread_oid_hex(commit, hex);
+		dbg_last_error("commit lookup");
+		die("cannot read the commit %s", hex);
+	}
+	return c;
+}
+
+char *gitread_commit_subject(struct gitread *gr,
+			     const struct gitread_oid *commit)
+{
+	char hex[GITREAD_OID_HEXSZ + 1];
+	git_commit *c = lookup_commit(gr, commit);
+	const char *summary;
+	char *subject;
+
+	summary = git_commit_summary(c);
+	if (!summary) {
+		gitread_oid_hex(commit, hex);
+		dbg_last_error("commit subject");
+		die("cannot read the subject of commit %s", hex);
+	}
+	subject = xstrdup(summary);
+	git_commit_free(c);
+	return subject;
+}
+
+int gitread_commit_parents(struct gitread *gr, const struct gitread_oid *commit,
+			   struct gitread_oid *first_parent)
+{
+	git_commit *c = lookup_commit(gr, commit);
+	int n;
+
+	n = git_commit_parentcount(c);
+	if (n > 0 && first_parent)
+		oid_from_libgit2(first_parent, git_commit_parent_id(c, 0));
+
+	git_commit_free(c);
+	return n;
+}
+
+bool gitread_commit_parent_of(struct gitread *gr, const struct gitread_oid *tip,
+			      const struct gitread_oid *candidate)
+{
+	git_commit *c = lookup_commit(gr, tip);
+	bool found = false;
+	unsigned int n;
+
+	n = git_commit_parentcount(c);
+	for (unsigned int i = 0; !found && i < n; i++) {
+		struct gitread_oid parent;
+
+		oid_from_libgit2(&parent, git_commit_parent_id(c, i));
+		found = !memcmp(parent.raw, candidate->raw, GITREAD_OID_RAWSZ);
+	}
+
+	git_commit_free(c);
+	return found;
 }
 
 void gitread_oid_hex(const struct gitread_oid *oid,
