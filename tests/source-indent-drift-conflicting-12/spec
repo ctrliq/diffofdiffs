@@ -1,0 +1,5 @@
+# Conflicting indentation in the retained source prevents the edits from
+# acquiring a correspondence.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

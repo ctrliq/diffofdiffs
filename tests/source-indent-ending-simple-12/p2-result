@@ -1,0 +1,4 @@
+		if (ready) {
+			prepare_current();
+			new_first();
+			new_last();

@@ -1,0 +1,5 @@
+# The same original source edit at different tab depths keeps its literal
+# result difference.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

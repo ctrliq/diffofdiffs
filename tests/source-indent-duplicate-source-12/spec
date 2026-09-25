@@ -1,0 +1,4 @@
+# A repeated source neighborhood leaves the original edit location unresolved.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

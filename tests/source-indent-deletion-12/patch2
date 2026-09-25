@@ -1,0 +1,10 @@
+--- a/f
++++ b/f
+@@ -28,7 +28,6 @@
+ 		if (ready) {
+ 			struct item *item = get_item();
+ 
+-			if (condition_a() &&
+ 			    item_ready(item)) {
+ 				work(item);
+ 			}

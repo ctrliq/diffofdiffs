@@ -1,0 +1,12 @@
+--- a/f
++++ b/f
+@@ -28,7 +28,8 @@
+ 
+ 			bind_item(item);
+ 
+-			if (condition_a() &&
++			if (type_ok() &&
++			    condition_a() &&
+ 			    item_ready(item)) {
+ 				work(item);
+ 			}

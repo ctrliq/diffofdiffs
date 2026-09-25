@@ -1,0 +1,5 @@
+# One source edit consumes an extra leading row that the other version
+# retains.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

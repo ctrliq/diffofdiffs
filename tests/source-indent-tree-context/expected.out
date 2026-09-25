@@ -1,0 +1,53 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                     Commit 1: bp                      ┃                     Commit 2: up
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete files before and after each commit.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                         *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new
+number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f                                             ┃ old new│f
+        │@@ prefix19;                                  ┃        │@@ remote_padding6;
+  21  21│	if (ready) {                           ┃        │
+  22  22│		struct item *item = get_item();┃        │
+  23  23│                                              ┃  28  28│
+        │                                              ┃  29  29│			bind_item(item);
+        │                                              ┃  30  30│
+- 24    │		if (condition_a() &&           ┃- 31    │			if (condition_a() &&
++     24│		if (type_ok() &&               ┃+     31│			if (type_ok() &&
++     25│		    condition_a() &&           ┃+     32│			    condition_a() &&
+  25  26│		    item_ready(item)) {        ┃  32  33│			    item_ready(item)) {
+  26  27│			work(item);            ┃  33  34│				work(item);
+  27  28│		}                              ┃  34  35│			}
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                   *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f                                             ┃     new│f
+        │@@ prefix17;                                  ┃        │@@ remote_padding5;
+      18│prefix17;                                     ┃        │
+      19│prefix18;                                     ┃        │
+      20│prefix19;                                     ┃        │
+-     21│	if (ready) {                           ┃        │
+-     22│		struct item *item = get_item();┃        │
+        │                                              ┃+     26│remote_padding5;
+        │                                              ┃+     27│remote_padding6;
+      23│                                              ┃      28│
+        │                                              ┃+     29│			bind_item(item);
+        │                                              ┃+     30│
+-     24│		if (type_ok() &&               ┃+     31│			if (type_ok() &&
+-     25│		    condition_a() &&           ┃+     32│			    condition_a() &&
+-     26│		    item_ready(item)) {        ┃+     33│			    item_ready(item)) {
+-     27│			work(item);            ┃+     34│				work(item);
+-     28│		}                              ┃+     35│			}
+-     29│	}                                      ┃+     36│		}
+      30│suffix00;                                     ┃      37│suffix00;
+      31│suffix01;                                     ┃      38│suffix01;

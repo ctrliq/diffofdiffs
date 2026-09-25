@@ -1,0 +1,4 @@
+		if (ready) {
+			prepare_current();
+			old_statement();
+			common_next();

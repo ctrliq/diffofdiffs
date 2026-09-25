@@ -1,0 +1,14 @@
+--- a/f
++++ b/f
+@@ -27,8 +27,9 @@
+ remote_padding6;
+ 		if (ready) {
+ 			struct item *item = get_item();
+-
+-			if (condition_a() &&
++			prepare_item();
++			if (type_ok() &&
++			    condition_a() &&
+ 			    item_ready(item)) {
+ 				work(item);
+ 			}

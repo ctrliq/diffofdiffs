@@ -1,0 +1,4 @@
+# No corresponding retained edge leaves the source edits unresolved.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

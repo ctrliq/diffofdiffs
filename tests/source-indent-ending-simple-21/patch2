@@ -1,0 +1,11 @@
+--- a/f
++++ b/f
+@@ -1,6 +1,7 @@
+ 	if (ready) {
+ 		prepare_current();
+-		old_statement();
++		new_first();
++		new_last();
+ local_after0;
+ local_after1;
+ local_after2;

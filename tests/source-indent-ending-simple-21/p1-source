@@ -1,0 +1,3 @@
+		if (ready) {
+			prepare_current();
+			old_statement();

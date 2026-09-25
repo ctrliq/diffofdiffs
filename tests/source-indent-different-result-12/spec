@@ -1,0 +1,5 @@
+# Corresponding source edits retain both their changed result text and
+# indentation.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

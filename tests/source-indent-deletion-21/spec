@@ -1,0 +1,5 @@
+# A source edit may produce code in one patch and delete the corresponding
+# interval in the other.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

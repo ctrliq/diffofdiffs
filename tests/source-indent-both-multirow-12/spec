@@ -1,0 +1,5 @@
+# Both source edits consume multiple rows under one coherent indentation
+# change.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

@@ -1,0 +1,12 @@
+--- a/f
++++ b/f
+@@ -28,7 +28,8 @@
+ 		if (ready) {
+ 			struct item *item = get_item();
+ 
+-			if (condition_a() &&
++			if (remote_guard() &&
++			    condition_a() &&
+ 			    item_ready(item)) {
+ 				work(item);
+ 			}

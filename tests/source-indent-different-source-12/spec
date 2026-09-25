@@ -1,0 +1,4 @@
+# Different source code cannot acquire identity from indentation alone.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

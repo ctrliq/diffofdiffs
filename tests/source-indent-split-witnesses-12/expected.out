@@ -1,0 +1,55 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                        Patch 1: patch1                        ┃                        Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                         *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means
+both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f                                                     ┃ old new│f
+        │@@ prefix19;                                          ┃        │@@ remote_padding6;
+  21  21│	if (ready) {                                   ┃  28  28│		if (ready) {
+  22  22│		struct item *item = get_item();        ┃  29  29│			struct item *item = get_item();
+  23  23│                                                      ┃  30  30│
+- 24    │		if (condition_a() &&                   ┃- 31    │			if (condition_a() &&
++     24│		if (type_ok() &&                       ┃+     31│			if (type_ok() &&
++     25│		    condition_a() &&                   ┃+     32│			    condition_a() &&
+  25  26│		    item_ready(item)) {                ┃  32  33│			    item_live(item)) {
+  26  27│			work(item);                    ┃  33  34│				work(item);
+  27  28│		}                                      ┃  34  35│			}
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                   *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f                                                     ┃     new│f
+        │@@ prefix17;                                          ┃        │@@ prefix17;
+      18│prefix17;                                             ┃      18│prefix17;
+      19│prefix18;                                             ┃      19│prefix18;
+      20│prefix19;                                             ┃      20│prefix19;
+        │                                                      ┃+     21│remote_padding0;
+        │                                                      ┃+     22│remote_padding1;
+        │                                                      ┃+     23│remote_padding2;
+        │                                                      ┃+     24│remote_padding3;
+        │                                                      ┃+     25│remote_padding4;
+        │                                                      ┃+     26│remote_padding5;
+        │                                                      ┃+     27│remote_padding6;
+-     21│	if (ready) {                                   ┃+     28│		if (ready) {
+-     22│		struct item *item = get_item();        ┃+     29│			struct item *item = get_item();
+      23│                                                      ┃      30│
+-     24│		if (type_ok() &&                       ┃+     31│			if (type_ok() &&
+-     25│		    condition_a() &&                   ┃+     32│			    condition_a() &&
+-     26│		    item_ready(item)) {                ┃+     33│			    item_live(item)) {
+-     27│			work(item);                    ┃+     34│				work(item);
+-     28│		}                                      ┃+     35│			}
+-     29│	}                                              ┃+     36│		}
+      30│suffix00;                                             ┃      37│suffix00;
+      31│suffix01;                                             ┃      38│suffix01;
+      32│suffix02;                                             ┃      39│suffix02;

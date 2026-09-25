@@ -1,0 +1,8 @@
+	if (ready) {
+		prepare_current();
+		old_statement();
+		common_next();
+local_after0;
+local_after1;
+local_after2;
+local_after3;

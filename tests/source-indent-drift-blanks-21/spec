@@ -1,0 +1,5 @@
+# Operation boundaries keep repeated blank rows from hiding nearby retained
+# code in context.
+bin: DIFFOFDIFFS
+args: -U3 patch1 patch2
+exit: 0

@@ -1,0 +1,41 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                        Patch 1: patch1                        ┃                        Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                         *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means
+both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f                                                     ┃ old new│f
+        │@@                                                    ┃        │@@
+  28  28│		if (ready) {                           ┃  21  21│	if (ready) {
+  29  29│			struct item *item = get_item();┃  22  22│		struct item *item = get_item();
+  30  30│                                                      ┃  23  23│
+- 31    │			if (condition_a() &&           ┃- 24    │		if (condition_a() &&
+        │                                                      ┃+     24│		if (type_ok() &&
+        │                                                      ┃+     25│		    condition_a() &&
+  32  31│			    item_ready(item)) {        ┃  25  26│		    item_ready(item)) {
+  33  32│				work(item);            ┃  26  27│			work(item);
+  34  33│			}                              ┃  27  28│		}
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                   *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│f                                                     ┃     new│f
+        │@@                                                    ┃        │@@
+-     28│		if (ready) {                           ┃+     21│	if (ready) {
+-     29│			struct item *item = get_item();┃+     22│		struct item *item = get_item();
+      30│                                                      ┃      23│
+        │                                                      ┃+     24│		if (type_ok() &&
+        │                                                      ┃+     25│		    condition_a() &&
+-     31│			    item_ready(item)) {        ┃+     26│		    item_ready(item)) {
+-     32│				work(item);            ┃+     27│			work(item);
+-     33│			}                              ┃+     28│		}

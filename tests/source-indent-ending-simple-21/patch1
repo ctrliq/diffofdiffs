@@ -1,0 +1,9 @@
+--- a/f
++++ b/f
+@@ -1,3 +1,4 @@
+ 		if (ready) {
+ 			prepare_current();
+-			old_statement();
++			new_first();
++			new_last();
+\ No newline at end of file
