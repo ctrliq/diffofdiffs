@@ -1,0 +1,9 @@
+# A large unresolved comparison must finish within the timeout and retain all
+# 3000 original upstream hunks, together with the original backport hunk. The
+# 2972788-byte report is stored as a digest rather than a large expected.out
+# file.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+timeout: 30
+exit: 0
+stdout-sha1: f78167ba6a5aced08388f8b863292ec4d532f57c
