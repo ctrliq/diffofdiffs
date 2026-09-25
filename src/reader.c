@@ -309,6 +309,32 @@ struct patch_name *unquoted_name(const char *base, size_t len)
 }
 
 /*
+ * Search backward only through leading metadata. Crossing a file or hunk header
+ * would attach a previous section's opener to the current record.
+ */
+long block_opener_above(const struct iomem_buf *buf, size_t at)
+{
+	const char *base = buf->base;
+
+	while (at) {
+		const char *nl = memrchr(base, '\n', at - 1);
+		size_t start = nl ? (size_t)(nl - base) + 1 : 0;
+
+		if (!strncmp(base + start, "diff --git ", 11))
+			return start;
+
+		if (!strncmp(base + start, "--- ", 4) ||
+		    !strncmp(base + start, "+++ ", 4) ||
+		    !strncmp(base + start, "@@ ", 3))
+			return -1;
+
+		at = start;
+	}
+
+	return -1;
+}
+
+/*
  * Follow Git's default core.quotePath escaping, preserving undecodable labels
  * verbatim. A decoded path beginning with a quote still needs normal escaping.
  */
@@ -593,6 +619,235 @@ struct file_groups {
 	size_t count;
 };
 
+/*
+ * Keep mode recognition and field parsing on the same vocabulary. Creation and
+ * deletion have distinct flags even though each supplies only one mode.
+ */
+/* clang-format off */
+static const struct {
+	const char *word;
+	size_t len;
+	bool old_side;
+	bool created;
+	bool deleted;
+} mode_words[] = {
+	{
+		.word = "old mode",
+		.len = sizeof("old mode") - 1,
+		.old_side = true
+	},
+	{
+		.word = "new mode",
+		.len = sizeof("new mode") - 1
+	},
+	{
+		.word = "new file mode",
+		.len = sizeof("new file mode") - 1,
+		.created = true
+	},
+	{
+		.word = "deleted file mode",
+		.len = sizeof("deleted file mode") - 1,
+		.old_side = true,
+		.deleted = true
+	}
+};
+/* clang-format on */
+
+bool line_is_mode_word(const char *base, size_t len)
+{
+	for (size_t i = 0; i < ARRAY_SIZE(mode_words); i++) {
+		size_t at = mode_words[i].len;
+
+		if (len > at && !memcmp(base, mode_words[i].word, at) &&
+		    (base[at] == ' ' || base[at] == '\t'))
+			return true;
+	}
+
+	return false;
+}
+
+bool scan_mode_line(const char *base, size_t len, struct file_mode *m)
+{
+	for (size_t i = 0; i < ARRAY_SIZE(mode_words); i++) {
+		size_t at = mode_words[i].len, n = 0;
+		char token[sizeof(m->old_mode)];
+
+		if (len < at || memcmp(base, mode_words[i].word, at))
+			continue;
+
+		/* Separate the keyword from its octal mode */
+		for (; at < len && (base[at] == ' ' || base[at] == '\t'); at++)
+			;
+
+		if (at == mode_words[i].len)
+			return false;
+
+		/* Keep the written digits without normalizing their value */
+		for (; at < len && base[at] >= '0' && base[at] <= '7'; at++) {
+			/*
+			 * Truncation would report a different mode, so reject
+			 * tokens that do not fit with their NUL terminator.
+			 */
+			if (n == sizeof(token) - 1)
+				return false;
+
+			token[n++] = base[at];
+		}
+
+		/* An octal prefix of an invalid token is not a complete mode */
+		if (!n || (at < len && base[at] != ' ' && base[at] != '\t' &&
+			   base[at] != '\r'))
+			return false;
+
+		/* Record a valid field without clearing earlier flags */
+		token[n] = '\0';
+		memcpy(mode_words[i].old_side ? m->old_mode : m->new_mode,
+		       token, n + 1);
+		m->created |= mode_words[i].created;
+		m->deleted |= mode_words[i].deleted;
+		return true;
+	}
+
+	return false;
+}
+
+/*
+ * Rename and copy need adjacent from/to lines. A valid similarity percentage
+ * can establish complete metadata on its own.
+ */
+#define WORD_LEN(word) word, sizeof(word) - 1
+
+/* clang-format off */
+static const struct {
+	const char *word;
+	size_t len;
+	enum block_op op;
+	bool similarity;
+} operation_words[] = {
+	{ WORD_LEN("rename from "),         BLOCK_OP_RENAME_FROM, false },
+	{ WORD_LEN("rename to "),           BLOCK_OP_RENAME_TO,   false },
+	{ WORD_LEN("copy from "),           BLOCK_OP_COPY_FROM,   false },
+	{ WORD_LEN("copy to "),             BLOCK_OP_COPY_TO,     false },
+	{ WORD_LEN("similarity index "),    BLOCK_OP_NONE,        true },
+	{ WORD_LEN("dissimilarity index "), BLOCK_OP_NONE,        true }
+};
+/* clang-format on */
+
+#undef WORD_LEN
+
+/* Git emits either a binary payload or a summary that the files differ */
+static const char *const binary_words[] = { "GIT binary patch",
+					    "Binary files " };
+
+bool line_is_binary_word(const char *base, size_t len)
+{
+	for (size_t i = 0; i < ARRAY_SIZE(binary_words); i++) {
+		size_t at = strlen(binary_words[i]);
+
+		if (len >= at && !memcmp(base, binary_words[i], at))
+			return true;
+	}
+
+	return false;
+}
+
+/* The offset where the lowercase-hex run starting at `at` ends */
+static size_t hex_run(const char *base, size_t len, size_t at)
+{
+	for (; at < len && ((base[at] >= '0' && base[at] <= '9') ||
+			    (base[at] >= 'a' && base[at] <= 'f'));
+	     at++)
+		;
+
+	return at;
+}
+
+/*
+ * Index lines can establish that metadata is complete, so require the full
+ * grammar: two 4-64 digit lowercase object IDs, an optional six-digit octal
+ * mode, and an optional CR. Combined-diff object lists are unsupported.
+ */
+bool scan_index_line(const char *base, size_t len, struct iomem_slice *pre,
+		     struct iomem_slice *post)
+{
+	size_t at = sizeof("index ") - 1, run;
+	struct iomem_slice a, b;
+
+	if (len < at || memcmp(base, "index ", at))
+		return false;
+
+	run = hex_run(base, len, at);
+	if (run - at < 4 || run - at > 64)
+		return false;
+
+	a.base = base + at;
+	a.len = run - at;
+
+	at = run;
+	if (len - at < 2 || base[at] != '.' || base[at + 1] != '.')
+		return false;
+
+	run = hex_run(base, len, at + 2);
+	if (run - (at + 2) < 4 || run - (at + 2) > 64)
+		return false;
+
+	b.base = base + at + 2;
+	b.len = run - (at + 2);
+
+	at = run;
+	if (at < len && base[at] == ' ') {
+		size_t digits;
+
+		at++;
+		for (digits = 0; at < len && base[at] >= '0' && base[at] <= '7';
+		     digits++)
+			at++;
+
+		if (digits != 6)
+			return false;
+	}
+
+	if (at < len && base[at] == '\r')
+		at++;
+
+	if (at != len)
+		return false;
+
+	*pre = a;
+	*post = b;
+	return true;
+}
+
+/*
+ * A complete similarity field has one or two digits, or exactly 100, followed
+ * by '%' and an optional CR. The caller skips the keyword and its space.
+ */
+static bool similarity_is_strict(const char *base, size_t len, size_t at)
+{
+	size_t digits = at;
+
+	for (; digits < len && base[digits] >= '0' && base[digits] <= '9';
+	     digits++)
+		;
+
+	if (digits == at || digits - at > 3)
+		return false;
+
+	if (digits - at == 3 && memcmp(base + at, "100", 3))
+		return false;
+
+	at = digits;
+	if (at >= len || base[at] != '%')
+		return false;
+
+	at++;
+	if (at < len && base[at] == '\r')
+		at++;
+
+	return at == len;
+}
+
 enum block_line_kind {
 	BLOCK_LINE_END,
 	BLOCK_LINE_MODE,
@@ -609,3 +864,125 @@ struct block_line {
 	enum block_op operation;
 	bool strict_similarity;
 };
+
+/*
+ * Both metadata consumers end their run on the same grammar. Recognition is
+ * weaker than capture: invalid mode fields and empty operation halves still
+ * belong to the run, but neither supplies a usable value.
+ */
+static struct block_line classify_block_line(const char *base, size_t len)
+{
+	struct block_line line = {};
+
+	if (line_is_mode_word(base, len)) {
+		line.kind = BLOCK_LINE_MODE;
+		return line;
+	}
+
+	for (size_t i = 0; i < ARRAY_SIZE(operation_words); i++) {
+		size_t at = operation_words[i].len;
+
+		if (len < at || memcmp(base, operation_words[i].word, at))
+			continue;
+
+		if (operation_words[i].similarity) {
+			line.kind = BLOCK_LINE_SIMILARITY;
+			line.strict_similarity =
+				similarity_is_strict(base, len, at);
+		} else {
+			size_t end = len - (len && base[len - 1] == '\r');
+
+			line.kind = BLOCK_LINE_OPERATION;
+			line.operation = operation_words[i].op;
+			if (end > at)
+				line.tail = (typeof(line.tail)){ base + at,
+								 end - at };
+		}
+		return line;
+	}
+
+	if (scan_index_line(base, len, &line.index[0], &line.index[1]))
+		line.kind = BLOCK_LINE_INDEX;
+	else if (line_is_binary_word(base, len))
+		line.kind = BLOCK_LINE_BINARY;
+
+	return line;
+}
+
+/*
+ * Capture authored fields as slices borrowed from the patch buffer. The
+ * classifier fixes the run boundary independently of which fields parse, so a
+ * recognized line with an unusable field still lets the story continue.
+ */
+static bool block_story_line(struct block_story *bs, const char *base,
+			     size_t len)
+{
+	struct block_line line = classify_block_line(base, len);
+
+	switch (line.kind) {
+	case BLOCK_LINE_MODE:
+		scan_mode_line(base, len, &bs->mode);
+		break;
+
+	case BLOCK_LINE_OPERATION:
+		if (!line.tail.len)
+			break;
+
+		switch (line.operation) {
+		case BLOCK_OP_RENAME_FROM:
+			bs->rename_from = line.tail;
+			break;
+		case BLOCK_OP_RENAME_TO:
+			bs->rename_to = line.tail;
+			break;
+		case BLOCK_OP_COPY_FROM:
+			bs->copy_from = line.tail;
+			break;
+		case BLOCK_OP_COPY_TO:
+			bs->copy_to = line.tail;
+			break;
+		case BLOCK_OP_NONE:
+			break;
+		}
+
+		break;
+
+	case BLOCK_LINE_INDEX:
+		bs->index_pre = line.index[0];
+		bs->index_post = line.index[1];
+		bs->has_index = true;
+		break;
+
+	case BLOCK_LINE_BINARY:
+		bs->has_binary = true;
+		break;
+
+	case BLOCK_LINE_SIMILARITY:
+		break;
+
+	case BLOCK_LINE_END:
+		return false;
+	}
+
+	return true;
+}
+
+void block_story_read(struct block_story *bs, const struct iomem_buf *buf,
+		      size_t opener, const char *operand)
+{
+	struct iomem_cursor cur;
+	struct iomem_line line;
+
+	*bs = (typeof(*bs)){};
+	iomem_cursor_init(&cur, buf);
+	iomem_cursor_seek(&cur, opener, operand);
+
+	/* Metadata must immediately follow the opener */
+	if (!iomem_cursor_next(&cur, &line))
+		return;
+
+	while (iomem_cursor_next(&cur, &line)) {
+		if (!block_story_line(bs, line.base, line.len))
+			return;
+	}
+}
