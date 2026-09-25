@@ -1,0 +1,5 @@
+{
+  "broad": "@@ -1,14 +1,14 @@\n /* before */\n \tbefore\n \tleft0\n \tright0\n-\tvalue0\n+\t  revised0\n \tbetween0\n \tbetween1\n \tleft1\n \tright1\n-\tvalue1\n+\t  revised1\n \tafter0\n \tafter1\n \tafter2\n \tafter3\n",
+  "tail": "@@ -3,4 +3,3 @@\n \tleft0\n \tright0\n-\tvalue0\n-\tforeign0\n+\trevised0\n",
+  "head": "@@ -9,4 +9,3 @@\n-\tforeign1\n-\tvalue1\n+\trevised1\n \tafter0\n \tafter1\n"
+}
