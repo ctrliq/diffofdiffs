@@ -1,0 +1,47 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: patch┃Patch 2: patch
+      1       ┃      2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use
+only the source lines quoted
+in the patches.
+
+═════════════════════════════
+*    DELTA DIFFERENCES      *
+═════════════════════════════
+Signs mark edits made by only
+that patch. A sign-less line
+with one number is an edit
+both patches make: a new
+number means both add it, an
+old number means both remove
+it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│a.c  ┃ old new│a.c
+        │@@ in┃        │@@ in
+        │t a_f┃        │t a_t
+        │ar(vo┃        │op(vo
+        │id)  ┃        │id)
+        │     ┃   5   5│a_c1
+        │     ┃-  6    │a_del
+        │     ┃+      6│a_add
+        │     ┃   7   7│a_c2
+ 100 100│a_f1 ┃        │
+-101    │a_old┃        │
++    101│a_new┃        │
+ 102 102│a_f2 ┃        │
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│b.c  ┃ old new│b.c
+        │@@ in┃        │@@ in
+        │t b_f┃        │t b_t
+        │ar(vo┃        │op(vo
+        │id)  ┃        │id)
+        │     ┃-  7    │b_del
+        │     ┃+      7│b_add
+ 200 200│b_f1 ┃        │
+-201    │b_old┃        │
++    201│b_new┃        │
+ 202 202│b_f2 ┃        │

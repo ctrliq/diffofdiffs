@@ -1,0 +1,29 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Patch 1: patch1  ┃ Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the
+source lines quoted in the patches.
+
+═════════════════════════════════════
+*    DELTA DIFFERENCES              *
+═════════════════════════════════════
+Signs mark edits made by only that
+patch. A sign-less line with one
+number is an edit both patches make:
+a new number means both add it, an
+old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f.c      ┃ old new│f.c
+        │@@ int fa┃        │@@ int cr
+        │r_away(vo┃        │lf_zone(v
+        │id)      ┃        │oid)
+        │         ┃  30  30│crlf_ctx1
+        │         ┃- 31    │crlf_old
+        │         ┃+     31│crlf_new
+        │         ┃  32  32│crlf_ctx2
+ 100 100│far1     ┃        │
+-101    │old_far  ┃        │
++    101│new_far  ┃        │
+ 102 102│far2     ┃        │

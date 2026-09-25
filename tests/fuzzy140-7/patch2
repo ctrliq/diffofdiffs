@@ -1,0 +1,7 @@
+--- a/f.c
++++ b/f.c
+@@ -30,3 +30,3 @@ int crlf_zone(void)
+ crlf_ctx1
+-crlf_old
++crlf_new
+ crlf_ctx2

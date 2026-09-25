@@ -1,0 +1,8 @@
+--- a/f.c
++++ b/f.c
+@@ -10,4 +10,4 @@ int near_top(void)
+ ctx1
+ ctx2
++new_a
+-del_a
+ ctx3

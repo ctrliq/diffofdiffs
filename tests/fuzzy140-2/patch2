@@ -1,0 +1,7 @@
+--- a/f.c
++++ b/f.c
+@@ -20,3 +20,3 @@ int hdrish(void)
+ keep1
+--- removed
++++ added
+ keep2

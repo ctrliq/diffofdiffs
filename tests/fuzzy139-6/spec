@@ -1,0 +1,5 @@
+# The separate upstream old20 to new20 change remains visible without turning
+# the shared edit into a difference.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

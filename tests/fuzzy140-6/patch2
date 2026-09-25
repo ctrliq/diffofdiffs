@@ -1,0 +1,12 @@
+--- a/a.c
++++ b/a.c
+@@ -5,3 +5,3 @@ int a_top(void)
+ a_c1
+-a_del
++a_add
+ a_c2
+--- a/b.c
++++ b/b.c
+@@ -7,1 +7,1 @@ int b_top(void)
+-b_del
++b_add

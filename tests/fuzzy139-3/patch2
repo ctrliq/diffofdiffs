@@ -1,0 +1,15 @@
+--- a/f.c
++++ b/f.c
+@@ -10,11 +10,11 @@ int near_top(void)
+ ctx1();
+ ctx2();
+ ctx3();
+-del_a();
++new_a();
+ mid();
+-del_b();
++new_b();
+ ctx4();
+ ctx5();
+ ctx6();
+ ctx7();

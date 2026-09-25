@@ -1,0 +1,12 @@
+--- a/f.c
++++ b/f.c
+@@ -11,3 +11,3 @@ int fn(void)
+ c11
+-old12
++new12
+ c13
+@@ -19,3 +19,3 @@ int fn(void)
+ c19
+-old20
++new20
+ c21

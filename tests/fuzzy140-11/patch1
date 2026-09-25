@@ -1,0 +1,9 @@
+--- /dev/null
++++ b/c.c
+@@ -0,0 +1,6 @@
++born1
++born2
++keepA
++keepB
++keepC
++born3

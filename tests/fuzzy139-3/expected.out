@@ -1,0 +1,40 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Patch 1: patch1  ┃  Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the
+source lines quoted in the patches.
+
+═══════════════════════════════════════
+*    DELTA DIFFERENCES                *
+═══════════════════════════════════════
+Signs mark edits made by only that
+patch. A sign-less line with one number
+is an edit both patches make: a new
+number means both add it, an old number
+means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│f.c       ┃ old new│f.c
+        │@@ int far┃        │@@ int nea
+        │_away(void┃        │r_top(void
+        │)         ┃        │)
+        │          ┃  10  10│ctx1();
+        │          ┃  11  11│ctx2();
+        │          ┃  12  12│ctx3();
+        │          ┃- 13    │del_a();
+        │          ┃+     13│new_a();
+        │          ┃  14  14│mid();
+        │          ┃- 15    │del_b();
+        │          ┃+     15│new_b();
+        │          ┃  16  16│ctx4();
+        │          ┃  17  17│ctx5();
+        │          ┃  18  18│ctx6();
+ 100 100│far1();   ┃        │
+ 101 101│far2();   ┃        │
+ 102 102│far3();   ┃        │
+-103    │old_far();┃        │
++    103│new_far();┃        │
+ 104 104│far4();   ┃        │
+ 105 105│far5();   ┃        │
+ 106 106│far6();   ┃        │

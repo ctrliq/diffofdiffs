@@ -1,0 +1,14 @@
+--- a/f.c
++++ b/f.c
+@@ -1,6 +1,6 @@
+ z1
+ z2
+ z3
+-l4
++l4new
+ l5
+ l6
+@@ -40,3 +40,3 @@ int tail_zone(void)
+ bare1
+-bare2
++bare3

@@ -1,0 +1,16 @@
+--- a/m.c
++++ b/m.c
+@@ -1,3 +1,3 @@
+ m_head
+ m_body
+-state = ZERO;
++state = ONE;
+--- a/n.c
++++ b/n.c
+@@ -20,5 +20,5 @@
+ n_p1_a
+ n_p1_b
+-limit(old_cap);
++limit(new_cap);
+ n_shared_x
+ n_shared_y

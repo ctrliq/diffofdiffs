@@ -1,0 +1,8 @@
+# Patch1 removes T1 and T2 at the top of f and T5 and T6 at line 6, and both
+# patches replace b31 with b31_x at line 30. The removals exist only in patch1
+# and must show on its side alone, as removals in patch1's own direction. The
+# shared replacement is left out even though patch1's earlier removals shift its
+# new line numbers.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

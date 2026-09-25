@@ -1,0 +1,24 @@
+--- a/f.c
++++ b/f.c
+@@ -1,3 +1,3 @@ int top(void)
+ c01
+-old02
++new02
+ c03
+@@ -5,15 +5,15 @@ int fn(void)
+ c05
+ c06
+ c07
+ c08
+ c09
+ c10
+ c11
+-old12
++other12
+ c13
+ c14
+ c15
+ c16
+ c17
+ c18
+ c19

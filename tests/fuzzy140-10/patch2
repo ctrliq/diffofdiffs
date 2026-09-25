@@ -1,0 +1,14 @@
+--- /dev/null	2001-01-01 00:00:00
++++ b/c.c	2001-01-01 00:00:01
+@@ -0,0 +1,6 @@
++born1
++born2
++keepA
++keepB
++keepC
++born3
+@@ -50,3 +50,3 @@ int away(void)
+ away1
+-away_old
++away_new
+ away2

@@ -1,0 +1,17 @@
+--- a/m.c
++++ b/m.c
+@@ -1,3 +1,3 @@
+ m_head
+ m_body
+-state = ZERO;
++state = TWO;
+--- a/n.c
++++ b/n.c
+@@ -120,5 +120,5 @@
+ n_p2_a
+ n_p2_b
+-	limit(old_cap);
++	limit(new_cap);
+ n_shared_x
+ n_shared_y
+\ No newline at end of file

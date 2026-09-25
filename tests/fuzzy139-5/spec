@@ -1,0 +1,5 @@
+# The source identifies the new12/other12 difference and the separate other20
+# change. Keep their actual result rows.
+bin: DIFFOFDIFFS
+args: patch1 patch2c
+exit: 0

@@ -1,0 +1,7 @@
+--- a/f.c
++++ b/f.c
+@@ -20,2 +20,2 @@ int tail(void)
+ c20
+-old21
+\ No newline at end of file
++new21

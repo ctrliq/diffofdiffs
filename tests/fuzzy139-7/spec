@@ -1,0 +1,5 @@
+# Compare the differing result at the known shared edit and retain the
+# separate upstream change. Each uses its own original source position.
+bin: DIFFOFDIFFS
+args: patch1 patch2c
+exit: 0

@@ -1,0 +1,7 @@
+--- a/f.c
++++ /dev/null
+@@ -1,4 +0,0 @@ int whole(void)
+-gone1
+-gone2
+-gone3
+-gone4

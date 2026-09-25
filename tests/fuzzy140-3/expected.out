@@ -1,0 +1,29 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [1mPatch 1: patch1[0m  ┃  [1mPatch 2: patch2[0m
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the
+source lines quoted in the patches.
+
+[1m═══════════════════════════════════════[0m
+[1m*    DELTA DIFFERENCES                *[0m
+[1m═══════════════════════════════════════[0m
+Signs mark edits made by only that
+patch. A sign-less line with one number
+is an edit both patches make: a new
+number means both add it, an old number
+means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[1m old new│f.c[0m       ┃[1m old new│f.c[0m
+[36m        │@@ int far[0m┃[36m        │@@ int hdr[0m
+[36m        │_away(void[0m┃[36m        │ish(void)[0m
+[36m        │)[0m         ┃        │
+        │          ┃  20  20│keep1
+        │          ┃[31m- 21    │-- removed[0m
+        │          ┃[32m+     21│++ added[0m
+        │          ┃  22  22│keep2
+ 100 100│far1      ┃        │
+[31m-101    │old_far[0m   ┃        │
+[32m+    101│new_far[0m   ┃        │
+ 102 102│far2      ┃        │

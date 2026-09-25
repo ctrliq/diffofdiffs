@@ -1,0 +1,5 @@
+# The bare2/bare3 replacement is a real result difference. Preserve the
+# missing final newline.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

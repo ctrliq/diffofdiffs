@@ -1,0 +1,7 @@
+--- a/f.c
++++ b/f.c
+@@ -100,3 +100,3 @@ int far_away(void)
+ far1
+-old_far
++new_far
+ far2

@@ -1,0 +1,11 @@
+--- a/f.c
++++ b/f.c
+@@ -100,7 +100,7 @@ int far_away(void)
+ far1();
+ far2();
+ far3();
+-old_far();
++new_far();
+ far4();
+ far5();
+ far6();

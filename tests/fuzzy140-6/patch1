@@ -1,0 +1,14 @@
+--- a/a.c
++++ b/a.c
+@@ -100,3 +100,3 @@ int a_far(void)
+ a_f1
+-a_old
++a_new
+ a_f2
+--- a/b.c
++++ b/b.c
+@@ -200,3 +200,3 @@ int b_far(void)
+ b_f1
+-b_old
++b_new
+ b_f2

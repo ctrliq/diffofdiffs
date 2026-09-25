@@ -1,0 +1,5 @@
+# The upstream deletions do not establish that T6 survives at the backport
+# edit. Do not invent a T6 restoration from an unrelated failed change.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
