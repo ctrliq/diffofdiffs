@@ -1,0 +1,14 @@
+diff --git a/x.c a/x.c
+index 3367afd..9c59e24 100644
+--- a/x.c
++++ a/x.c
+@@ -1 +1 @@
+-old
++first
+diff --git anchor.c anchor.c
+index 4925c77..7220682 100644
+--- anchor.c
++++ anchor.c
+@@ -1 +1 @@
+-anchor
++ANCHOR

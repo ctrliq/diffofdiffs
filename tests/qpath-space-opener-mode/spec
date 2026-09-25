@@ -1,0 +1,6 @@
+# Real Git mode-only diffs name dir b/y.c. The old label contains
+# the same space-b-slash bytes as the opener separator. Only complete
+# agreement between the two names identifies that separator.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

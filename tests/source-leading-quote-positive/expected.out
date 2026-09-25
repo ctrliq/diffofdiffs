@@ -1,0 +1,52 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Patch 1: patch1 ┃ Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only
+the source lines quoted in the
+patches.
+
+═══════════════════════════════════
+*    DELTA DIFFERENCES            *
+═══════════════════════════════════
+Signs mark edits made by only that
+patch. A sign-less line with one
+number is an edit both patches
+make: a new number means both add
+it, an old number means both remove
+it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│"\"leadi┃ old new│"\"leadi
+        │ng.c"   ┃        │ng.c"
+        │The othe┃        │
+        │r patch ┃        │
+        │renames ┃        │
+        │this fil┃        │
+        │e to ren┃        │
+        │amed.c. ┃        │
+        │@@      ┃        │@@
+   1   1│one     ┃        │
+   2   2│two     ┃        │
+-  3    │three   ┃        │
++      3│THREE_p1┃        │
+   4   4│four    ┃        │
+   5   5│five    ┃        │
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│renamed.┃ old new│renamed.
+        │c       ┃        │c
+        │        ┃        │Rename:
+        │        ┃        │"\"leadi
+        │        ┃        │ng.c" ->
+        │        ┃        │ renamed
+        │        ┃        │.c
+        │        ┃        │The othe
+        │        ┃        │r patch
+        │        ┃        │also nam
+        │        ┃        │es the s
+        │        ┃        │ource fi
+        │        ┃        │le "\"le
+        │        ┃        │ading.c"
+        │        ┃        │ (text c
+        │        ┃        │hanges).

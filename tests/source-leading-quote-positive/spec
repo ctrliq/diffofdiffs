@@ -1,0 +1,7 @@
+# The edited file begins with a literal double quote. Patch1 uses
+# --no-prefix while patch2 uses Git prefixes and quoted rename metadata.
+# Decode both spellings before comparing the source, and quote output
+# headers using the decoded path rather than treating it as a raw label.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

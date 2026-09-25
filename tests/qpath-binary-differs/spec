@@ -1,0 +1,8 @@
+# Both patches carry git's "Binary files ... differ" block for one path
+# spelled the way git quotes it ("caf\303\251.bin"), off one before-state
+# oid onto different after-state oids. The quoted opener names its new side,
+# so the block arms and the two after-state blobs compare under DELTA
+# instead of the operand dying as one that holds no patch.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

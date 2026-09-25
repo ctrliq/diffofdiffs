@@ -1,0 +1,8 @@
+# Both patches carry a git diff --binary payload for the quoted path
+# "caf\303\251.bin", from the same before blob to different after blobs. The
+# reader must take the quoted diff --git line as naming the file, so the report
+# shows the two binary file notes side by side with their result blobs, rather
+# than both operands warning that they hold no patch.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

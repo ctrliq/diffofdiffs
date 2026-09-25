@@ -1,0 +1,8 @@
+# Both patches come from git diff --no-prefix and edit a file whose name starts
+# with a double quote, which git writes as "\"leading.c". Patch1 changes three
+# at line 3 to THREE_p1, and patch2 changes it to THREE_p2. The report must name
+# the file in the same quoted form and show the removal of three as an edit both
+# patches make, with the two replacements side by side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

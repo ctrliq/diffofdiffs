@@ -1,0 +1,7 @@
+# A bare creation label b/x.c can identify x.c with a Git prefix or
+# literal b/x.c. Patch1 really edits both files, and its Git records prove
+# both identities. Keep all three original changes visible rather than
+# choosing either possible counterpart for the bare creation.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

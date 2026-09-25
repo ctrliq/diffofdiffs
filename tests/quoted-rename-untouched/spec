@@ -1,0 +1,10 @@
+# The hand-quoted "g c.c" (git itself never quotes a blank) is created by
+# patch1 and mode-flipped plus edited by patch2, so the two sections pair at
+# strip depth 1 and the mode stories compare under DELTA while each one-sided
+# entry keeps its lead and its note. The reader decodes git's quoting before
+# anything compares or prints a name, so the pairing key at depth 1 is the
+# bare g c.c and the DELTA header renders it that way, ending with the TAB
+# git puts after a blank-carrying name on a header line.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

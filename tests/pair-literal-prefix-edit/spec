@@ -1,0 +1,7 @@
+# Both Git patches spell their old label a/x.c, but the first edits
+# actual a/x.c with --no-prefix and the second edits actual x.c.
+# The shared anchor sets depth zero, so raw label equality must not
+# combine the two independent edits or suppress either one.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

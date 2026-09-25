@@ -1,0 +1,7 @@
+# Both patches delete the same binary file, whose name git quotes with octal
+# escapes ("caf\303\251.bin"), identically. The quoted names must still pair the
+# two blocks, so the report is empty and the run exits 0, rather than refusing
+# either operand as holding no patch.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,10 @@
+# Git quotes each side of the opener on its own, so a rename from a plain
+# name onto one that needs quoting reads diff --git a/plain.c
+# "b/caf\303\2512.c". The quoted new side is the only half that names the
+# block here; patch1's rename-only block and patch2's renaming section both
+# print one-sided with their leads, each behind a note that the other patch
+# renames the file, the same two entries an unquoted rename prints when the
+# section is indexed under its old-side name.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

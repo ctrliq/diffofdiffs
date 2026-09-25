@@ -1,0 +1,47 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ Patch 1: patch1 ┃ Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only
+the source lines quoted in the
+patches.
+
+═══════════════════════════════════
+*    DELTA DIFFERENCES            *
+═══════════════════════════════════
+Signs mark edits made by only that
+patch. A sign-less line with one
+number is an edit both patches
+make: a new number means both add
+it, an old number means both remove
+it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│a/x.c   ┃ old new│a/x.c
+        │The othe┃        │
+        │r patch ┃        │
+        │renames ┃        │
+        │this fil┃        │
+        │e to b/y┃        │
+        │.c.     ┃        │
+        │@@      ┃        │@@
+   1   1│one     ┃        │
+   2   2│two     ┃        │
+-  3    │three   ┃        │
++      3│THREE_p1┃        │
+   4   4│four    ┃        │
+   5   5│five    ┃        │
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│b/y.c   ┃ old new│b/y.c
+        │        ┃        │Rename:
+        │        ┃        │a/x.c ->
+        │        ┃        │ b/y.c
+        │        ┃        │The othe
+        │        ┃        │r patch
+        │        ┃        │also nam
+        │        ┃        │es the s
+        │        ┃        │ource fi
+        │        ┃        │le a/x.c
+        │        ┃        │ (text c
+        │        ┃        │hanges).

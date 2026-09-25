@@ -1,0 +1,8 @@
+# The real directory name starts with a double quote followed by a.
+# Patch1 edits that directory's x.c, while patch2 creates unrelated x.c.
+# Both include the same anchor edit, which establishes strip depth zero.
+# All blocks come from Git; a decoded leading quote is part of the path
+# and cannot be skipped to invent an a/ prefix and pair these files.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

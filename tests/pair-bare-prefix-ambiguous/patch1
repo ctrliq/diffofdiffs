@@ -1,0 +1,21 @@
+diff --git a/b/x.c b/b/x.c
+index 3367afd..0ba4e1f 100644
+--- a/b/x.c
++++ b/b/x.c
+@@ -1 +1 @@
+-old
++literal
+diff --git a/x.c b/x.c
+index 3367afd..9c59e24 100644
+--- a/x.c
++++ b/x.c
+@@ -1 +1 @@
+-old
++first
+diff --git anchor.c anchor.c
+index 3367afd..4925c77 100644
+--- anchor.c
++++ anchor.c
+@@ -1 +1 @@
+-old
++anchor

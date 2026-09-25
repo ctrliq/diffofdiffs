@@ -1,0 +1,11 @@
+diff --git a/x.c a/x.c
+index b2f931a..44ab10c 100644
+--- a/x.c
++++ a/x.c
+@@ -1,5 +1,5 @@
+ one
+ two
+-three
++THREE_p1
+ four
+ five

@@ -1,0 +1,11 @@
+--- /dev/null
++++ b/x.c
+@@ -0,0 +1 @@
++second
+diff --git anchor.c anchor.c
+index 3367afd..4925c77 100644
+--- anchor.c
++++ anchor.c
+@@ -1 +1 @@
+-old
++anchor

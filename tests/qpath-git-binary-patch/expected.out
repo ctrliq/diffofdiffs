@@ -1,0 +1,65 @@
+━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: pa┃Patch 2: pa
+   tch1    ┃   tch2
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons
+use only the source
+lines quoted in the
+patches.
+
+═══════════════════════
+*    DELTA DIFFERENCES*
+═══════════════════════
+Signs mark edits made
+by only that patch. A
+sign-less line with one
+number is an edit both
+patches make: a new
+number means both add
+it, an old number means
+both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+ old new│"c┃ old new│"c
+        │af┃        │af
+        │\3┃        │\3
+        │03┃        │03
+        │\2┃        │\2
+        │51┃        │51
+        │.b┃        │.b
+        │in┃        │in
+        │" ┃        │"
+        │Bi┃        │Bi
+        │na┃        │na
+        │ry┃        │ry
+        │ f┃        │ f
+        │il┃        │il
+        │e ┃        │e
+        │Re┃        │Re
+        │su┃        │su
+        │lt┃        │lt
+        │ b┃        │ b
+        │lo┃        │lo
+        │b:┃        │b:
+        │ f┃        │ e
+        │2c┃        │6c
+        │e3┃        │2d
+        │ef┃        │f2
+        │34┃        │fb
+        │e1┃        │64
+        │0c┃        │1d
+        │ac┃        │2c
+        │51┃        │cb
+        │c3┃        │02
+        │6c┃        │3d
+        │cd┃        │2f
+        │99┃        │d8
+        │66┃        │80
+        │ba┃        │b6
+        │fa┃        │70
+        │8b┃        │8d
+        │d6┃        │57
+        │a2┃        │40
+        │d8┃        │2b
+        │c ┃        │8

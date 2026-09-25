@@ -1,0 +1,10 @@
+# A file under the directory "caf\303\251 b" puts the bytes " b/" inside the
+# quoted a-name itself. Reading the plain spelling first would take the
+# a-name's interior as the block's name (b/y.c" "b/caf\303\251 b/y.c"), so
+# the quoted spelling is tried first and the mode stories compare under the
+# right name. This is the one opener where the search order decides. The
+# DELTA header re-quotes the decoded name the way git spells it by default
+# and ends with the TAB git puts after a label carrying a blank.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

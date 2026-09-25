@@ -1,0 +1,6 @@
+# Patch1 edits the real a/x.c using --no-prefix. Patch2 renames the
+# unrelated x.c with normal Git prefixes. Equal patch1 labels establish
+# the literal a/ directory, so neither entry can claim a source relation.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,6 @@
+# Git --no-prefix edits actual a/x.c, while ordinary Git creates x.c.
+# The shared anchor sets strip depth zero. A literal a/ directory
+# cannot count as a display prefix or invent a counterpart note.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

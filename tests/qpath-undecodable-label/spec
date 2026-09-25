@@ -1,0 +1,8 @@
+# Both patches name their file "bad\q.c", a quoted label whose escape \q git
+# never writes, so the name cannot be decoded. Patch1 changes old at line 1 to
+# first, and patch2 changes it to second. The report must print the label as
+# spelled and show the removal of old as an edit both patches make, with first
+# beside second.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

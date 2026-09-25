@@ -1,0 +1,11 @@
+# The same path spelled two ways: patch1's mode-only block comes from git
+# with core.quotePath on ("caf\303\251.c") and patch2's content section from
+# git with it off (the raw UTF-8 bytes). The reader decodes git's quoting into
+# the path's own bytes before pairing, so the two spellings are one name: the
+# mode-only block and the content section pair the way qpath-mode-vs-content's
+# do, with the mode change noted under DELTA (its header re-quoted the way git
+# spells the name by default) and patch2's section printed one-sided with the
+# mode-only counterpart note.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

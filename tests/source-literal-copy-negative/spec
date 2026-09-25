@@ -1,0 +1,6 @@
+# Git copies the real a/x.c to b/y.c with --no-prefix and leaves the
+# source unchanged. Patch1 edits unrelated x.c, so neither entry has a
+# source note even though the opener resembles a normal prefixed copy.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,9 @@
+# patch1 flips the mode of a quoted path and patch2 edits its content. The
+# mode-only record is indexed under the quoted "b/" name and the content
+# section under the quoted "a/" one, so the pairing walk's git-prefix rule,
+# stepping over the opening quote, pairs them across kinds: the mode change
+# notes under DELTA and patch2's section prints one-sided with the mode-only
+# counterpart note.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

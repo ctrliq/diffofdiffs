@@ -1,0 +1,6 @@
+# A quoted rename that also flips the mode, 644 to 755 in patch1 and the
+# reverse in patch2. The mode stories compare under DELTA beneath the quoted
+# new-side name.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

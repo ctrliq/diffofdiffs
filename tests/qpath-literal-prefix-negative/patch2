@@ -1,0 +1,14 @@
+diff --git a/x.c b/x.c
+new file mode 100644
+index 0000000..e019be0
+--- /dev/null
++++ b/x.c
+@@ -0,0 +1 @@
++second
+diff --git anchor.c anchor.c
+index 4925c77..7220682 100644
+--- anchor.c
++++ anchor.c
+@@ -1 +1 @@
+-anchor
++ANCHOR

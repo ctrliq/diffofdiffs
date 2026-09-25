@@ -1,0 +1,6 @@
+# Git --no-prefix renames the real a/x.c to b/y.c, while patch1 edits
+# the unrelated x.c. The opener looks prefixed, but its rename metadata
+# names a/x.c and b/y.c literally, so neither entry has a source note.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

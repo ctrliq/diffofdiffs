@@ -1,0 +1,6 @@
+# Git emits the same edit once with --no-prefix and once with its
+# usual prefixes. The shared anchor sets depth zero. Record evidence
+# establishes that both paths name x.c, so the comparison is empty.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

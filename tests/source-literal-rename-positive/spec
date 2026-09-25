@@ -1,0 +1,6 @@
+# Both patches name the real a/x.c. Git --no-prefix makes the rename
+# opener look prefixed, but the metadata establishes literal a/ and b/
+# directories. The edit and rename must retain their source relationship.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

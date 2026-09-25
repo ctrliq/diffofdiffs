@@ -1,0 +1,6 @@
+# Two mode-only blocks on a quoted path, one flipping 644 to 755 and the
+# other the reverse. The quoted opener names its new side, so both blocks
+# arm and the mode stories compare under DELTA.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
