@@ -411,6 +411,334 @@ struct change_match {
 	bool consumed;
 };
 
+static const struct patch_row *next_change(const struct change_match *match,
+					   size_t *at)
+{
+	while (*at < match->first + match->count) {
+		const struct patch_row *row = &match->file->rows[(*at)++];
+
+		if (!row->neutral && (row->sign == '-' || row->sign == '+'))
+			return row;
+	}
+	return NULL;
+}
+
+static int changed_rows_compare(const struct change_match *a,
+				const struct change_match *b)
+{
+	size_t at = a->first, bt = b->first;
+
+	if (a->hash != b->hash)
+		return a->hash < b->hash ? -1 : 1;
+
+	/* Hashes group candidates; signed source bytes decide equality */
+	for (;;) {
+		const struct patch_row *x = next_change(a, &at);
+		const struct patch_row *y = next_change(b, &bt);
+		int order;
+
+		if (!x || !y)
+			return !!x - !!y;
+
+		if (x->sign != y->sign)
+			return x->sign < y->sign ? -1 : 1;
+
+		order = memcmp(x->text.ptr, y->text.ptr,
+			       MIN(x->text.len, y->text.len));
+		if (order)
+			return order;
+
+		if (x->text.len != y->text.len)
+			return x->text.len < y->text.len ? -1 : 1;
+	}
+}
+
+static int change_match_order(const void *a, const void *b)
+{
+	const struct change_match *x = a, *y = b;
+	int order = changed_rows_compare(x, y);
+
+	if (order)
+		return order;
+
+	order = strcmp(x->basename, y->basename);
+	if (order)
+		return order;
+
+	if (x->leg != y->leg)
+		return x->leg - y->leg;
+
+	if (x->file->record->pos != y->file->record->pos)
+		return x->file->record->pos < y->file->record->pos ? -1 : 1;
+
+	return (x->first > y->first) - (x->first < y->first);
+}
+
+static bool change_signature(struct change_match *match,
+			     enum change_extent extent)
+{
+	const struct patch_row *row;
+	size_t at = match->first;
+	bool changed = false, meaningful = false;
+
+	match->hash = FNV_OFFSET_BASIS;
+
+	/* Signs and row lengths keep different edit sequences distinct */
+	while ((row = next_change(match, &at))) {
+		match->hash = (match->hash ^ row->sign) * FNV_PRIME;
+		for (size_t j = 0; j < row->text.len; j++) {
+			match->hash =
+				(match->hash ^ row->text.ptr[j]) * FNV_PRIME;
+			meaningful |= isalnum(row->text.ptr[j]);
+		}
+		match->hash = (match->hash ^ row->text.len) * FNV_PRIME;
+		changed = true;
+	}
+
+	/* Punctuation alone doesn't identify a fragment moved across files */
+	return changed && (extent == WHOLE_HUNK || meaningful);
+}
+
+static void match_move(struct change_match *sides[2])
+{
+	struct patch_move *moves[2];
+
+	/* Reciprocal indices require both records to have been reserved */
+	for (int leg = 0; leg < 2; leg++) {
+		struct patch_file *file = sides[leg]->file;
+
+		moves[leg] = &file->moves[file->nmoves++];
+	}
+
+	for (int leg = 0; leg < 2; leg++) {
+		const struct patch_file *partner = sides[!leg]->file;
+		struct change_match *match = sides[leg];
+
+		*moves[leg] =
+			(typeof(*moves[0])){ .partner_file = partner,
+					     .first = match->first,
+					     .count = match->count,
+					     .partner_move = moves[!leg] -
+							     partner->moves };
+		for (size_t i = match->first; i < match->first + match->count;
+		     i++)
+			match->file->rows[i].move = moves[leg];
+	}
+}
+
+static const struct udiff_line *change_context(const struct change_match *match,
+					       int direction)
+{
+	const struct patch_row *rows = match->file->rows;
+	size_t at = direction < 0 ? match->first :
+				    match->first + match->count - 1;
+	size_t hunk = rows[at].hunk;
+
+	for (at += direction; at < match->file->nrows; at += direction) {
+		const struct patch_row *row = &rows[at];
+		bool blank = true;
+
+		if (row->hunk != hunk || row->sign != ' ' || row->neutral)
+			return NULL;
+		for (size_t i = 0; i < row->text.len; i++)
+			blank &= !!isspace(row->text.ptr[i]);
+		if (!blank)
+			return &row->text;
+	}
+	return NULL;
+}
+
+static bool matching_context(const struct change_match *a,
+			     const struct change_match *b)
+{
+	for (int direction = -1; direction <= 1; direction += 2) {
+		const struct udiff_line *lines[2] = {
+			change_context(a, direction),
+			change_context(b, direction)
+		};
+		size_t length[2];
+		bool meaningful = false;
+
+		if (!lines[0] || !lines[1])
+			return false;
+
+		/* Keep call names as context when their arguments differ */
+		for (int leg = 0; leg < 2; leg++) {
+			const char *paren =
+				memchr(lines[leg]->ptr, '(', lines[leg]->len);
+
+			length[leg] =
+				paren ? (size_t)(paren - lines[leg]->ptr) :
+					lines[leg]->len;
+		}
+		if (length[0] != length[1] ||
+		    memcmp(lines[0]->ptr, lines[1]->ptr, length[0]))
+			return false;
+
+		for (size_t i = 0; i < length[0]; i++)
+			meaningful |= isalnum(lines[0]->ptr[i]);
+		if (!meaningful)
+			return false;
+	}
+	return true;
+}
+
+/*
+ * After same-basename occurrences are accounted for, an exact changed-row
+ * signature must occur once on each side to pair across different filenames.
+ * The marks preserve input records and coordinates; no document is rewritten.
+ */
+static void pair_changes(struct change_match *matches, size_t n,
+			 enum change_extent extent)
+{
+	qsort(matches, n, sizeof(*matches), change_match_order);
+	for (size_t first = 0; first < n;) {
+		size_t residue[2] = { SIZE_MAX, SIZE_MAX };
+		size_t count[2] = {};
+		size_t end;
+
+		for (end = first + 1;
+		     end < n &&
+		     !changed_rows_compare(&matches[first], &matches[end]);
+		     end++)
+			;
+
+		/* Same-basename occurrences belong to ordinary file pairing */
+		for (size_t i = first; i < end;) {
+			size_t next, mid, paired;
+
+			for (next = i + 1;
+			     next < end && !strcmp(matches[i].basename,
+						   matches[next].basename);
+			     next++)
+				;
+			for (mid = i; mid < next && !matches[mid].leg; mid++)
+				;
+			paired = MIN(mid - i, next - mid);
+			for (size_t j = 0; j < paired; j++) {
+				matches[i + j].consumed =
+					matches[mid + j].consumed = true;
+			}
+			i = next;
+		}
+		for (size_t i = first; i < end; i++) {
+			if (matches[i].consumed)
+				continue;
+
+			residue[matches[i].leg] = i;
+			count[matches[i].leg]++;
+		}
+		if (count[0] == 1 && count[1] == 1) {
+			struct change_match *sides[2] = {
+				&matches[residue[0]], &matches[residue[1]]
+			};
+
+			if (extent == WHOLE_HUNK ||
+			    matching_context(sides[0], sides[1]))
+				match_move(sides);
+		}
+		first = end;
+	}
+}
+
+/* A run advances one source view while its insertion point stays fixed */
+static size_t change_run_end(const struct patch_file *file, size_t first)
+{
+	const struct patch_row *row = &file->rows[first];
+	int stage = row->sign == '+';
+	size_t end;
+
+	for (end = first + 1; end < file->nrows; end++) {
+		const struct patch_row *next = &file->rows[end];
+
+		if (next->neutral || next->move || next->sign != row->sign ||
+		    next->pos[stage] != row->pos[stage] + end - first ||
+		    next->pos[!stage] != row->pos[!stage])
+			break;
+	}
+	return end;
+}
+
+static size_t collect_changes(struct patch_file *file, int leg,
+			      enum change_extent extent,
+			      struct change_match *matches)
+{
+	const char *path = patch_file_path(file);
+	const char *base = strrchr(path, '/');
+	size_t n = 0, count = extent == EDIT_RUN ? file->nrows : file->nhunks;
+
+	for (size_t i = 0; i < count; i++) {
+		struct change_match match = { .file = file,
+					      .basename = base ? base + 1 :
+								 path,
+					      .leg = leg };
+
+		if (extent == EDIT_RUN) {
+			const struct patch_row *row = &file->rows[i];
+			size_t end;
+
+			if (row->neutral || row->move ||
+			    (row->sign != '+' && row->sign != '-'))
+				continue;
+
+			end = change_run_end(file, i);
+			match.first = i;
+			match.count = end - i;
+			i = end - 1;
+		} else {
+			match.first = file->hunks[i].first;
+			match.count = file->hunks[i].count;
+		}
+		if (change_signature(&match, extent))
+			matches[n++] = match;
+	}
+	return n;
+}
+
+void patch_match_moved(struct patch_document docs[2])
+{
+	struct change_match *matches __free(free) = NULL;
+	size_t total = 0;
+
+	for (int leg = 0; leg < 2; leg++) {
+		for (size_t i = 0; i < docs[leg].nfiles; i++) {
+			struct patch_file *file = &docs[leg].files[i];
+
+			/*
+			 * Every move claims a row. Reserve that bound once,
+			 * since rows keep pointers into this array after
+			 * pairing.
+			 */
+			file->moves = xmalloc_array(file->nrows,
+						    sizeof(*file->moves));
+			total += file->nrows + file->nhunks;
+		}
+	}
+	matches = xmalloc_array(total, sizeof(*matches));
+
+	/* Whole hunks claim their rows before smaller runs can use them */
+	for (enum change_extent extent = WHOLE_HUNK; extent <= EDIT_RUN;
+	     extent++) {
+		size_t n = 0;
+
+		for (int leg = 0; leg < 2; leg++) {
+			for (size_t i = 0; i < docs[leg].nfiles; i++) {
+				n += collect_changes(&docs[leg].files[i], leg,
+						     extent, matches + n);
+			}
+		}
+		pair_changes(matches, n, extent);
+	}
+}
+
+const struct patch_file *patch_row_partner(const struct patch_source *source,
+					   size_t row)
+{
+	const struct patch_move *move = source->rows[row].move;
+
+	return move ? move->partner_file : NULL;
+}
+
 static void append_source_row(struct patch_source *source,
 			      const struct patch_row *row)
 {
