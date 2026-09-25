@@ -1,0 +1,19 @@
+--- a/f.c
++++ b/f.c
+@@ -2,2 +2,2 @@
+-mark0
++MARK0
+ top
+@@ -10,2 +10,2 @@
+-mark
++MARK
+ beta
+@@ -16,2 +16,2 @@
+-tag
++TAG
+ 
+@@ -22,3 +22,3 @@
+-note
++NOTE
+ new1
+ new2

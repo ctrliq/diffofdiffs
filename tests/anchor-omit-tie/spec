@@ -1,0 +1,11 @@
+# patch2's hunks sit three lines below patch1's, so the context diff pads the
+# gap with filler, and filler the diff couldn't match unties the two files'
+# numbering. The hunk below that filler holds nothing but change lines, its
+# own context being filler the splitter strips, so nothing in the hunk says
+# its two blocks sit opposite each other. The line both patches quote sits in
+# the region the diff left out, where gap_quotes_a_line() reads it off
+# patch1's context view and tie_frames() re-anchors the numbering; without
+# that tie filter_edge_hunks() drops the hunk whole.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

@@ -1,0 +1,6 @@
+# Patch1 changes f, the last line of f.c, to F. Patch2 keeps f and adds b!!!!
+# after it. The report must show patch1's removal of f and addition of F beside
+# patch2's addition of b!!!! as line 7, with f unchanged on patch2's side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

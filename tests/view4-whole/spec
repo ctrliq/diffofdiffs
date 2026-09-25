@@ -1,0 +1,7 @@
+# Both patches create n.c with two hunks, lines 1-3 and lines 10-12, and differ
+# only in the first line: aaa in patch1 and zzz in patch2. The report must show
+# aaa and zzz as each patch's own addition, with bbb and ccc as additions both
+# make, and leave out lines 10-12, which both patches add identically.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

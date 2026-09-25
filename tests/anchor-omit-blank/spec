@@ -1,0 +1,9 @@
+# The tests/anchor-omit-tie operands with the line both patches quote in the
+# region the diff left out blanked. A blank line is in every file at every
+# depth, so gap_quotes_a_line() takes it as no evidence the way
+# ctx_views_overlap() does, the numbering stays untied across the gap, and
+# filter_edge_hunks() drops the hunk that rests on it. The hunk carrying the
+# filler still prints, since the numbering was still tied at its first line.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

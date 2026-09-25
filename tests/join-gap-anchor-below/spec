@@ -1,0 +1,11 @@
+# patch2 quotes its second block seven filler lines further down the file than
+# patch1 quotes its own, past the squashable_gap() the plain squash covers, and
+# the first line of the block differs, so the context diff walks a bare '-'
+# run, seven '+' unlines, then the '+' run. squash_paired_gap() anchors on the
+# matched context directly below that '+' run, count_line_seq() finds the
+# anchor exactly once in either view, and the two runs join into one hunk; a
+# gap this long would otherwise leave the two halves to die apart and print
+# nothing at all.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

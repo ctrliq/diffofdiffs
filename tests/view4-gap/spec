@@ -1,0 +1,8 @@
+# Near line 4 of f.c, patch1 changes d to D and patch2 changes d to Q. Near line
+# 31, patch1 changes y1 to z1 while patch2 keeps y1 and adds b!!!! after it. The
+# report must pair the D and Q changes, show the second region with patch2's
+# b!!!! as line 32 and the trailing context lines m, p1, and w on both sides,
+# and the context section must show z1 against y1 and b!!!! in the two results.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

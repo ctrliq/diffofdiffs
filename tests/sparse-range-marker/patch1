@@ -1,0 +1,10 @@
+--- a/foo.c
++++ b/foo.c
+@@ -1,2 +1 @@
+-hotel
+ india
+@@ -5 +4 @@
+-papa
+\ No newline at end of file
++PAPA1
+\ No newline at end of file

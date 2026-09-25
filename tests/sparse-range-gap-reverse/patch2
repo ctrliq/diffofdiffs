@@ -1,0 +1,8 @@
+--- a/foo.c
++++ b/foo.c
+@@ -1,2 +1 @@
+-hotel
+ india
+@@ -5 +4 @@
+-papa
++PAPA1

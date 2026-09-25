@@ -1,0 +1,44 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Commit 1: view┃Commit 2: view
+      4a      ┃      4b
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use
+complete files before and
+after each commit.
+
+═════════════════════════════
+*    DELTA DIFFERENCES      *
+═════════════════════════════
+Signs mark edits made by only
+that patch. A sign-less line
+with one number is an edit
+both patches make: a new
+number means both add it, an
+old number means both remove
+it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│view4┃ old new│view4
+        │@@ c ┃        │@@ c
+   3   3│c    ┃   3   3│c
+   4   4│d    ┃   4   4│d
+   5   5│e    ┃   5   5│e
+-  6    │f    ┃   6   6│f
++      6│F    ┃+      7│b!!!!
+
+═════════════════════════════
+*    CONTEXT DIFFERENCES    *
+═════════════════════════════
+Signs mark lines present in
+only one result: - patch1, +
+patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│view4┃     new│view4
+        │@@ c ┃        │@@ c
+       3│c    ┃       3│c
+       4│d    ┃       4│d
+       5│e    ┃       5│e
+-      6│F    ┃+      6│f
+        │     ┃+      7│b!!!!

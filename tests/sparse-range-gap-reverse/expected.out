@@ -1,0 +1,29 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Patch 1: patch┃Patch 2: patch
+      1       ┃      2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use
+only the source lines quoted
+in the patches.
+
+═════════════════════════════
+*    DELTA DIFFERENCES      *
+═════════════════════════════
+Signs mark edits made by only
+that patch. A sign-less line
+with one number is an edit
+both patches make: a new
+number means both add it, an
+old number means both remove
+it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│foo.c┃ old new│foo.c
+        │@@   ┃        │@@
+   1    │hotel┃   1    │hotel
+-  2    │india┃   2   1│india
+        │─────╂────────┼─────
+        │@@   ┃        │@@
+   5    │papa ┃   5    │papa
++      3│PAPA2┃+      4│PAPA1

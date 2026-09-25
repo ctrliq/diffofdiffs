@@ -1,0 +1,8 @@
+# Both patches add guard_check() after alpha_three() and guard_release() after
+# gamma_three(). Their context differs in one line, beta_three() in patch1
+# against beta_four() in patch2, and patch2 declares its second hunk one line
+# earlier. Both insertions are edits both patches make, and the fixture expects
+# no output at all.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

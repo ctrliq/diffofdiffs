@@ -1,0 +1,5 @@
+# view4-gap with patch2 adding zzzzz in place of b!!!!. The report must be
+# view4-gap's with only that line changed.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,8 @@
+# In git tree mode, view4a and view4b start from the same six-line file view4,
+# holding a through f. view4a changes f to F, and view4b keeps f and adds b!!!!
+# after it, the same edits as view4-min. The report must show the change of f to
+# F beside the addition of b!!!! as line 7, and the context section must show F
+# against f and b!!!! in the two results.
+bin: DIFFOFDIFFS
+args: --git-tree=repo view4a view4b
+exit: 0

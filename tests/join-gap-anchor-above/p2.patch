@@ -1,0 +1,18 @@
+--- a/f
++++ b/f
+@@ -10,6 +10,7 @@
+ alpha_one();
+ alpha_two();
+ alpha_three();
++guard_check();
+ beta_one();
+ beta_two();
+ beta_four();
+@@ -29,6 +30,7 @@
+ gamma_one();
+ gamma_two();
+ gamma_three();
++guard_release();
+ delta_one();
+ delta_two();
+ delta_three();

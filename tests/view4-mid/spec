@@ -1,0 +1,6 @@
+# view4-min with patch2 adding three lines after f instead of one: zzz1, b!!!!,
+# and zzz2. The report must show all three as patch2's additions, as lines 7-9,
+# in the same hunk as patch1's change of f to F.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0
