@@ -26,6 +26,13 @@
  */
 #define PAIR_MIN_COMPONENTS 2
 
+static bool line_starts(const struct iomem_line *line, const char *prefix)
+{
+	size_t len = strlen(prefix);
+
+	return line->len >= len && !memcmp(line->base, prefix, len);
+}
+
 /*
  * Compare the full name, including any embedded NUL: a path merely beginning
  * with /dev/null is not the absent-file marker.
@@ -309,6 +316,68 @@ struct patch_name *unquoted_name(const char *base, size_t len)
 }
 
 /*
+ * The expected identity bounds an unquoted name even when it contains spaces. A
+ * quoted token supplies its own boundary, so both spellings compare without
+ * guessing which space separates the opener's two paths.
+ */
+static bool git_name_token(const char *base, size_t len,
+			   const struct patch_name *name, size_t *used)
+{
+	struct patch_name *parsed __free(patch_name) = NULL;
+	size_t end;
+
+	if (!len || name->verbatim)
+		return false;
+
+	if (base[0] != '"') {
+		if (len < name->len || memcmp(base, name->text, name->len))
+			return false;
+
+		*used = name->len;
+		return true;
+	}
+
+	for (end = 1; end < len;) {
+		char c = base[end++];
+
+		if (c == '"')
+			break;
+
+		if (c == '\\' && end < len)
+			end++;
+	}
+
+	parsed = unquoted_name(base, end);
+	if (parsed->verbatim || parsed->len != name->len ||
+	    memcmp(parsed->text, name->text, name->len))
+		return false;
+
+	*used = end;
+	return true;
+}
+
+bool git_block_names(const struct iomem_line *line,
+		     const struct patch_name *oldname,
+		     const struct patch_name *newname)
+{
+	size_t first, second, len;
+	const char *base;
+
+	if (!line_starts(line, "diff --git "))
+		return false;
+
+	base = line->base + 11;
+	len = chomp_header(base, line->len - 11);
+	if (!git_name_token(base, len, oldname, &first) || first >= len ||
+	    base[first] != ' ')
+		return false;
+
+	first++;
+	return git_name_token(base + first, len - first, newname, &second) &&
+	       first + second == len;
+}
+
+/*
  * Search backward only through leading metadata. Crossing a file or hunk header
  * would attach a previous section's opener to the current record.
  */
@@ -332,6 +401,170 @@ long block_opener_above(const struct iomem_buf *buf, size_t at)
 	}
 
 	return -1;
+}
+
+/* Rename and copy metadata supplies paths without display prefixes */
+static void git_story_paths(const struct iomem_buf *buf,
+			    const struct iomem_line *opener,
+			    struct patch_name **src, struct patch_name **dst)
+{
+	const struct iomem_slice *from, *to;
+	struct block_story story;
+
+	block_story_read(&story, buf, opener->offset, "patch");
+	if (story.rename_from.base && story.rename_to.base) {
+		from = &story.rename_from;
+		to = &story.rename_to;
+	} else if (story.copy_from.base && story.copy_to.base) {
+		from = &story.copy_from;
+		to = &story.copy_to;
+	} else {
+		return;
+	}
+
+	*src = unquoted_name(from->base, from->len);
+	*dst = unquoted_name(to->base, to->len);
+}
+
+static bool same_path(const struct patch_name *a, const struct patch_name *b)
+{
+	return !a->verbatim && !b->verbatim && a->len == b->len &&
+	       !memcmp(a->text, b->text, a->len);
+}
+
+static bool prefixed_path(const struct patch_name *name,
+			  const struct patch_name *path, char prefix)
+{
+	return !name->verbatim && !path->verbatim &&
+	       name->len == path->len + 2 && name->text[0] == prefix &&
+	       name->text[1] == '/' &&
+	       !memcmp(name->text + 2, path->text, path->len);
+}
+
+static bool git_prefixed_paths(const struct iomem_line *opener,
+			       const struct patch_name *src,
+			       const struct patch_name *dst)
+{
+	struct patch_name oldname, newname;
+	char *old __free(free) = NULL;
+	char *new __free(free) = NULL;
+
+	if (src->verbatim || dst->verbatim || strlen(src->text) != src->len ||
+	    strlen(dst->text) != dst->len)
+		return false;
+
+	xasprintf(&old, "a/%s", src->text);
+	xasprintf(&new, "b/%s", dst->text);
+	oldname = (typeof(oldname)){ .text = old, .len = src->len + 2 };
+	newname = (typeof(newname)){ .text = new, .len = dst->len + 2 };
+	return git_block_names(opener, &oldname, &newname);
+}
+
+/*
+ * A leading a/ can be a real directory in a --no-prefix patch. The paired
+ * labels establish the convention for an edit, while rename and copy metadata
+ * establish it for an operation whose paths differ. The metadata takes
+ * precedence because a literal a/x -> b/x rename otherwise looks prefixed.
+ */
+enum patch_prefix patch_name_prefix(const struct iomem_buf *buf, long pos,
+				    const char *operand,
+				    const struct patch_name *key)
+{
+	struct patch_name *oldname __free(patch_name) = NULL;
+	struct patch_name *newname __free(patch_name) = NULL;
+	struct patch_name *src __free(patch_name) = NULL;
+	struct patch_name *dst __free(patch_name) = NULL;
+	long start = block_opener_above(buf, pos);
+	struct iomem_line opener = {}, line;
+	struct iomem_cursor cur;
+
+	if (key->verbatim)
+		return PATCH_PREFIX_UNKNOWN;
+
+	iomem_cursor_init(&cur, buf);
+	if (start >= 0) {
+		iomem_cursor_seek(&cur, start, operand);
+		iomem_cursor_next(&cur, &opener);
+		git_story_paths(buf, &opener, &src, &dst);
+	}
+
+	iomem_cursor_seek(&cur, pos, operand);
+	while (iomem_cursor_next(&cur, &line)) {
+		if (line_starts(&line, "diff --git ") ||
+		    line_starts(&line, "@@ "))
+			break;
+
+		if (!line_starts(&line, "--- "))
+			continue;
+
+		oldname = filename_from_header(line.base + 4, line.len - 4);
+		if (iomem_cursor_next(&cur, &line) &&
+		    line_starts(&line, "+++ "))
+			newname = filename_from_header(line.base + 4,
+						       line.len - 4);
+		break;
+	}
+
+	if (src) {
+		/* Operation paths are literal and disambiguate the headers */
+		if (git_block_names(&opener, src, dst) &&
+		    (!oldname || same_path(oldname, src)) &&
+		    (!newname || same_path(newname, dst)))
+			return PATCH_PREFIX_LITERAL;
+
+		if (git_prefixed_paths(&opener, src, dst) &&
+		    (!oldname || prefixed_path(oldname, src, 'a')) &&
+		    (!newname || prefixed_path(newname, dst, 'b')) &&
+		    (prefixed_path(key, src, 'a') ||
+		     prefixed_path(key, dst, 'b')))
+			return PATCH_PREFIX_GIT;
+
+		return PATCH_PREFIX_UNKNOWN;
+	}
+
+	if (oldname && newname) {
+		if (same_path(oldname, newname)) {
+			if (!opener.base ||
+			    git_block_names(&opener, oldname, newname))
+				return PATCH_PREFIX_LITERAL;
+
+			return PATCH_PREFIX_UNKNOWN;
+		}
+
+		if (!oldname->verbatim && !newname->verbatim &&
+		    !strncmp(oldname->text, "a/", 2) &&
+		    !strncmp(newname->text, "b/", 2) &&
+		    !strcmp(oldname->text + 2, newname->text + 2) &&
+		    (!opener.base ||
+		     git_block_names(&opener, oldname, newname)))
+			return PATCH_PREFIX_GIT;
+	}
+
+	if (git_block_names(&opener, key, key))
+		return PATCH_PREFIX_LITERAL;
+
+	if (key->len >= 2 && (key->text[0] == 'a' || key->text[0] == 'b') &&
+	    key->text[1] == '/') {
+		struct patch_name path = { .text = key->text + 2,
+					   .len = key->len - 2 };
+
+		if (git_prefixed_paths(&opener, &path, &path))
+			return PATCH_PREFIX_GIT;
+	}
+
+	/*
+	 * With one /dev/null label, a bare header cannot prove the prefix.
+	 * Leave that decision to evidence from other files in the same operand.
+	 */
+	if (!opener.base && oldname && newname && key->len > 2 &&
+	    key->text[1] == '/' &&
+	    ((name_is_dev_null(oldname->text, oldname->len) &&
+	      key->text[0] == 'b') ||
+	     (name_is_dev_null(newname->text, newname->len) &&
+	      key->text[0] == 'a')))
+		return PATCH_PREFIX_INCOMPLETE;
+
+	return PATCH_PREFIX_UNKNOWN;
 }
 
 /*
@@ -591,6 +824,240 @@ struct hunk_progress {
 	bool active;
 	bool changed;
 };
+
+static struct patch_name *git_opener_pair(const struct iomem_line *line,
+					  size_t split)
+{
+	struct patch_name *oldname __free(patch_name) = NULL;
+	struct patch_name *newname __free(patch_name) = NULL;
+	size_t len = chomp_header(line->base, line->len);
+	size_t opener_len = sizeof("diff --git ") - 1;
+	size_t path_prefix_len = sizeof("a/") - 1;
+
+	if (split >= len || line->base[split] != ' ')
+		return NULL;
+
+	oldname = unquoted_name(line->base + opener_len, split - opener_len);
+	newname = unquoted_name(line->base + split + 1, len - split - 1);
+	if (!git_block_names(line, oldname, newname))
+		return NULL;
+
+	/* Git's a/ and b/ prefixes have equal lengths and name the two sides */
+	if (same_path(oldname, newname)) {
+		newname->prefix = PATCH_PREFIX_LITERAL;
+	} else if (!strncmp(oldname->text, "a/", path_prefix_len) &&
+		   !strncmp(newname->text, "b/", path_prefix_len)) {
+		if (!strcmp(oldname->text + path_prefix_len,
+			    newname->text + path_prefix_len))
+			newname->prefix = PATCH_PREFIX_GIT;
+	} else {
+		return NULL;
+	}
+
+	return no_free_ptr(newname);
+}
+
+/*
+ * Unquoted paths can contain the same blanks as the separator. Metadata binds
+ * both complete names for a rename or copy, while equal old/new paths bind a
+ * mode-only block. Without either, only an unambiguous token pair is usable.
+ */
+struct patch_name *git_block_name(const struct iomem_buf *buf,
+				  const struct iomem_line *line)
+{
+	struct patch_name *best __free(patch_name) = NULL;
+	struct patch_name *src __free(patch_name) = NULL;
+	struct patch_name *dst __free(patch_name) = NULL;
+	size_t len = chomp_header(line->base, line->len);
+	size_t opener_len = sizeof("diff --git ") - 1;
+	const char *base = line->base;
+	const char *separator;
+	size_t split;
+
+	git_story_paths(buf, line, &src, &dst);
+	if (src && git_block_names(line, src, dst)) {
+		dst->prefix = PATCH_PREFIX_LITERAL;
+		return no_free_ptr(dst);
+	}
+
+	if (src && git_prefixed_paths(line, src, dst)) {
+		char *text __free(free) = NULL;
+
+		xasprintf(&text, "b/%s", dst->text);
+		best = unquoted_name(text, dst->len + sizeof("b/") - 1);
+		best->prefix = PATCH_PREFIX_GIT;
+		return no_free_ptr(best);
+	}
+
+	if (len <= opener_len + 1)
+		return NULL;
+
+	if (base[opener_len] == '\"') {
+		for (split = opener_len + 1; split < len;) {
+			char c = base[split++];
+
+			if (c == '\"')
+				break;
+
+			if (c == '\\' && split < len)
+				split++;
+		}
+
+		return git_opener_pair(line, split);
+	}
+
+	separator = memmem(base + opener_len, len - opener_len, " \"",
+			   sizeof(" \"") - 1);
+	if (separator)
+		return git_opener_pair(line, separator - base);
+
+	split = opener_len + (len - opener_len) / 2;
+	best = git_opener_pair(line, split);
+	if (best && best->prefix != PATCH_PREFIX_UNKNOWN)
+		return no_free_ptr(best);
+
+	patch_name_free(best);
+	best = NULL;
+	separator = memmem(base + opener_len, len - opener_len, " b/",
+			   sizeof(" b/") - 1);
+	if (!separator || memmem(separator + 1, len - (separator + 1 - base),
+				 " b/", sizeof(" b/") - 1))
+		return NULL;
+
+	return git_opener_pair(line, separator - base);
+}
+
+/*
+ * Steps over a validated hunk's body using both declared line counts. Markers
+ * spend neither count, and a deletion-only hunk still consumes its old rows.
+ * The operand can end before the counts when its last context rows were cut.
+ */
+static void skip_hunk_body(struct iomem_cursor *cur, unsigned long old_left,
+			   unsigned long new_left)
+{
+	struct iomem_line line;
+
+	while (old_left || new_left) {
+		enum body_class class;
+
+		if (!iomem_cursor_next(cur, &line))
+			return;
+
+		class = classify_body_line(line.base, line.len, NULL);
+		old_left -= class == BODY_CONTEXT || class == BODY_REMOVED;
+		new_left -= class == BODY_CONTEXT || class == BODY_ADDED;
+	}
+}
+
+/*
+ * Count out every hunk before looking for file headers, so body rows that begin
+ * with "--- " or "+++ " keep their role. Index both operands identically,
+ * retaining hunkless records too.
+ *
+ * A record starts at its first operation metadata line, or at --- when there is
+ * none. A named Git block without file headers can still yield a metadata
+ * record when the next block begins or the input ends.
+ */
+void index_patch(const struct iomem_buf *buf, struct cds_list_head *list)
+{
+	struct patch_name *git_name __free(patch_name) = NULL;
+	struct block_latch latch = {};
+	bool header_seen = false;
+	struct iomem_cursor cur;
+	struct iomem_line line;
+	long arm_pos = -1;
+
+	iomem_cursor_init(&cur, buf);
+	while (iomem_cursor_next(&cur, &line)) {
+		struct patch_name *name0 __free(patch_name) = NULL;
+		struct patch_name *name1 __free(patch_name) = NULL;
+		unsigned long old_count, new_count;
+		long pos = line.offset;
+
+		if (header_seen &&
+		    !read_atatline_n(line.base, line.len, NULL, &old_count,
+				     NULL, &new_count)) {
+			skip_hunk_body(&cur, old_count, new_count);
+			continue;
+		}
+
+		if (line_starts(&line, "diff --git ")) {
+			/*
+			 * Emit only complete metadata records. Reset the name,
+			 * state, and offset together so none can leak into the
+			 * next block.
+			 */
+			if (git_name && arm_pos >= 0 && latch.complete) {
+				struct file_list *rec;
+
+				rec = add_to_list(list, git_name, arm_pos);
+				rec->mode_only = true;
+			}
+
+			patch_name_free(git_name);
+			git_name = git_block_name(buf, &line);
+			block_latch_opener(&latch, git_name != NULL);
+			arm_pos = -1;
+			continue;
+		}
+
+		if (!line_starts(&line, "--- ")) {
+			/*
+			 * Save the first qualifying metadata offset within this
+			 * named block. File headers close that opportunity; the
+			 * following lines then belong to the text section.
+			 */
+			if (block_latch_line(&latch, line.base, line.len))
+				arm_pos = pos;
+
+			continue;
+		}
+
+		/* This section names a file, so it isn't mode-only */
+		patch_name_free(git_name);
+		git_name = NULL;
+		block_latch_opener(&latch, false);
+
+		if (arm_pos >= 0) {
+			pos = arm_pos;
+			arm_pos = -1;
+		}
+
+		name0 = filename_from_header(line.base + 4, line.len - 4);
+
+		/*
+		 * A lone header must not consume the next section's first line.
+		 */
+		if (!iomem_cursor_next(&cur, &line))
+			break;
+
+		if (!line_starts(&line, "+++ ")) {
+			iomem_cursor_seek(&cur, line.offset, "patch");
+			continue;
+		}
+
+		name1 = filename_from_header(line.base + 4, line.len - 4);
+		name0->prefix = patch_name_prefix(buf, pos, "patch", name0);
+		name1->prefix = patch_name_prefix(buf, pos, "patch", name1);
+		header_seen = true;
+
+		add_to_list(list, best_patch_name(name0, name1), pos);
+	}
+
+	/* A mode-only block at the very end of the operand */
+	if (git_name && arm_pos >= 0 && latch.complete)
+		add_to_list(list, git_name, arm_pos)->mode_only = true;
+}
+
+struct file_list *add_to_list(struct cds_list_head *list,
+			      const struct patch_name *file, long pos)
+{
+	struct file_list *make = xmalloc(sizeof(*make));
+
+	*make = (typeof(*make)){ .file = patch_name_dup(file), .pos = pos };
+	cds_list_add_tail(&make->node, list);
+	return make;
+}
 
 struct patch_name_resolution {
 	struct patch_name *name;
@@ -907,6 +1374,95 @@ static struct block_line classify_block_line(const char *base, size_t len)
 		line.kind = BLOCK_LINE_BINARY;
 
 	return line;
+}
+
+void block_latch_opener(struct block_latch *bl, bool named)
+{
+	*bl = (typeof(*bl)){ .named = named, .run_open = named };
+}
+
+/*
+ * Track metadata before a file's ---/+++ headers. A mode or binary line marks
+ * an operation anywhere in the named block, but completeness requires evidence
+ * in the uninterrupted metadata immediately after its opener. A rename or copy
+ * needs adjacent matching from/to lines so a lone prose fragment cannot count.
+ */
+bool block_latch_line(struct block_latch *bl, const char *base, size_t len)
+{
+	struct block_line line;
+	bool first;
+
+	if (!bl->named)
+		return false;
+
+	line = classify_block_line(base, len);
+	switch (line.kind) {
+	case BLOCK_LINE_MODE:
+		if (bl->run_open) {
+			if (!memcmp(base, "old mode", sizeof("old mode") - 1))
+				bl->saw_old_mode = true;
+			else if (!memcmp(base, "new mode",
+					 sizeof("new mode") - 1))
+				bl->saw_new_mode = true;
+
+			if (bl->saw_old_mode && bl->saw_new_mode)
+				bl->complete = true;
+		}
+
+		bl->prev_op = BLOCK_OP_NONE;
+		goto arm;
+
+	case BLOCK_LINE_OPERATION:
+		if (!bl->run_open)
+			return false;
+
+		if (!line.tail.len) {
+			bl->prev_op = BLOCK_OP_NONE;
+			return false;
+		}
+
+		/* A same-kind pair arms the block; a lone half only tracks */
+		if ((bl->prev_op == BLOCK_OP_RENAME_FROM &&
+		     line.operation == BLOCK_OP_RENAME_TO) ||
+		    (bl->prev_op == BLOCK_OP_COPY_FROM &&
+		     line.operation == BLOCK_OP_COPY_TO)) {
+			bl->complete = true;
+			bl->prev_op = line.operation;
+			goto arm;
+		}
+
+		bl->prev_op = line.operation;
+		return false;
+
+	case BLOCK_LINE_SIMILARITY:
+		if (bl->run_open) {
+			bl->complete |= line.strict_similarity;
+			bl->prev_op = BLOCK_OP_NONE;
+		}
+		return false;
+
+	case BLOCK_LINE_INDEX:
+		if (bl->run_open)
+			bl->complete = true;
+
+		bl->prev_op = BLOCK_OP_NONE;
+		return false;
+
+	case BLOCK_LINE_BINARY:
+		/* A binary payload still needs its index line for completion */
+		bl->prev_op = BLOCK_OP_NONE;
+		goto arm;
+
+	case BLOCK_LINE_END:
+		bl->run_open = false;
+		bl->prev_op = BLOCK_OP_NONE;
+		return false;
+	}
+
+arm:
+	first = !bl->armed;
+	bl->armed = true;
+	return first;
 }
 
 /*
