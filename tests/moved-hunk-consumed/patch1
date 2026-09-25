@@ -1,0 +1,12 @@
+--- a/x/file.c
++++ b/x/file.c
+@@ -10,3 +10,4 @@ static int probe(void)
+ 	aaa();
+ 	bbb();
++	added_line();
+ 	ccc();
+@@ -50,3 +50,4 @@ static void extra(void)
+ 	e1();
+ 	e2();
++	only_in_one();
+ 	e3();

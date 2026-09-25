@@ -1,0 +1,8 @@
+# Both patches add added_line() to a probe() function, patch1 in drivers/one.c
+# and patch2 in drivers/two.c, but in patch1 the added line ends the file
+# without a newline. The two additions differ by that newline, so they must not
+# pair as the same change: the report must show each file's addition on its own
+# patch's side, patch1's with its no-newline marker.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

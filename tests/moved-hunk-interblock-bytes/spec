@@ -1,0 +1,10 @@
+# Both patches add added_line() to a probe() function, patch1 in drivers/one.c
+# at line 12 and patch2 in drivers/two.c at line 42, and both add a line to
+# real_init() in lib/real.c, from_patch1() in patch1 and from_patch2() in
+# patch2. Patch1's drivers/one.c block is followed by a mail signature: a "-- "
+# line, a version line, and a text line. The report must leave out the
+# added_line() change, which both patches make, and show only the two real.c
+# additions side by side, with nothing from the signature.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

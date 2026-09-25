@@ -1,0 +1,5 @@
+--- a/y.c
++++ b/y.c
+@@ -1,1 +1,1 @@ int helper(void)
+-	old();
++	new();

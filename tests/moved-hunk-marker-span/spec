@@ -1,0 +1,9 @@
+# Patch1's m.c has two hunks: the first changes helper() and ends in a context
+# line followed by two no-newline markers, one for each side, and the second
+# changes sib() at line 40. Patch2 makes the identical helper() change in n.c.
+# The helper() hunks pair as the same moved change and are left out along with
+# both markers, so m.c shows only patch1's sib() change, under the note about
+# overlapping source quotations, with no stray marker line.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

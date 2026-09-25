@@ -1,0 +1,5 @@
+--- a/drivers/two.c
++++ b/drivers/two.c
+@@ -40,1 +40,2 @@ static int probe(void)
+ 	xxx();
++	added_line();

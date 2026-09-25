@@ -1,0 +1,7 @@
+# Identical added rows under the same basename in different directories
+# consume each other instead of matching, and consumption is not
+# suppression: both hunks stay in their operands, the sections pair at the
+# auto depth, and the delta prints only the second hunks' real difference.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

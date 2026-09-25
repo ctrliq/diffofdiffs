@@ -1,0 +1,7 @@
+--- a/drivers/two.c
++++ b/drivers/two.c
+@@ -40,3 +40,4 @@ struct probe_table entries
+ 	xxx();
+ 	yyy();
++	added_line();
+ 	zzz();

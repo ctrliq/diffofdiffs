@@ -1,0 +1,8 @@
+# Patch1's src/dup.c block changes the file's mode and helper(); patch2 changes
+# unrelated() in src/dup.c and makes the identical helper() change in
+# src/other.c. The helper() hunks pair as the same moved change and are left
+# out, but patch1's mode change must survive: src/dup.c shows patch1's mode note
+# beside patch2's unrelated() change.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

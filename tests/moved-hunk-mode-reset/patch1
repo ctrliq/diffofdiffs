@@ -1,0 +1,14 @@
+diff --git a/A.c b/A.c
+old mode 100644
+new mode 100755
+--- a/A.c
++++ b/A.c
+@@ -1,1 +1,1 @@ void aye(void)
+-	a1();
++	a2();
+diff --git a/B.c b/B.c
+--- a/B.c
++++ b/B.c
+@@ -20,1 +20,1 @@ void bee(void)
+-	b1();
++	b2();

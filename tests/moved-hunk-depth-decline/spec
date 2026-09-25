@@ -1,0 +1,8 @@
+# Removing the matched sections would shrink the name set until the auto
+# strip depth moves and unrelated files pair by basename. The depth guard
+# compares determine_ignore_components() before and after the rewrite and
+# declines the whole filter, so the output is byte for byte the
+# filter-less tool's.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

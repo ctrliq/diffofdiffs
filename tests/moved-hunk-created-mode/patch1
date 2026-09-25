@@ -1,0 +1,8 @@
+diff --git a/src/dup.c b/src/dup.c
+new file mode 100644
+
+--- a/src/dup.c
++++ b/src/dup.c
+@@ -10,1 +10,1 @@ void helper(void)
+-	old_line();
++	new_line();

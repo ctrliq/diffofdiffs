@@ -1,0 +1,8 @@
+# The matched hunk sits beside a self-cancelling hunk, so its removal
+# leaves a section that states no difference. do_output_unpaired() declines
+# such a section before writing, and the section stream opens only on the
+# first byte actually written, so the run prints no bare banner and no
+# content: silence.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,9 @@
+# Patch1's git block for A.c changes its mode from 100644 to 100755 and changes
+# old() to new() in helper() at line 10, and patch1 then edits B.c. Patch2 makes
+# the helper change in moved.c at line 70 and changes b1() in B.c to b3() where
+# patch1 has b2(). The report must leave out the helper change, which both
+# patches make, while still showing A.c's mode change on patch1's side, and show
+# the two B.c changes side by side with no mode note.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

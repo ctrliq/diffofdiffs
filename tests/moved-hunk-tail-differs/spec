@@ -1,0 +1,8 @@
+# Identical added rows whose hunk headers name different functions, probe()
+# against setup(). Function names play no part in the match, since
+# backporting often renames the enclosing function: the pair matches on its
+# signature, residue uniqueness, and differing basenames, both sections are
+# removed whole, and the run prints nothing.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

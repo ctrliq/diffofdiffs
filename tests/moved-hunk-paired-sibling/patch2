@@ -1,0 +1,21 @@
+--- a/kernel/rt.c
++++ b/kernel/rt.c
+@@ -50,3 +50,4 @@ static void teardown(void)
+ 	t1();
+ 	t2();
++	sibling_two();
+ 	t3();
+--- a/kernel/newhome.c
++++ b/kernel/newhome.c
+@@ -200,3 +200,4 @@ static void start_proxy(void)
+ 	n1();
+ 	n2();
++	moved_row();
+ 	n3();
+--- a/kernel/api.c
++++ b/kernel/api.c
+@@ -90,3 +90,3 @@ static void unrelated(void)
+ 	u1();
+-	u2();
++	u2_new();
+ 	u3();

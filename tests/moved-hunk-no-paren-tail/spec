@@ -1,0 +1,7 @@
+# Identical added rows under nonempty hunk-header tails that carry no '(':
+# an ownerless tail doesn't matter to the match, which reads only the
+# signature, residue uniqueness, and basenames, so the pair is removed whole
+# and the run prints nothing.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

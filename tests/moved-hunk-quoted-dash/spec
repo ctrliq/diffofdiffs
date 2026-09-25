@@ -1,0 +1,7 @@
+# A quoted "--- " line stands directly above the real header, so the
+# one-line peek consumes the real "--- " line and the section is hidden
+# from the filter exactly as it is hidden from the engine's index: no
+# match fires and the output is the filter-less tool's.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

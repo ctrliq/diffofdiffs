@@ -1,0 +1,6 @@
+--- quoted/thing.c
+--- a/x.c
++++ b/x.c
+@@ -1,1 +1,1 @@ void helper(void)
+-	old();
++	new();

@@ -1,0 +1,14 @@
+--- a/drivers/two.c
++++ b/drivers/two.c
+@@ -40,3 +40,4 @@ static int probe(void)
+ 	xxx();
+ 	yyy();
++	added_line();
+ 	zzz();
+--- a/lib/real.c
++++ b/lib/real.c
+@@ -20,3 +20,4 @@ int real_init(void)
+ 	r1();
+ 	r2();
++	from_patch2();
+ 	r3();

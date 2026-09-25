@@ -1,0 +1,8 @@
+# A.c's block carries a mode pair and survives the filter; B.c's block is
+# the one emptied, and it has no mode pair of its own. The keep's
+# tracking resets at every block boundary, so A.c's pair licenses no keep
+# for B.c and the emptied block cuts whole, leaving both runs identical
+# and the output empty.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

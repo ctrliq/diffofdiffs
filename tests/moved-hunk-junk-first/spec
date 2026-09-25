@@ -1,0 +1,9 @@
+# Patch1 changes old() to new() in helper() at line 1 of m.c, then has a stray
+# "Notes: rebased" line before a second hunk that changes s1() to s2() at line
+# 40, and it edits z.c. Patch2 makes the helper change in n.c at line 9 and the
+# same z.c change. The report must leave out the helper and z.c changes, which
+# both patches make, and show patch1's s1() change on its side alone despite the
+# stray line in front of it.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

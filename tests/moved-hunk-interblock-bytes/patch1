@@ -1,0 +1,17 @@
+--- a/drivers/one.c
++++ b/drivers/one.c
+@@ -10,3 +10,4 @@ static int probe(void)
+ 	aaa();
+ 	bbb();
++	added_line();
+ 	ccc();
+-- 
+2.43.0
+mail signature trailing text
+--- a/lib/real.c
++++ b/lib/real.c
+@@ -20,3 +20,4 @@ int real_init(void)
+ 	r1();
+ 	r2();
++	from_patch1();
+ 	r3();

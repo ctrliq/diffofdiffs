@@ -1,0 +1,9 @@
+# Patch1 edits A.c, M.c, B.c, and z.c, and between the A.c and M.c blocks it has
+# a stray --- abandoned/x.c line with no +++ line after it. Patch2 makes
+# patch1's M.c change in moved.c, at line 70 instead of 10, and the same z.c
+# change. The stray line must not swallow the M.c block that follows it: the
+# report must leave out the M.c change, which patch2 makes in moved.c, and the
+# z.c change, and show patch1's A.c and B.c edits on its side alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

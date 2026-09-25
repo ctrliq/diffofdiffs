@@ -1,0 +1,7 @@
+# Both patches add added_line() inside a probe() function: patch1 in
+# drivers/one.c and drivers/three.c, patch2 in drivers/two.c. Moved hunks pair
+# only when the change appears exactly once on each side, so nothing pairs here:
+# all three insertions must show, each on its own patch's side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,9 @@
+# Patch1 adds moved_row() to start_proxy() in kernel/rt.c and sibling_one() to
+# teardown(). Patch2 adds sibling_two() to the same teardown() and the identical
+# moved_row() insertion to start_proxy() in kernel/newhome.c, and both patches
+# make the same change to kernel/api.c. The moved_row() hunks pair as the same
+# moved change and are left out with the api.c change, so rt.c shows only the
+# two differing teardown() insertions side by side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,8 @@
+# Both patches add added_line() to a probe() function, patch1 in drivers/one.c
+# and patch2 in drivers/two.c, and then add a line to shared_init() in
+# lib/shared.c, from_patch1() in patch1 and from_patch2() in patch2. The report
+# must leave out the added_line() change, which both patches make in different
+# files, and show the two shared.c additions side by side.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

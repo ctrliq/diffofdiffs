@@ -1,0 +1,8 @@
+# Both patches make the same two changes to d1/dup.c. Patch1 also changes
+# helper() and yy() in d2/dup.c, while patch2 makes the identical helper()
+# change in zz/other.c instead, as if the code had moved. Identical hunks pair
+# in operand order, so the helper() hunks in d2/dup.c and zz/other.c pair as the
+# same change and are left out, and only patch1's yy() change shows.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

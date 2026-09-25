@@ -1,0 +1,16 @@
+--- a/d1/dup.c
++++ b/d1/dup.c
+@@ -10,1 +10,1 @@ void helper(void)
+-	old();
++	new();
+@@ -40,1 +40,1 @@ void xx(void)
+-	xx1();
++	xx2();
+--- a/d2/dup.c
++++ b/d2/dup.c
+@@ -10,1 +10,1 @@ void helper(void)
+-	old();
++	new();
+@@ -60,1 +60,1 @@ void yy(void)
+-	yy1();
++	yy2();

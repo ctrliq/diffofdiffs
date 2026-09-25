@@ -1,0 +1,6 @@
+--- a/drivers/one.c
++++ b/drivers/one.c
+@@ -10,1 +10,2 @@ static int probe(void)
+ 	aaa();
++	added_line();
+\ No newline at end of file

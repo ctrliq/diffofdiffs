@@ -1,0 +1,8 @@
+# The cross-file moved-hunk filter's simplest matched pair: patch1 adds a
+# row in one file and patch2 adds the byte-identical row in another, both
+# hunks naming probe() in their trailing text. The pair is the same change
+# moved between files, so the filter removes both sections whole and the
+# run prints nothing.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

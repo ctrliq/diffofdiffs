@@ -1,0 +1,8 @@
+--- a/n.c
++++ b/n.c
+@@ -9,2 +9,2 @@ int helper(void)
+-	old();
++	new();
+ 	tail_ctx
+\ No newline at end of file
+\ No newline at end of file

@@ -1,0 +1,14 @@
+--- a/drivers/one.c
++++ b/drivers/one.c
+@@ -10,3 +10,4 @@ static int probe(void)
+ 	aaa();
+ 	bbb();
++	added_line();
+ 	ccc();
+--- a/drivers/three.c
++++ b/drivers/three.c
+@@ -70,3 +70,4 @@ static int probe(void)
+ 	qqq();
+ 	rrr();
++	added_line();
+ 	sss();

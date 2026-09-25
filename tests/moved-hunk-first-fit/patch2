@@ -1,0 +1,13 @@
+--- a/d1/dup.c
++++ b/d1/dup.c
+@@ -10,1 +10,1 @@ void helper(void)
+-	old();
++	new();
+@@ -40,1 +40,1 @@ void xx(void)
+-	xx1();
++	xx2();
+--- a/zz/other.c
++++ b/zz/other.c
+@@ -80,1 +80,1 @@ int helper(void)
+-	old();
++	new();

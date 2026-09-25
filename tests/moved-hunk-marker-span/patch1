@@ -1,0 +1,11 @@
+--- a/m.c
++++ b/m.c
+@@ -1,2 +1,2 @@ void helper(void)
+-	old();
++	new();
+ 	tail_ctx
+\ No newline at end of file
+\ No newline at end of file
+@@ -40,1 +40,1 @@ void sib(void)
+-	s1();
++	s2();

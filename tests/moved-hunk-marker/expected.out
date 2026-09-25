@@ -1,0 +1,29 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       Patch 1: patch1       ┃       Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in
+the patches.
+
+═══════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES                                    *
+═══════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line
+with one number is an edit both patches make: a new number
+means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│drivers/one.c       ┃ old new│drivers/one.c
+        │@@ static int probe(┃        │@@
+        │void)               ┃        │
+  10  10│	aaa();       ┃        │
++     11│	added_line();┃        │
+\       │No newline at end of┃        │
+        │ file               ┃        │
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│drivers/two.c       ┃ old new│drivers/two.c
+        │@@                  ┃        │@@ static int probe(
+        │                    ┃        │void)
+        │                    ┃  40  40│	xxx();
+        │                    ┃+     41│	added_line();

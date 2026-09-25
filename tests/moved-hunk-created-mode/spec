@@ -1,0 +1,9 @@
+# Patch1's git block for src/dup.c carries a new file mode line but changes
+# old_line() to new_line() at line 10 like an edit. Patch2 makes that same
+# change in src/other.c at line 20 and changes aaa() to bbb() in src/dup.c at
+# line 50. The report must leave out the old_line() change, which both patches
+# make, and show src/dup.c with patch1's create-file and mode notes beside
+# patch2's aaa() change.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

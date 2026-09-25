@@ -1,0 +1,14 @@
+--- a/drivers/two.c
++++ b/drivers/two.c
+@@ -40,3 +40,4 @@ static int probe(void)
+ 	xxx();
+ 	yyy();
++	added_line();
+ 	zzz();
+--- a/lib/shared.c
++++ b/lib/shared.c
+@@ -20,3 +20,4 @@ int shared_init(void)
+ 	s1();
+ 	s2();
++	from_patch2();
+ 	s3();

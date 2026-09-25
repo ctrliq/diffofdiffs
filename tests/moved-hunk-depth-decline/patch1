@@ -1,0 +1,10 @@
+--- a/p/dup.c
++++ b/p/dup.c
+@@ -10,1 +10,1 @@ void helper(void)
+-	old();
++	new();
+--- a/zzz/dup.c
++++ b/zzz/dup.c
+@@ -5,1 +5,1 @@ void zzz(void)
+-	zz1();
++	zz2();

@@ -1,0 +1,5 @@
+# moved-hunk-junk-first at -U 3, which must print the same report: patch1's s1()
+# change on its side alone.
+bin: DIFFOFDIFFS
+args: -U 3 patch1 patch2
+exit: 0

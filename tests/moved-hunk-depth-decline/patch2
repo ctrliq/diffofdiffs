@@ -1,0 +1,10 @@
+--- a/q/other.c
++++ b/q/other.c
+@@ -20,1 +20,1 @@ int helper(void)
+-	old();
++	new();
+--- a/p/dup.c
++++ b/p/dup.c
+@@ -7,1 +7,1 @@ void pp(void)
+-	pp1();
++	pp2();

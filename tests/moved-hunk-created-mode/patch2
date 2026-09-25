@@ -1,0 +1,12 @@
+diff --git a/src/dup.c b/src/dup.c
+--- a/src/dup.c
++++ b/src/dup.c
+@@ -50,1 +50,1 @@ void unrelated(void)
+-	aaa();
++	bbb();
+diff --git a/src/other.c b/src/other.c
+--- a/src/other.c
++++ b/src/other.c
+@@ -20,1 +20,1 @@ void helper(void)
+-	old_line();
++	new_line();
