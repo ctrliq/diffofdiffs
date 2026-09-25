@@ -114,3 +114,39 @@ check: check-matches
 
 check-matches: tests/support/match-driver
 	$(Q)"$(PYTHON)" tests/check-matches.py tests/support/match-driver
+
+RUN_GOALS := $(patsubst tests/%/spec,run-%,$(wildcard tests/*/spec))
+TEST_HELPERS := tests/support/udiff_driver tests/support/gitread-unit \
+	tests/support/derive-patch tests/support/tool-setup.so \
+	tests/support/no-locale.so
+
+.PHONY: $(RUN_GOALS)
+.NOTPARALLEL: check
+check: all $(TEST_HELPERS) $(RUN_GOALS)
+
+ifneq ($(strip $(RUN_GOALS)),)
+$(RUN_GOALS): run-%: tests/%/spec diffofdiffs $(TEST_HELPERS)
+	$(Q)tests/run-one.sh tests/$*
+
+$(RUN_GOALS): export DIFFOFDIFFS := $(CURDIR)/diffofdiffs
+$(RUN_GOALS): export UDIFF_DRIVER := $(CURDIR)/tests/support/udiff_driver
+$(RUN_GOALS): export GITREAD_UNIT := $(CURDIR)/tests/support/gitread-unit
+$(RUN_GOALS): export TOOL_SETUP_SO := $(CURDIR)/tests/support/tool-setup.so
+$(RUN_GOALS): export RUN_VARIANT := plain
+endif
+
+ifneq ($(wildcard tests/check-highlight.py),)
+.PHONY: check-highlight
+check: check-highlight
+
+check-highlight: diffofdiffs tests/support/highlight-driver
+	$(Q)"$(PYTHON)" tests/check-highlight.py ./diffofdiffs tests/support/highlight-driver
+endif
+
+ifneq ($(wildcard tests/check-review.py),)
+.PHONY: check-review
+check: check-review
+
+check-review: diffofdiffs $(TEST_HELPERS)
+	$(Q)"$(PYTHON)" tests/check-review.py ./diffofdiffs
+endif
