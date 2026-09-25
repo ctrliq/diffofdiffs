@@ -1,0 +1,18 @@
+--- a/mm/hugetlb.c
++++ b/mm/hugetlb.c
+@@ -5122,6 +5122,7 @@ int move_hugetlb_page_tables(struct vm_area_struct *vma,
+ 	 * range.
+ 	 */
+ 	flush_cache_range(vma, range.start, range.end);
++	tlb_gather_mmu_vma(&tlb, vma);
+ 
+ 	mmu_notifier_invalidate_range_start(&range);
+ 	last_addr_mask = hugetlb_mask_last_page(h);
+@@ -6442,6 +6433,7 @@ long hugetlb_change_protection(struct vm_area_struct *vma,
+ 
+ 	BUG_ON(address >= end);
+ 	flush_cache_range(vma, range.start, range.end);
++	tlb_gather_mmu_vma(&tlb, vma);
+ 
+ 	mmu_notifier_invalidate_range_start(&range);
+ 	hugetlb_vma_lock_write(vma);

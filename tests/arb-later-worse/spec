@@ -1,0 +1,4 @@
+# Original source evidence keeps the established shared edit in place. The
+# extra upstream remainder retains its own source and one-sided presentation.
+bin: DIFFOFDIFFS
+args: patch1 patch2

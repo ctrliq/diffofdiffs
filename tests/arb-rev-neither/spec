@@ -1,0 +1,8 @@
+# Patch1 adds ADD1 at line 22 and ADD3 at line 42 of f.c, each inside a copy of
+# the www, o50, ggg lines, and its third hunk changes SHARED_OLD to SHARED_NEW
+# at line 83. Patch2 makes that same change at line 53, quoting a different last
+# context line. The report must show ADD1 and ADD3 on patch1's side alone and
+# leave out the shared change.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

@@ -1,0 +1,78 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Commit 1: sil1   ┃  Commit 2: sil2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Tree mode: comparisons use complete
+files before and after each commit.
+
+═══════════════════════════════════════
+*    DELTA DIFFERENCES                *
+═══════════════════════════════════════
+Signs mark edits made by only that
+patch. A sign-less line with one number
+is an edit both patches make: a new
+number means both add it, an old number
+means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│sil       ┃ old new│sil
+        │@@ sil row┃        │@@
+        │ 19       ┃        │
+  19  19│sil row 19┃        │
+  20  20│www       ┃        │
+  21  21│o50       ┃        │
++     22│ADD1      ┃        │
+  22  23│ggg       ┃        │
+  23  24│sil row 23┃        │
+  24  25│sil row 24┃        │
+        │──────────╂────────┼──────────
+        │@@ sil row┃        │@@ nnn
+        │ 79       ┃        │
+  79  80│sil row 79┃        │
+  80  81│www       ┃        │
+  81  82│o50       ┃        │
++     83│ADD2      ┃        │
+  82  84│ggg       ┃        │
+  83  85│ddd       ┃        │
+  84  86│nnn       ┃  54  54│nnn
+
+═══════════════════════════════════════
+*    CONTEXT DIFFERENCES              *
+═══════════════════════════════════════
+Signs mark lines present in only one
+result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│sil       ┃     new│sil
+        │@@ sil row┃        │@@ sil row
+        │ 17       ┃        │ 47
+      17│sil row 17┃        │
+      18│sil row 18┃        │
+      19│sil row 19┃        │
+-     20│www       ┃        │
+-     21│o50       ┃        │
+-     22│ADD1      ┃        │
+-     23│ggg       ┃        │
+      24│sil row 23┃        │
+      25│sil row 24┃        │
+      26│sil row 25┃        │
+        │          ┃      47│sil row 47
+        │          ┃      48│sil row 48
+        │          ┃      49│sil row 49
+        │──────────╂────────┼──────────
+        │@@ sil row┃        │@@ www
+        │ 76       ┃        │
+-     77│sil row 76┃        │
+-     78│sil row 77┃        │
+-     79│sil row 78┃        │
+-     80│sil row 79┃        │
+      81│www       ┃      50│www
+      82│o50       ┃      51│o50
+-     83│ADD2      ┃        │
+      84│ggg       ┃      52│ggg
+-     85│ddd       ┃+     53│eee
+      86│nnn       ┃      54│nnn
+-     87│mmm       ┃+     55│kkk
+      88│ppp       ┃      56│ppp
+      89│qqq_NEW   ┃      57│qqq_NEW
+      90│rrr       ┃      58│rrr

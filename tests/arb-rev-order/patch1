@@ -1,0 +1,17 @@
+diff --git a/f.c b/f.c
+--- a/f.c
++++ b/f.c
+@@ -20,3 +20,4 @@
+ www
+ o50
++ADD1
+ ggg
+@@ -80,6 +81,7 @@
+ www
+ o50
++ADD2
+ ggg
+-SHARED_OLD
++SHARED_NEW
+ nnn
+ mmm

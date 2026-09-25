@@ -1,0 +1,32 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                           Patch 1: patch1                            ┃                           Patch 2: patch2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                       *
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an
+old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│mm/hugetlb.c                                               ┃  old  new│mm/hugetlb.c
+          │@@                                                         ┃          │@@ int move_hugetlb_page_tables(struct vm_area_struct *vma,
+          │                                                           ┃ 5122 5122│	 * range.
+          │                                                           ┃ 5123 5123│	 */
+          │                                                           ┃ 5124 5124│	flush_cache_range(vma, range.start, range.end);
+          │                                                           ┃+     5125│	tlb_gather_mmu_vma(&tlb, vma);
+          │                                                           ┃ 5125 5126│
+          │                                                           ┃ 5126 5127│	mmu_notifier_invalidate_range_start(&range);
+          │                                                           ┃ 5127 5128│	last_addr_mask = hugetlb_mask_last_page(h);
+          │───────────────────────────────────────────────────────────╂──────────┼───────────────────────────────────────────────────────────
+          │@@ unsigned long hugetlb_change_protection(struct vm_area_s┃          │@@ long hugetlb_change_protection(struct vm_area_struct *vm
+          │truct *vma,                                                ┃          │a,
+ 5098 5088│                                                           ┃ 6442 6433│
+ 5099 5089│	BUG_ON(address >= end);                               ┃ 6443 6434│	BUG_ON(address >= end);
+ 5100 5090│	flush_cache_range(vma, range.start, range.end);       ┃ 6444 6435│	flush_cache_range(vma, range.start, range.end);
++     5091│	tlb_gather_mmu_vma(&tlb, vma, range.start, range.end);┃+     6436│	tlb_gather_mmu_vma(&tlb, vma);
+ 5101 5092│                                                           ┃ 6445 6437│
+ 5102 5093│	mmu_notifier_invalidate_range_start(&range);          ┃ 6446 6438│	mmu_notifier_invalidate_range_start(&range);
+ 5103 5094│	i_mmap_lock_write(vma->vm_file->f_mapping);           ┃ 6447 6439│	hugetlb_vma_lock_write(vma);

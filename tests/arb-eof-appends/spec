@@ -1,0 +1,5 @@
+# Patch1 changes k4 to k4_mod at line 103 of h.c. Patch2 adds APPEND_ONE after
+# line 300 and APPEND_TWO after line 700, in two hunks that quote no lines at
+# all. Both additions must still show on patch2's side, as lines 301 and 701.
+bin: DIFFOFDIFFS
+args: patch1 patch2

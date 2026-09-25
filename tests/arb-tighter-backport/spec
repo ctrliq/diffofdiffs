@@ -1,0 +1,9 @@
+# Patch1's hunk quotes OLD_A and OLD_B on adjacent lines 103-104 and changes c5.
+# Patch2 replaces OLD_A at line 103 and OLD_B at line 110, as when a backport's
+# base holds two changed lines closer together than upstream does.
+#
+# Each of patch2's replacements must pair with patch1's own copy of the line, at
+# patch1's lines 103 and 104, and show as patch2's edit; c5's change shows as
+# patch1's alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2

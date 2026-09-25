@@ -1,0 +1,9 @@
+# Patch1 changes r120 to r120_mod at line 120 of s.c, quoting lines 100-119
+# above it. Patch2 replaces r105 with r105_UP at line 105, adds INSERTED after a
+# context line r105 that it numbers 115, and replaces r106 with r106_UP at a
+# line it numbers 117, well past where patch1's quoted file holds those lines.
+# The report must show all three of patch2's changes on its side, with INSERTED
+# beside patch1's r105 line and the r106 replacement beside patch1's r106, and
+# patch1's r120 change on its side alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2

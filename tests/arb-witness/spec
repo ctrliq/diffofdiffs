@@ -1,0 +1,11 @@
+# Patch1 adds a four-argument tlb_gather_mmu_vma() call to
+# hugetlb_change_protection(). Patch2 adds a two-argument call there and another
+# in move_hugetlb_page_tables(), and both of patch2's insertions follow the same
+# flush_cache_range() line.
+#
+# The report must pair patch2's hugetlb_change_protection() insertion with
+# patch1's differing one and show the move_hugetlb_page_tables() insertion as
+# patch2's alone, rather than matching both of patch2's insertions against the
+# one site in patch1. arb-witness-fuzz1 shares patch2 and the expected report.
+bin: DIFFOFDIFFS
+args: patch1 patch2

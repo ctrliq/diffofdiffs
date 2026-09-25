@@ -1,0 +1,16 @@
+--- a/foo.c
++++ b/foo.c
+@@ -500,4 +500,5 @@ void g(void)
+ beta
+ gamma
++ROW_A
+ gamma
+ delta
+@@ -900,6 +900,7 @@ void h(void)
+ zeta
+ eta
+ gamma
++ROW_B
+ gamma
+ delta
+ theta

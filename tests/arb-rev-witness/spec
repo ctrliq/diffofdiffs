@@ -1,0 +1,7 @@
+# arb-rev-fuzzcorr with patch1's first hunk at lines 50-51, the same line
+# numbers as patch2's copy of www and o50, and no zzz line above it. The report
+# must show ADD1 and ADD2 on patch1's side alone and the change to SHARED_NEW as
+# an edit both patches make, pairing patch1's line 83 with patch2's line 53.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

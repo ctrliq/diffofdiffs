@@ -1,0 +1,6 @@
+# Both patches carry one hunk over lines 100-120 of s.c. Patch1 changes r120;
+# patch2 changes r104 and r116. The edits interleave without overlapping, so
+# each must show as its own patch's edit beside the other patch's unchanged copy
+# of the line, at that patch's own line numbers.
+bin: DIFFOFDIFFS
+args: patch1 patch2

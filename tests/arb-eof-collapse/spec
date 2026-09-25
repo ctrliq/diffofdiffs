@@ -1,0 +1,4 @@
+# Remote insertions with no quoted source do not prove that the backport
+# insertion should be reversed. Preserve their separate original positions.
+bin: DIFFOFDIFFS
+args: patch1 patch2

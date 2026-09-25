@@ -1,0 +1,6 @@
+# arb-consuming-junction with a third hunk in patch2: it replaces r105 with
+# r105_UP, adds INSERTED after line 105, and replaces r106 with r106_UP, in
+# three hunks with no context whose line ranges touch. All three changes must
+# show on patch2's side, as lines 105-107, beside patch1's quoted lines.
+bin: DIFFOFDIFFS
+args: patch1 patch2

@@ -1,0 +1,10 @@
+--- a/mm/hugetlb.c
++++ b/mm/hugetlb.c
+@@ -5098,6 +5088,7 @@ unsigned long hugetlb_change_protection(struct vm_area_struct *vma,
+ 
+ 	BUG_ON(address >= end);
+ 	flush_cache_range(vma, range.start, range.end);
++	tlb_gather_mmu_vma(&tlb, vma, range.start, range.end);
+ 
+ 	mmu_notifier_invalidate_range_start(&range);
+ 	i_mmap_lock_write(vma->vm_file->f_mapping);

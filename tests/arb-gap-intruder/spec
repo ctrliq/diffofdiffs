@@ -1,0 +1,5 @@
+# The shared source edit is accounted for. The extra upstream insertion
+# remains a one-sided change on its own source, rather than acquiring the
+# neighboring edit's position.
+bin: DIFFOFDIFFS
+args: patch1 patch2

@@ -1,0 +1,10 @@
+# Patch1 adds ADD1 after www and o50 at lines 20-21 of f.c, behind a zzz line at
+# 19 that patch2 never quotes, and adds ADD2 after the same pair of lines at
+# 80-81, above a change of SHARED_OLD to SHARED_NEW. Patch2 makes only that
+# change, at line 53, quoting www, o50, and ggg above it and a different last
+# line below. The report must show ADD1 and ADD2 on patch1's side alone and the
+# change to SHARED_NEW as an edit both patches make, pairing patch1's line 83
+# with patch2's line 53.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

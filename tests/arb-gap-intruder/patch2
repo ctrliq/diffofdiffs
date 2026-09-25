@@ -1,0 +1,14 @@
+--- a/foo.c
++++ b/foo.c
+@@ -500,4 +500,4 @@ void g(void)
+ beta
+ gamma
++NEWROW
+-gamma
+ delta
+@@ -900,4 +900,5 @@ void h(void)
+ gamma
+ gamma
++NEWROW
+ delta
+ epsilon

@@ -1,0 +1,11 @@
+# Patch1 has two hunks with the same www/o50/ggg context, at lines 20 and 80,
+# adding ADD1 and ADD2, and its second hunk also replaces SHARED_OLD with
+# SHARED_NEW. Patch2 makes only the SHARED_OLD replacement, declared at line 50
+# between patch1's two sites, with context that matches both of patch1's hunks.
+#
+# The replacement must show as an edit both patches make, paired with patch1's
+# second hunk where patch1 makes the same replacement, while ADD1 and ADD2 show
+# as patch1's alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2
+exit: 0

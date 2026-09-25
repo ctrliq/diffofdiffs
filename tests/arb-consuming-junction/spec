@@ -1,0 +1,7 @@
+# Patch1 changes r120 to r120_mod at line 120 of s.c, quoting lines 100-119
+# above it. Patch2 replaces the adjacent lines r105 and r106 with r105_UP and
+# r106_UP, in two one-line hunks with no context. The report must show both of
+# patch2's replacements on its side, beside patch1's quoted lines 105 and 106,
+# and patch1's r120 change on its side alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2

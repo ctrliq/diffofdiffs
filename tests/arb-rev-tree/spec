@@ -1,0 +1,11 @@
+# In git tree mode, arb1 and arb2 both change SHARED_OLD in arb to SHARED_NEW,
+# but their parents differ: arb1's holds www, o50, and ggg twice, first in place
+# of arb rows 20 to 22 and again before SHARED_OLD, has arb rows 50 to 79 that
+# arb2's lacks, and ends in mmm where arb2's ends in kkk. arb1 also adds ADD1
+# and ADD2, each after an o50. The report must pair the two SHARED_OLD changes
+# at the one place both commits make them, show ADD1 and ADD2 on arb1's side,
+# and show the differences between the two tips around these edits in its
+# context section.
+bin: DIFFOFDIFFS
+args: --git-tree=repo arb1 arb2
+exit: 0

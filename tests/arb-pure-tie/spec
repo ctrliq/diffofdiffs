@@ -1,0 +1,7 @@
+# Patch1 adds INSERTED_BY_P1 after the first gamma at line 102 of foo.c. Patch2
+# adds ROW_A after line 501 and ROW_B after line 901, and each of its hunks
+# quotes beta, gamma, gamma, and delta around the addition, as patch1 does. The
+# report must pair INSERTED_BY_P1 with ROW_A and show ROW_B on patch2's side
+# alone.
+bin: DIFFOFDIFFS
+args: patch1 patch2

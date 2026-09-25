@@ -1,0 +1,5 @@
+# Equal deleted text at different source positions does not establish a shared
+# edit. Keep the unresolved original changes visible instead of comparing the
+# wrong occurrence.
+bin: DIFFOFDIFFS
+args: patch1 patch2

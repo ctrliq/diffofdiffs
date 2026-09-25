@@ -1,0 +1,6 @@
+# A repeated code pattern sits beside a thirty-row deletion in the source.
+# Tree context must show the complete selected run and the requested source
+# rows around it, using each result file's coordinates.
+bin: DIFFOFDIFFS
+args: --git-tree=repo sil1 sil2
+exit: 0
