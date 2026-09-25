@@ -1,0 +1,76 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                              Patch 1: a                               ┃                              Patch 2: b
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                         *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old
+number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│fs/nfs/write.c                                                ┃ old new│fs/nfs/write.c
+        │@@ nfs_lock_and_join_requests(struct page *page)              ┃        │@@ static struct nfs_page *nfs_lock_and_join_requests(struct f
+        │                                                              ┃        │olio *folio)
+        │                                                              ┃ 526 577│	if (ret < 0)
+ 577 628│		return head;                                   ┃ 527 578│		goto out_unlock;
+ 578 629│                                                              ┃ 528 579│
+        │                                                              ┃-529    │	/* lock each request in the page group */
+        │                                                              ┃ 530    │	ret = nfs_page_group_lock_subrequests(head);
+     630│	ret = nfs_page_group_lock(head);                       ┃     580│	ret = nfs_page_group_lock(head);
++    631│	if (ret < 0)                                           ┃ 531 581│	if (ret < 0)
++    632│		goto out_unlock;                               ┃ 532 582│		goto out_unlock;
++    633│                                                              ┃ 533 583│
+ 579 634│	/* lock each request in the page group */              ┃+    584│	/* lock each request in the page group */
+ 580    │	ret = nfs_page_group_lock_subrequests(head);           ┃        │
+-581    │	if (ret < 0) {                                         ┃        │
+-582    │		nfs_unlock_and_release_request(head);          ┃        │
+-583    │		return ERR_PTR(ret);                           ┃        │
+     635│	for (subreq = head->wb_this_page;                      ┃     585│	for (subreq = head->wb_this_page;
+     636│	     subreq != head;                                   ┃     586│	     subreq != head;
+     637│	     subreq = subreq->wb_this_page) {                  ┃     587│	     subreq = subreq->wb_this_page) {
+     638│		ret = nfs_page_group_lock_subreq(head, subreq);┃     588│		ret = nfs_page_group_lock_subreq(head, subreq);
+     639│		if (ret < 0)                                   ┃     589│		if (ret < 0)
+     640│			goto out_unlock;                       ┃     590│			goto out_unlock;
+ 584 641│	}                                                      ┃+    591│	}
+ 585 642│                                                              ┃+    592│
+-586    │	nfs_join_page_group(head, inode);                      ┃        │
+     643│	nfs_page_group_unlock(head);                           ┃     593│	nfs_page_group_unlock(head);
+ 587 644│                                                              ┃+    594│
+        │                                                              ┃ 534 595│	nfs_init_cinfo_from_inode(&cinfo, inode);
++    645│	nfs_join_page_group(head, inode);                      ┃ 535 596│	nfs_join_page_group(head, &cinfo, inode);
+ 588 646│	return head;                                           ┃ 536 597│	return head;
++    647│                                                              ┃        │
++    648│out_unlock:                                                   ┃        │
++    649│	nfs_unlock_and_release_request(head);                  ┃        │
++    650│	return ERR_PTR(ret);                                   ┃        │
+ 589 651│}                                                             ┃        │
+ 590 652│                                                              ┃        │
+ 591 653│static void nfs_write_error(struct nfs_page *req, int error)  ┃        │
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                   *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│fs/nfs/write.c                                                ┃     new│fs/nfs/write.c
+        │@@ nfs_lock_and_join_requests(struct page *page)              ┃        │@@ static struct nfs_page *nfs_lock_and_join_requests(struct f
+        │                                                              ┃        │olio *folio)
+     616│{                                                             ┃     548│{
+-    617│	struct inode *inode = page_file_mapping(page)->host;   ┃+    549│	struct inode *inode = folio->mapping->host;
+     618│	struct nfs_page *head, *subreq;                        ┃     550│	struct nfs_page *head, *subreq;
+        │                                                              ┃+    551│	struct nfs_commit_info cinfo;
+     619│	int ret;                                               ┃     552│	int ret;
+     620│                                                              ┃     553│
+        │──────────────────────────────────────────────────────────────╂────────┼──────────────────────────────────────────────────────────────
+        │@@ nfs_lock_and_join_requests(struct page *page)              ┃        │@@ static struct nfs_page *nfs_lock_and_join_requests(struct f
+        │                                                              ┃        │olio *folio)
+     642│                                                              ┃     592│
+     643│	nfs_page_group_unlock(head);                           ┃     593│	nfs_page_group_unlock(head);
+     644│                                                              ┃     594│
+        │                                                              ┃+    595│	nfs_init_cinfo_from_inode(&cinfo, inode);
+-    645│	nfs_join_page_group(head, inode);                      ┃+    596│	nfs_join_page_group(head, &cinfo, inode);
+     646│	return head;                                           ┃     597│	return head;

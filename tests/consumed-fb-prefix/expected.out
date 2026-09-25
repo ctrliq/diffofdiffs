@@ -1,0 +1,27 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                    Patch 1: a                                     ┃                                    Patch 2: b
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                                 *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both
+remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  old  new│fs/nfsd/nfs4xdr.c                                                       ┃  old  new│fs/nfsd/nfs4xdr.c
+          │@@ nfsd4_encode_operation(struct nfsd4_compoundres *resp, struct nfsd4_o┃          │@@ nfsd4_encode_operation(struct nfsd4_compoundres *resp, struct nfsd4_o
+          │p *op)                                                                  ┃          │p *op)
+ 4943 4943│                                                                        ┃ 6282 6282│
+ 4944 4944│		so->so_replay.rp_status = op->status;                      ┃ 6283 6283│		so->so_replay.rp_status = op->status;
+ 4945     │		so->so_replay.rp_buflen = len;                             ┃ 6284     │		so->so_replay.rp_buflen = len;
+-4946     │		read_bytes_from_xdr_buf(xdr->buf, post_err_offset,         ┃-6285     │		read_bytes_from_xdr_buf(xdr->buf, op_status_offset + XDR_UNIT,
+      4945│		if (len <= NFSD4_REPLAY_ISIZE) {                           ┃      6284│		if (len <= NFSD4_REPLAY_ISIZE) {
+      4946│			so->so_replay.rp_buflen = len;                     ┃      6285│			so->so_replay.rp_buflen = len;
+      4947│			read_bytes_from_xdr_buf(xdr->buf,                  ┃      6286│			read_bytes_from_xdr_buf(xdr->buf,
++     4948│						post_err_offset,           ┃+     6287│						op_status_offset + XDR_UNIT,
+ 4947 4949│						so->so_replay.rp_buf, len);┃ 6286 6288│						so->so_replay.rp_buf, len);
+      4950│		} else {                                                   ┃      6289│		} else {
+      4951│			so->so_replay.rp_buflen = 0;                       ┃      6290│			so->so_replay.rp_buflen = 0;

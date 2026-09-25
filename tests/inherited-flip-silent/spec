@@ -1,0 +1,9 @@
+# Patch1 is a backport of "NFS: Fix a race when updating an existing write" and
+# patch2 is the upstream commit. Their pagelist.c and nfs_page.h changes match
+# and must be left out. In fs/nfs/write.c the backport removes
+# nfs_find_and_lock_page_request() at line 245, where patch2 has no hunk, so the
+# report must show that removal on patch1's side alone, and show the backport's
+# rework of nfs_lock_and_join_requests() beside patch2's.
+bin: DIFFOFDIFFS
+args: bp-47b7c5fd21be.patch up-76d2e3890fb1.patch
+exit: 0

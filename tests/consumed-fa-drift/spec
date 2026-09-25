@@ -1,0 +1,8 @@
+# Both patches change the size constant in the same
+# libeth_cacheline_set_assert() call for struct idpf_tx_queue, with identical
+# context, but at lines 681 and 692 and with different values: 88 becomes 96 in
+# patch1 and 112 becomes 120 in patch2. The report must pair the two hunks
+# despite the 11-line offset and show both replacements side by side.
+bin: DIFFOFDIFFS
+args: p1.patch p2.patch
+exit: 0

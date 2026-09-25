@@ -1,0 +1,123 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                Patch 1: bp-47b7c5fd21be.patch                                ┃                                Patch 2: up-76d2e3890fb1.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                                                       *
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│fs/nfs/write.c                                                                       ┃ old new│fs/nfs/write.c
+        │@@ static struct nfs_page *nfs_page_find_head_request(struct page *page)             ┃        │@@
+ 242 232│	return req;                                                                   ┃        │
+ 243 233│}                                                                                    ┃        │
+ 244 234│                                                                                     ┃        │
+-245    │static struct nfs_page *nfs_find_and_lock_page_request(struct page *page)            ┃        │
+-246    │{                                                                                    ┃        │
+-247    │	struct inode *inode = page_file_mapping(page)->host;                          ┃        │
+-248    │	struct nfs_page *req, *head;                                                  ┃        │
+-249    │	int ret;                                                                      ┃        │
+-250    │                                                                                     ┃        │
+-251    │	for (;;) {                                                                    ┃        │
+-252    │		req = nfs_page_find_head_request(page);                               ┃        │
+-253    │		if (!req)                                                             ┃        │
+-254    │			return req;                                                   ┃        │
+-255    │		head = nfs_page_group_lock_head(req);                                 ┃        │
+-256    │		if (head != req)                                                      ┃        │
+-257    │			nfs_release_request(req);                                     ┃        │
+-258    │		if (IS_ERR(head))                                                     ┃        │
+-259    │			return head;                                                  ┃        │
+-260    │		ret = nfs_cancel_remove_inode(head, inode);                           ┃        │
+-261    │		if (ret < 0) {                                                        ┃        │
+-262    │			nfs_unlock_and_release_request(head);                         ┃        │
+-263    │			return ERR_PTR(ret);                                          ┃        │
+-264    │		}                                                                     ┃        │
+-265    │		/* Ensure that nobody removed the request before we locked it */      ┃        │
+-266    │		if (head == nfs_page_private_request(page))                           ┃        │
+-267    │			break;                                                        ┃        │
+-268    │		if (PageSwapCache(page))                                              ┃        │
+-269    │			break;                                                        ┃        │
+-270    │		nfs_unlock_and_release_request(head);                                 ┃        │
+-271    │	}                                                                             ┃        │
+-272    │	return head;                                                                  ┃        │
+-273    │}                                                                                    ┃        │
+-274    │                                                                                     ┃        │
+ 275 235│/* Adjust the file length if we're writing beyond the end */                         ┃        │
+ 276 236│static void nfs_grow_file(struct page *page, unsigned int offset, unsigned int count)┃        │
+ 277 237│{                                                                                    ┃        │
+        │─────────────────────────────────────────────────────────────────────────────────────╂────────┼─────────────────────────────────────────────────────────────────────────────────────
+        │@@ nfs_lock_and_join_requests(struct page *page)                                     ┃        │@@ static struct nfs_page *nfs_lock_and_join_requests(struct folio *folio)
+ 623 583│	 * reference to the whole page group - the group will not be destroyed        ┃        │
+ 624 584│	 * until the head reference is released.                                      ┃        │
+ 625 585│	 */                                                                           ┃        │
+-626    │	head = nfs_find_and_lock_page_request(page);                                  ┃        │
++    586│retry:                                                                               ┃        │
++    587│	head = nfs_page_find_head_request(page);                                      ┃        │
+ 627 588│	if (IS_ERR_OR_NULL(head))                                                     ┃        │
+ 628 589│		return head;                                                          ┃        │
+ 629 590│                                                                                     ┃        │
++    591│	while (!nfs_lock_request(head)) {                                             ┃        │
++    592│		ret = nfs_wait_on_request(head);                                      ┃        │
++    593│		if (ret < 0) {                                                        ┃        │
++    594│			nfs_release_request(head);                                    ┃        │
++    595│			return ERR_PTR(ret);                                          ┃        │
++    596│		}                                                                     ┃ 585 575│		}
++    597│	}                                                                             ┃ 586 576│	}
++    598│                                                                                     ┃ 587 577│
+ 630 599│	ret = nfs_page_group_lock(head);                                              ┃+    578│	ret = nfs_page_group_lock(head);
+ 631 600│	if (ret < 0)                                                                  ┃+    579│	if (ret < 0)
+ 632 601│		goto out_unlock;                                                      ┃+    580│		goto out_unlock;
+ 633 602│                                                                                     ┃+    581│
++    603│	/* Ensure that nobody removed the request before we locked it */              ┃ 588 582│	/* Ensure that nobody removed the request before we locked it */
++    604│	if (head != nfs_page_private_request(page) && !PageSwapCache(page)) {         ┃ 589 583│	if (head != folio->private) {
+     605│		nfs_page_group_unlock(head);                                          ┃     584│		nfs_page_group_unlock(head);
++    606│		nfs_unlock_and_release_request(head);                                 ┃ 590 585│		nfs_unlock_and_release_request(head);
++    607│		goto retry;                                                           ┃ 591 586│		goto retry;
++    608│	}                                                                             ┃ 592 587│	}
++    609│                                                                                     ┃ 593 588│
+        │                                                                                     ┃-594    │	ret = nfs_cancel_remove_inode(head, inode);
+        │                                                                                     ┃-595    │	if (ret < 0)
+        │                                                                                     ┃-596    │		goto out_unlock;
+        │                                                                                     ┃-597    │
+        │                                                                                     ┃-598    │	ret = nfs_page_group_lock(head);
+        │                                                                                     ┃-599    │	if (ret < 0)
+        │                                                                                     ┃-600    │		goto out_unlock;
+     610│	nfs_cancel_remove_inode(head, inode);                                         ┃     589│	nfs_cancel_remove_inode(head, inode);
++    611│                                                                                     ┃ 601 590│
+ 634 612│	/* lock each request in the page group */                                     ┃ 602 591│	/* lock each request in the page group */
+ 635 613│	for (subreq = head->wb_this_page;                                             ┃ 603 592│	for (subreq = head->wb_this_page;
+ 636 614│	     subreq != head;                                                          ┃        │
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                                                                 *
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│fs/nfs/write.c                                                                       ┃     new│fs/nfs/write.c
+        │@@ nfs_lock_and_join_requests(struct page *page)                                     ┃        │@@ static struct nfs_page *nfs_lock_and_join_requests(struct folio *folio)
+     601│		goto out_unlock;                                                      ┃     580│		goto out_unlock;
+     602│                                                                                     ┃     581│
+     603│	/* Ensure that nobody removed the request before we locked it */              ┃     582│	/* Ensure that nobody removed the request before we locked it */
+-    604│	if (head != nfs_page_private_request(page) && !PageSwapCache(page)) {         ┃+    583│	if (head != folio->private) {
+     605│		nfs_page_group_unlock(head);                                          ┃     584│		nfs_page_group_unlock(head);
+     606│		nfs_unlock_and_release_request(head);                                 ┃     585│		nfs_unlock_and_release_request(head);
+     607│		goto retry;                                                           ┃     586│		goto retry;
+        │─────────────────────────────────────────────────────────────────────────────────────╂────────┼─────────────────────────────────────────────────────────────────────────────────────
+        │@@ static void nfs_inode_remove_request(struct nfs_page *req)                        ┃        │@@ static void nfs_inode_remove_request(struct nfs_page *req)
+     823│                                                                                     ┃     777│
+     824│	nfs_page_group_lock(req);                                                     ┃     778│	nfs_page_group_lock(req);
+     825│	if (nfs_page_group_sync_on_bit_locked(req, PG_REMOVE)) {                      ┃     779│	if (nfs_page_group_sync_on_bit_locked(req, PG_REMOVE)) {
+-    826│		head = req->wb_head;                                                  ┃+    780│		struct folio *folio = nfs_page_to_folio(req->wb_head);
+        │                                                                                     ┃+    781│		struct address_space *mapping = folio->mapping;
+     827│                                                                                     ┃     782│
+        │─────────────────────────────────────────────────────────────────────────────────────╂────────┼─────────────────────────────────────────────────────────────────────────────────────
+        │@@ static void nfs_inode_remove_request(struct nfs_page *req)                        ┃        │@@ static void nfs_inode_remove_request(struct nfs_page *req)
+     833│		}                                                                     ┃     788│		}
+-    834│		spin_unlock(&mapping->private_lock);                                  ┃+    789│		spin_unlock(&mapping->i_private_lock);
+     835│	}                                                                             ┃     790│	}
+     836│	nfs_page_group_unlock(req);                                                   ┃     791│	nfs_page_group_unlock(req);
+     837│                                                                                     ┃     792│

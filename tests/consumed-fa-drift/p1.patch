@@ -1,0 +1,12 @@
+diff --git a/drivers/net/ethernet/intel/idpf/idpf_txrx.h b/drivers/net/ethernet/intel/idpf/idpf_txrx.h
+--- a/drivers/net/ethernet/intel/idpf/idpf_txrx.h
++++ b/drivers/net/ethernet/intel/idpf/idpf_txrx.h
+@@ -681,7 +683,7 @@ struct idpf_tx_queue {
+ 	__cacheline_group_end_aligned(cold);
+ };
+ libeth_cacheline_set_assert(struct idpf_tx_queue, 64,
+-			    88 + sizeof(struct u64_stats_sync),
++			    96 + sizeof(struct u64_stats_sync),
+ 			    24);
+ 
+ /**

@@ -1,0 +1,334 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                        Patch 1: bp-346c9604237.patch                                        ┃                                       Patch 2: up-899ee91156e5.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                                                                                                     *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│include/net/tc_act/tc_pedit.h                                                                       ┃ old new│include/net/tc_act/tc_pedit.h
+        │@@ struct tcf_pedit {                                                                               ┃        │@@ struct tcf_pedit_parms {
+  14  14│	struct tc_action	common;                                                              ┃        │
+  15  15│	unsigned char		tcfp_nkeys;                                                          ┃        │
+  16  16│	unsigned char		tcfp_flags;                                                          ┃        │
+- 17    │	u32			tcfp_off_max_hint;                                                   ┃        │
+  18  17│	struct tc_pedit_key	*tcfp_keys;                                                          ┃  15  15│	struct tc_pedit_key	*tcfp_keys;
+  19  18│	struct tcf_pedit_key_ex	*tcfp_keys_ex;                                                       ┃  16  16│	struct tcf_pedit_key_ex	*tcfp_keys_ex;
+  20  19│};                                                                                                  ┃  17  17│	int action;
+        │                                                                                                    ┃- 18    │	u32 tcfp_off_max_hint;
+        │                                                                                                    ┃  19  18│	unsigned char tcfp_nkeys;
+        │                                                                                                    ┃  20  19│	unsigned char tcfp_flags;
+        │                                                                                                    ┃  21  20│	struct rcu_head rcu;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│net/sched/act_pedit.c                                                                               ┃ old new│net/sched/act_pedit.c
+        │@@                                                                                                  ┃        │@@
+  15  15│#include <linux/init.h>                                                                             ┃  17  17│#include <linux/ipv6.h>
+  16  16│#include <linux/slab.h>                                                                             ┃  18  18│#include <linux/slab.h>
+      17│#include <linux/overflow.h>                                                                         ┃      19│#include <linux/overflow.h>
++     18│#include <asm/unaligned.h>                                                                          ┃+     20│#include <linux/unaligned.h>
+        │                                                                                                    ┃  19  21│#include <net/ipv6.h>
+  17  19│#include <net/netlink.h>                                                                            ┃  20  22│#include <net/netlink.h>
+  18  20│#include <net/pkt_sched.h>                                                                          ┃  21  23│#include <net/pkt_sched.h>
+  19  21│#include <linux/tc_act/tc_pedit.h>                                                                  ┃        │
+        │────────────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ static int tcf_pedit_init(struct net *net, struct nlattr *nla,                                   ┃        │@@ static int tcf_pedit_init(struct net *net, struct nlattr *nla,
+ 228 230│		p->tcfp_nkeys = parm->nkeys;                                                         ┃ 242 244│		goto out_free_ex;
+ 229 231│	}                                                                                            ┃ 243 245│	}
+ 230 232│	memcpy(p->tcfp_keys, parm->keys, ksize);                                                     ┃        │
+-231    │	p->tcfp_off_max_hint = 0;                                                                    ┃        │
+ 232 233│	for (i = 0; i < p->tcfp_nkeys; ++i) {                                                        ┃        │
+-233    │		u32 cur = p->tcfp_keys[i].off;                                                       ┃        │
+-234    │                                                                                                    ┃ 244 246│
+ 235 234│		/* sanitize the shift value for any later use */                                     ┃        │
+ 236 235│		p->tcfp_keys[i].shift = min_t(size_t, BITS_PER_TYPE(int) - 1,                        ┃        │
+ 237 236│					      p->tcfp_keys[i].shift);                                ┃        │
+        │                                                                                                    ┃-245    │	nparms->tcfp_off_max_hint = 0;
+        │                                                                                                    ┃ 246 247│	nparms->tcfp_flags = parm->flags;
+        │                                                                                                    ┃ 247 248│	nparms->tcfp_nkeys = parm->nkeys;
+        │                                                                                                    ┃ 248 249│
+        │────────────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ static int tcf_pedit_init(struct net *net, struct nlattr *nla,                                   ┃        │@@ static int tcf_pedit_init(struct net *net, struct nlattr *nla,
+        │                                                                                                    ┃ 268 269│						   BITS_PER_TYPE(int) - 1,
+        │                                                                                                    ┃ 269 270│						   nparms->tcfp_keys[i].shift);
+-238    │                                                                                                    ┃ 270 271│
+ 239    │		/* The AT option can read a single byte, we can bound the actual                     ┃ 271    │		/* The AT option can read a single byte, we can bound the actual
+ 240    │		 * value with uchar max.                                                             ┃ 272    │		 * value with uchar max.
+ 241    │		 */                                                                                  ┃ 273    │		 */
+-242    │		cur += (0xff & p->tcfp_keys[i].offmask) >> p->tcfp_keys[i].shift;                    ┃-274    │		cur += (0xff & offmask) >> nparms->tcfp_keys[i].shift;
+ 243    │                                                                                                    ┃ 275    │
+ 244    │		/* Each key touches 4 bytes starting from the computed offset */                     ┃ 276    │		/* Each key touches 4 bytes starting from the computed offset */
+-245    │		p->tcfp_off_max_hint = max(p->tcfp_off_max_hint, cur + 4);                           ┃-277    │		nparms->tcfp_off_max_hint =
+        │                                                                                                    ┃-278    │			max(nparms->tcfp_off_max_hint, cur + 4);
+ 246 237│	}                                                                                            ┃ 279 272│	}
+ 247 238│                                                                                                    ┃ 280 273│
+ 248 239│	p->tcfp_flags = parm->flags;                                                                 ┃ 281 274│	p = to_pedit(*a);
+        │────────────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ static bool offset_valid(struct sk_buff *skb, int offset, int len)                               ┃        │@@ static bool offset_valid(struct sk_buff *skb, int offset, int len)
+     270│static bool offset_valid(struct sk_buff *skb, int offset, int len)                                  ┃     314│static bool offset_valid(struct sk_buff *skb, int offset, int len)
+ 280 271│{                                                                                                   ┃ 322 315│{
+ 281    │	if (offset > 0 && offset > skb->len)                                                         ┃ 323    │	if (offset > 0 && offset > skb->len)
+        │                                                                                                    ┃-324    │		return false;
+        │                                                                                                    ┃-325    │
+        │                                                                                                    ┃ 326    │	if  (offset < 0 && -offset > skb_headroom(skb))
+     272│	if (offset < -(int)skb_headroom(skb))                                                        ┃     316│	if (offset < -(int)skb_headroom(skb))
+ 282 273│		return false;                                                                        ┃ 327 317│		return false;
+ 283 274│                                                                                                    ┃ 328 318│
+ 284    │	if  (offset < 0 && -offset > skb_headroom(skb))                                              ┃        │
+-285    │		return false;                                                                        ┃        │
+-286    │                                                                                                    ┃        │
+ 287    │	return true;                                                                                 ┃ 329    │	return true;
+     275│	return offset <= (int)skb->len - len;                                                        ┃     319│	return offset <= (int)skb->len - len;
+ 288 276│}                                                                                                   ┃ 330 320│}
+        │────────────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ static int tcf_pedit_act(struct sk_buff *skb, const struct tc_action *a,                         ┃        │@@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
+ 332    │	max_offset = (skb_transport_header_was_set(skb) ?                                            ┃ 401    │	max_offset = (skb_transport_header_was_set(skb) ?
+ 333    │		      skb_transport_offset(skb) :                                                    ┃ 402    │		      skb_transport_offset(skb) :
+ 334    │		      skb_network_offset(skb)) +                                                     ┃ 403    │		      skb_network_offset(skb)) +
+-335    │		     p->tcfp_off_max_hint;                                                           ┃-404    │		     parms->tcfp_off_max_hint;
+ 336    │	if (skb_ensure_writable(skb, min(skb->len, max_offset)))                                     ┃ 405    │	if (skb_ensure_writable(skb, min(skb->len, max_offset)))
+-337    │		goto unlock;                                                                         ┃-406    │		goto done;
+ 338    │                                                                                                    ┃ 407    │
+ 339 319│	tcf_lastuse_update(&p->tcf_tm);                                                              ┃ 408 390│	tcf_lastuse_update(&p->tcf_tm);
+        │                                                                                                    ┃ 409 391│	tcf_action_update_bstats(&p->common, skb);
+ 340 320│                                                                                                    ┃ 410 392│
+        │────────────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ static int tcf_pedit_act(struct sk_buff *skb, const struct tc_action *a,                         ┃        │@@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
+ 346 326│		enum pedit_cmd cmd = TCA_PEDIT_KEY_EX_CMD_SET;                                       ┃ 412 394│	tkey_ex = parms->tcfp_keys_ex;
+ 347 327│                                                                                                    ┃ 413 395│
+ 348 328│		for (i = p->tcfp_nkeys; i > 0; i--, tkey++) {                                        ┃ 414 396│	for (i = parms->tcfp_nkeys; i > 0; i--, tkey++) {
+-349    │			u32 *ptr, hdata;                                                             ┃        │
++    329│			int write_offset, write_len;                                                 ┃+    397│		int write_offset, write_len;
+ 350 330│			int offset = tkey->off;                                                      ┃ 415 398│		int offset = tkey->off;
+-351    │			int hoffset;                                                                 ┃        │
+-352    │			u32 val;                                                                     ┃        │
++    331│			int hoffset = 0;                                                             ┃ 416 399│		int hoffset = 0;
+        │                                                                                                    ┃-417    │		u32 *ptr, hdata;
+        │                                                                                                    ┃-418    │		u32 val;
++    332│			u32 cur_val, val;                                                            ┃+    400│		u32 cur_val, val;
++    333│			u32 *ptr;                                                                    ┃+    401│		u32 *ptr;
+ 353 334│			int rc;                                                                      ┃ 419 402│		int rc;
+ 354 335│                                                                                                    ┃ 420 403│
+ 355 336│			if (tkey_ex) {                                                               ┃ 421 404│		if (tkey_ex) {
+        │────────────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ static int tcf_pedit_act(struct sk_buff *skb, const struct tc_action *a,                         ┃        │@@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
+ 361 342│                                                                                                    ┃ 433 416│
+ 362 343│			rc = pedit_skb_hdr_offset(skb, htype, &hoffset);                             ┃        │
+ 363 344│			if (rc) {                                                                    ┃        │
+-364    │				pr_info("tc action pedit bad header type specified (0x%x)\n",        ┃        │
+-365    │					htype);                                                      ┃        │
++    345│				pr_info_ratelimited("tc action pedit unable to extract header offset ┃        │
+        │for header type (0x%x)\n",                                                                          ┃        │
++    346│						    htype);                                          ┃        │
+ 366 347│				goto bad;                                                            ┃        │
+ 367 348│			}                                                                            ┃        │
+ 368 349│                                                                                                    ┃        │
+ 369 350│			if (tkey->offmask) {                                                         ┃ 434 417│		if (tkey->offmask) {
+ 370 351│				u8 *d, _d;                                                           ┃ 435 418│			u8 *d, _d;
++    352│				int at_offset;                                                       ┃+    419│			int at_offset;
+ 371 353│                                                                                                    ┃ 436 420│
+-372    │				if (!offset_valid(skb, hoffset + tkey->at)) {                        ┃-437    │			if (!offset_valid(skb, hoffset + tkey->at)) {
+-373    │					pr_info("tc action pedit 'at' offset %d out of bounds\n",    ┃        │
+-374    │						hoffset + tkey->at);                                 ┃        │
++    354│				if (check_add_overflow(hoffset, (int)tkey->at, &at_offset) ||        ┃+    421│			if (check_add_overflow(hoffset, (int)tkey->at, &at_offset) ||
++    355│				    !offset_valid(skb, at_offset, sizeof(_d))) {                     ┃+    422│			    !offset_valid(skb, at_offset, sizeof(_d))) {
++    356│					pr_info_ratelimited("tc action pedit 'at' offset %d out of bo┃ 438 423│				pr_info_ratelimited("tc action pedit 'at' offset %d out of bounds\n",
+        │unds\n",                                                                                            ┃        │
++    357│							    hoffset + tkey->at);                     ┃ 439 424│						    hoffset + tkey->at);
+ 375 358│					goto bad;                                                    ┃ 440 425│				goto bad;
+ 376 359│				}                                                                    ┃ 441 426│			}
+-377    │				d = skb_header_pointer(skb, hoffset + tkey->at,                      ┃-442    │			d = skb_header_pointer(skb, hoffset + tkey->at,
++    360│				d = skb_header_pointer(skb, at_offset,                               ┃+    427│			d = skb_header_pointer(skb, at_offset,
+ 378 361│						       sizeof(_d), &_d);                             ┃ 443 428│					       sizeof(_d), &_d);
+ 379 362│				if (!d)                                                              ┃ 444 429│			if (!d)
+ 380 363│					goto bad;                                                    ┃ 445 430│				goto bad;
+        │────────────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ static int tcf_pedit_act(struct sk_buff *skb, const struct tc_action *a,                         ┃        │@@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
+ 382 365│			}                                                                            ┃        │
+ 383 366│                                                                                                    ┃        │
+ 384 367│			if (offset % 4) {                                                            ┃        │
+-385    │				pr_info("tc action pedit offset must be on 32 bit boundaries\n");    ┃        │
++    368│				pr_info_ratelimited("tc action pedit offset must be on 32 bit boundar┃        │
+        │ies\n");                                                                                            ┃        │
+ 386 369│				goto bad;                                                            ┃ 451 436│			}
+ 387 370│			}                                                                            ┃ 452 437│		}
+ 388 371│                                                                                                    ┃ 453 438│
+-389    │			if (!offset_valid(skb, hoffset + offset)) {                                  ┃-454    │		if (!offset_valid(skb, hoffset + offset)) {
+-390    │				pr_info("tc action pedit offset %d out of bounds\n",                 ┃-455    │			pr_info_ratelimited("tc action pedit offset %d out of bounds\n", hoffset + offset);
+-391    │					hoffset + offset);                                           ┃        │
++    372│			if (check_add_overflow(hoffset, offset, &write_offset)) {                    ┃+    439│		if (check_add_overflow(hoffset, offset, &write_offset)) {
++    373│				pr_info_ratelimited("tc action pedit offset overflow\n");            ┃+    440│			pr_info_ratelimited("tc action pedit offset overflow\n");
+ 392 374│				goto bad;                                                            ┃ 456 441│			goto bad;
+ 393 375│			}                                                                            ┃ 457 442│		}
+ 394 376│                                                                                                    ┃ 458 443│
+-395    │			ptr = skb_header_pointer(skb, hoffset + offset,                              ┃-459    │		ptr = skb_header_pointer(skb, hoffset + offset,
+-396    │						 sizeof(hdata), &hdata);                             ┃-460    │					 sizeof(hdata), &hdata);
+-397    │			if (!ptr)                                                                    ┃-461    │		if (!ptr)
++    377│			if (!offset_valid(skb, write_offset, sizeof(*ptr))) {                        ┃+    444│		if (!offset_valid(skb, write_offset, sizeof(*ptr))) {
++    378│				pr_info_ratelimited("tc action pedit offset %d out of bounds\n",     ┃+    445│			pr_info_ratelimited("tc action pedit offset %d out of bounds\n",
++    379│						    write_offset);                                   ┃+    446│					    write_offset);
+ 398 380│				goto bad;                                                            ┃ 462 447│			goto bad;
++    381│			}                                                                            ┃+    448│		}
+     382│                                                                                                    ┃     449│
++    383│			if (write_offset < 0) {                                                      ┃+    450│		if (write_offset < 0) {
++    384│				if (skb_cow(skb, -write_offset))                                     ┃+    451│			if (skb_cow(skb, -write_offset))
++    385│					goto bad;                                                    ┃+    452│				goto bad;
++    386│				if (write_offset + (int)sizeof(*ptr) > 0) {                          ┃+    453│			if (write_offset + (int)sizeof(*ptr) > 0) {
++    387│					if (skb_ensure_writable(skb,                                 ┃+    454│				if (skb_ensure_writable(skb,
++    388│								min_t(int, skb->len,                 ┃+    455│							min_t(int, skb->len,
++    389│								      write_offset + (int)sizeof(*ptr┃+    456│							      write_offset + (int)sizeof(*ptr))))
+        │))))                                                                                                ┃        │
++    390│						goto bad;                                            ┃+    457│					goto bad;
++    391│				}                                                                    ┃+    458│			}
++    392│			} else {                                                                     ┃+    459│		} else {
++    393│				if (check_add_overflow(write_offset, (int)sizeof(*ptr),              ┃+    460│			if (check_add_overflow(write_offset, (int)sizeof(*ptr),
++    394│						       &write_len))                                  ┃+    461│					       &write_len))
++    395│					goto bad;                                                    ┃+    462│				goto bad;
++    396│				if (skb_ensure_writable(skb, min_t(int, skb->len,                    ┃+    463│			if (skb_ensure_writable(skb, min_t(int, skb->len,
+     397│							   write_len)))                              ┃     464│							   write_len)))
++    398│					goto bad;                                                    ┃+    465│				goto bad;
++    399│			}                                                                            ┃+    466│		}
+     400│                                                                                                    ┃     467│
++    401│			ptr = (u32 *)(skb->data + write_offset);                                     ┃+    468│		ptr = (u32 *)(skb->data + write_offset);
++    402│			cur_val = get_unaligned(ptr);                                                ┃+    469│		cur_val = get_unaligned(ptr);
+ 399 403│			/* just do it, baby */                                                       ┃ 463 470│		/* just do it, baby */
+ 400 404│			switch (cmd) {                                                               ┃ 464 471│		switch (cmd) {
+ 401 405│			case TCA_PEDIT_KEY_EX_CMD_SET:                                               ┃ 465 472│		case TCA_PEDIT_KEY_EX_CMD_SET:
+ 402 406│				val = tkey->val;                                                     ┃ 466 473│			val = tkey->val;
+ 403 407│				break;                                                               ┃ 467 474│			break;
+ 404 408│			case TCA_PEDIT_KEY_EX_CMD_ADD:                                               ┃ 468 475│		case TCA_PEDIT_KEY_EX_CMD_ADD:
+-405    │				val = (*ptr + tkey->val) & ~tkey->mask;                              ┃-469    │			val = (*ptr + tkey->val) & ~tkey->mask;
++    409│				val = (cur_val + tkey->val) & ~tkey->mask;                           ┃+    476│			val = (cur_val + tkey->val) & ~tkey->mask;
+ 406 410│				break;                                                               ┃ 470 477│			break;
+ 407 411│			default:                                                                     ┃ 471 478│		default:
+-408    │				pr_info("tc action pedit bad command (%d)\n",                        ┃        │
+-409    │					cmd);                                                        ┃        │
++    412│				pr_info_ratelimited("tc action pedit bad command (%d)\n",            ┃ 472 479│			pr_info_ratelimited("tc action pedit bad command (%d)\n", cmd);
++    413│						    cmd);                                            ┃        │
+ 410 414│				goto bad;                                                            ┃ 473 480│			goto bad;
+ 411 415│			}                                                                            ┃ 474 481│		}
+ 412 416│                                                                                                    ┃ 475 482│
+-413    │			*ptr = ((*ptr & tkey->mask) ^ val);                                          ┃-476    │		*ptr = ((*ptr & tkey->mask) ^ val);
+-414    │			if (ptr == &hdata)                                                           ┃-477    │		if (ptr == &hdata)
+-415    │				skb_store_bits(skb, hoffset + offset, ptr, 4);                       ┃-478    │			skb_store_bits(skb, hoffset + offset, ptr, 4);
++    417│			put_unaligned((cur_val & tkey->mask) ^ val, ptr);                            ┃+    483│		put_unaligned((cur_val & tkey->mask) ^ val, ptr);
+ 416 418│		}                                                                                    ┃ 479 484│	}
+ 417 419│                                                                                                    ┃ 480 485│
+ 418 420│		goto done;                                                                           ┃ 481 486│	goto done;
+        │────────────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ static int tcf_pedit_act(struct sk_buff *skb, const struct tc_action *a,                         ┃        │@@
+ 424 426│	p->tcf_qstats.overlimits++;                                                                  ┃        │
+ 425 427│done:                                                                                               ┃        │
+ 426 428│	bstats_update(&p->tcf_bstats, skb);                                                          ┃        │
+-427    │unlock:                                                                                             ┃        │
+ 428 429│	spin_unlock(&p->tcf_lock);                                                                   ┃        │
+ 429 430│	return p->tcf_action;                                                                        ┃        │
+ 430 431│}                                                                                                   ┃        │
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                                                                                                                               *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - patch1, + patch2.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│net/sched/act_pedit.c                                                                               ┃     new│net/sched/act_pedit.c
+        │@@                                                                                                  ┃        │@@
+      16│#include <linux/slab.h>                                                                             ┃      18│#include <linux/slab.h>
+      17│#include <linux/overflow.h>                                                                         ┃      19│#include <linux/overflow.h>
+-     18│#include <asm/unaligned.h>                                                                          ┃+     20│#include <linux/unaligned.h>
+        │                                                                                                    ┃+     21│#include <net/ipv6.h>
+      19│#include <net/netlink.h>                                                                            ┃      22│#include <net/netlink.h>
+      20│#include <net/pkt_sched.h>                                                                          ┃      23│#include <net/pkt_sched.h>
+        │────────────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ static int tcf_pedit_act(struct sk_buff *skb, const struct tc_action *a,                         ┃        │@@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
+     315│	int i;                                                                                       ┃     386│	int i;
+     316│                                                                                                    ┃     387│
+-    317│	spin_lock(&p->tcf_lock);                                                                     ┃+    388│	parms = rcu_dereference_bh(p->parms);
+     318│                                                                                                    ┃     389│
+     319│	tcf_lastuse_update(&p->tcf_tm);                                                              ┃     390│	tcf_lastuse_update(&p->tcf_tm);
+        │                                                                                                    ┃+    391│	tcf_action_update_bstats(&p->common, skb);
+     320│                                                                                                    ┃     392│
+        │────────────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ static int tcf_pedit_act(struct sk_buff *skb, const struct tc_action *a,                         ┃        │@@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
+     327│                                                                                                    ┃     395│
+-    328│		for (i = p->tcfp_nkeys; i > 0; i--, tkey++) {                                        ┃+    396│	for (i = parms->tcfp_nkeys; i > 0; i--, tkey++) {
+-    329│			int write_offset, write_len;                                                 ┃+    397│		int write_offset, write_len;
+-    330│			int offset = tkey->off;                                                      ┃+    398│		int offset = tkey->off;
+-    331│			int hoffset = 0;                                                             ┃+    399│		int hoffset = 0;
+-    332│			u32 cur_val, val;                                                            ┃+    400│		u32 cur_val, val;
+-    333│			u32 *ptr;                                                                    ┃+    401│		u32 *ptr;
+-    334│			int rc;                                                                      ┃+    402│		int rc;
+     335│                                                                                                    ┃     403│
+-    336│			if (tkey_ex) {                                                               ┃+    404│		if (tkey_ex) {
+        │────────────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ static int tcf_pedit_act(struct sk_buff *skb, const struct tc_action *a,                         ┃        │@@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
+     342│                                                                                                    ┃     416│
+-    343│			rc = pedit_skb_hdr_offset(skb, htype, &hoffset);                             ┃        │
+-    344│			if (rc) {                                                                    ┃        │
+-    345│				pr_info_ratelimited("tc action pedit unable to extract header offset ┃        │
+        │for header type (0x%x)\n",                                                                          ┃        │
+-    346│						    htype);                                          ┃        │
+-    347│				goto bad;                                                            ┃        │
+-    348│			}                                                                            ┃        │
+-    349│                                                                                                    ┃        │
+-    350│			if (tkey->offmask) {                                                         ┃+    417│		if (tkey->offmask) {
+-    351│				u8 *d, _d;                                                           ┃+    418│			u8 *d, _d;
+-    352│				int at_offset;                                                       ┃+    419│			int at_offset;
+     353│                                                                                                    ┃     420│
+-    354│				if (check_add_overflow(hoffset, (int)tkey->at, &at_offset) ||        ┃+    421│			if (check_add_overflow(hoffset, (int)tkey->at, &at_offset) ||
+-    355│				    !offset_valid(skb, at_offset, sizeof(_d))) {                     ┃+    422│			    !offset_valid(skb, at_offset, sizeof(_d))) {
+-    356│					pr_info_ratelimited("tc action pedit 'at' offset %d out of bo┃+    423│				pr_info_ratelimited("tc action pedit 'at' offset %d out of bounds\n",
+        │unds\n",                                                                                            ┃        │
+-    357│							    hoffset + tkey->at);                     ┃+    424│						    hoffset + tkey->at);
+-    358│					goto bad;                                                    ┃+    425│				goto bad;
+-    359│				}                                                                    ┃+    426│			}
+-    360│				d = skb_header_pointer(skb, at_offset,                               ┃+    427│			d = skb_header_pointer(skb, at_offset,
+-    361│						       sizeof(_d), &_d);                             ┃+    428│					       sizeof(_d), &_d);
+-    362│				if (!d)                                                              ┃+    429│			if (!d)
+-    363│					goto bad;                                                    ┃+    430│				goto bad;
+        │────────────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ static int tcf_pedit_act(struct sk_buff *skb, const struct tc_action *a,                         ┃        │@@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
+-    370│			}                                                                            ┃+    437│		}
+     371│                                                                                                    ┃     438│
+-    372│			if (check_add_overflow(hoffset, offset, &write_offset)) {                    ┃+    439│		if (check_add_overflow(hoffset, offset, &write_offset)) {
+-    373│				pr_info_ratelimited("tc action pedit offset overflow\n");            ┃+    440│			pr_info_ratelimited("tc action pedit offset overflow\n");
+-    374│				goto bad;                                                            ┃+    441│			goto bad;
+-    375│			}                                                                            ┃+    442│		}
+     376│                                                                                                    ┃     443│
+-    377│			if (!offset_valid(skb, write_offset, sizeof(*ptr))) {                        ┃+    444│		if (!offset_valid(skb, write_offset, sizeof(*ptr))) {
+-    378│				pr_info_ratelimited("tc action pedit offset %d out of bounds\n",     ┃+    445│			pr_info_ratelimited("tc action pedit offset %d out of bounds\n",
+-    379│						    write_offset);                                   ┃+    446│					    write_offset);
+-    380│				goto bad;                                                            ┃+    447│			goto bad;
+-    381│			}                                                                            ┃+    448│		}
+     382│                                                                                                    ┃     449│
+-    383│			if (write_offset < 0) {                                                      ┃+    450│		if (write_offset < 0) {
+-    384│				if (skb_cow(skb, -write_offset))                                     ┃+    451│			if (skb_cow(skb, -write_offset))
+        │────────────────────────────────────────────────────────────────────────────────────────────────────╂────────┼────────────────────────────────────────────────────────────────────────────────────────────────────
+        │@@ static int tcf_pedit_act(struct sk_buff *skb, const struct tc_action *a,                         ┃        │@@ TC_INDIRECT_SCOPE int tcf_pedit_act(struct sk_buff *skb,
+-    398│					goto bad;                                                    ┃+    465│				goto bad;
+-    399│			}                                                                            ┃+    466│		}
+     400│                                                                                                    ┃     467│
+-    401│			ptr = (u32 *)(skb->data + write_offset);                                     ┃+    468│		ptr = (u32 *)(skb->data + write_offset);
+-    402│			cur_val = get_unaligned(ptr);                                                ┃+    469│		cur_val = get_unaligned(ptr);
+-    403│			/* just do it, baby */                                                       ┃+    470│		/* just do it, baby */
+-    404│			switch (cmd) {                                                               ┃+    471│		switch (cmd) {
+-    405│			case TCA_PEDIT_KEY_EX_CMD_SET:                                               ┃+    472│		case TCA_PEDIT_KEY_EX_CMD_SET:
+-    406│				val = tkey->val;                                                     ┃+    473│			val = tkey->val;
+-    407│				break;                                                               ┃+    474│			break;
+-    408│			case TCA_PEDIT_KEY_EX_CMD_ADD:                                               ┃+    475│		case TCA_PEDIT_KEY_EX_CMD_ADD:
+-    409│				val = (cur_val + tkey->val) & ~tkey->mask;                           ┃+    476│			val = (cur_val + tkey->val) & ~tkey->mask;
+-    410│				break;                                                               ┃+    477│			break;
+-    411│			default:                                                                     ┃+    478│		default:
+-    412│				pr_info_ratelimited("tc action pedit bad command (%d)\n",            ┃+    479│			pr_info_ratelimited("tc action pedit bad command (%d)\n", cmd);
+-    413│						    cmd);                                            ┃        │
+-    414│				goto bad;                                                            ┃+    480│			goto bad;
+-    415│			}                                                                            ┃+    481│		}
+     416│                                                                                                    ┃     482│
+-    417│			put_unaligned((cur_val & tkey->mask) ^ val, ptr);                            ┃+    483│		put_unaligned((cur_val & tkey->mask) ^ val, ptr);
+-    418│		}                                                                                    ┃+    484│	}
+     419│                                                                                                    ┃     485│
+-    420│		goto done;                                                                           ┃+    486│	goto done;

@@ -1,0 +1,10 @@
+# Patch1 is a backport of "net/sched: fix pedit partial COW leading to page
+# cache" and patch2 is the upstream commit. Both change
+# include/net/tc_act/tc_pedit.h and net/sched/act_pedit.c, starting from
+# different versions of the code. The report must keep each patch's replacements
+# of the offset_valid() checks in tcf_pedit_act() visible, pair the pedit code
+# both patches add, and name a hunk's function in its header only from lines the
+# patch quotes above the hunk, leaving a bare @@ where there are none.
+bin: DIFFOFDIFFS
+args: bp-346c9604237.patch up-899ee91156e5.patch
+exit: 0

@@ -1,0 +1,9 @@
+# Patches a and b both rework nfs_lock_and_join_requests() in fs/nfs/write.c
+# from different versions of the surrounding code, replacing the
+# nfs_page_group_lock_subrequests() call with the same loop that locks each
+# subrequest. The loop must show as lines both patches add, and patch b's own
+# edits around the replaced call, such as moving the "lock each request" comment
+# below nfs_page_group_lock(), must stay visible on its side.
+bin: DIFFOFDIFFS
+args: a b
+exit: 0

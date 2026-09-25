@@ -1,0 +1,23 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                           Patch 1: p1.patch                            ┃                           Patch 2: p2.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                                           *
+═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number means both add it, an old
+number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│drivers/net/ethernet/intel/idpf/idpf_txrx.h                    ┃ old new│drivers/net/ethernet/intel/idpf/idpf_txrx.h
+        │@@ struct idpf_tx_queue {                                      ┃        │@@ struct idpf_tx_queue {
+ 681 683│	__cacheline_group_end_aligned(cold);                    ┃ 692 694│	__cacheline_group_end_aligned(cold);
+ 682 684│};                                                             ┃ 693 695│};
+ 683 685│libeth_cacheline_set_assert(struct idpf_tx_queue, 64,          ┃ 694 696│libeth_cacheline_set_assert(struct idpf_tx_queue, 64,
+-684    │			    88 + sizeof(struct u64_stats_sync), ┃-695    │			    112 + sizeof(struct u64_stats_sync),
++    686│			    96 + sizeof(struct u64_stats_sync), ┃+    697│			    120 + sizeof(struct u64_stats_sync),
+ 685 687│			    24);                                ┃ 696 698│			    24);
+ 686 688│                                                               ┃ 697 699│
+ 687 689│/**                                                            ┃ 698 700│/**

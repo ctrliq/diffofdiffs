@@ -1,0 +1,5 @@
+# The two patches remove else beside different source calls. Comparing the
+# shared result must not restore that removed else as a new result difference.
+bin: DIFFOFDIFFS
+args: a b
+exit: 0

@@ -1,0 +1,13 @@
+# A backport of the upstream NFS fix "NFS: Fix a race when updating an existing
+# write" onto a folio-based tree (patch1), compared with the upstream commit
+# (patch2). Besides the fix, patch1 removes nfs_folio_find_and_lock_request()
+# and the nfs_init_cinfo_from_inode() call and rewrites the start of
+# nfs_lock_and_join_requests() around a retry loop, none of which patch2 does.
+#
+# The report must show those edits on patch1's side alone, patch2's removal of
+# its duplicated nfs_cancel_remove_inode() block on patch2's side, and the
+# differing swapcache check in the context section. inherited-flip-silent pairs
+# the same upstream commit with another backport.
+bin: DIFFOFDIFFS
+args: bp-43173dcfe8c.patch up-76d2e3890fb1.patch
+exit: 0

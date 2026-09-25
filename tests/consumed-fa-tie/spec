@@ -1,0 +1,11 @@
+# Both patches convert fs/cifs/transport.c from locking server->srv_mutex
+# directly to cifs_server_lock() and cifs_server_unlock(). Patch2 also converts
+# the pair in compound_send_recv() at line 1190, which patch1 leaves alone, and
+# three of patch1's other hunks share that hunk's unlock line and closing brace.
+#
+# The shared conversions must be left out as common changes, and the
+# compound_send_recv() hunk must show as patch2's alone rather than pairing with
+# one of the look-alike hunks in patch1.
+bin: DIFFOFDIFFS
+args: a b
+exit: 0

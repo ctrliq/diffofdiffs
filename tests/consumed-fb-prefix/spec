@@ -1,0 +1,10 @@
+# Both patches wrap the replay buffer copy in nfsd4_encode_operation() in
+# fs/nfsd/nfs4xdr.c in the same if (len <= NFSD4_REPLAY_ISIZE) block, at
+# different line numbers. The removed read_bytes_from_xdr_buf() line and one
+# added argument line differ, since patch a passes post_err_offset where patch b
+# passes op_status_offset + XDR_UNIT. The report must show those lines as each
+# patch's own, and the rest of the new block must still show as additions both
+# patches make rather than being left out.
+bin: DIFFOFDIFFS
+args: -U 3 a b
+exit: 0
