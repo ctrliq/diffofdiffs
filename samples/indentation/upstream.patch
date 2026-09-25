@@ -1,0 +1,23 @@
+diff --git a/request.c b/request.c
+--- a/request.c
++++ b/request.c
+@@ -3,8 +3,10 @@
+ 	int ret;
+ 
+ 	if (!req->ready)
+ 		return -EAGAIN;
++	req->attempts++;
++	trace_submit(req);
+ 	ret = queue_request(req);
+ 	if (!ret)
+ 		req->submitted = true;
+ 	return ret;
+diff --git a/counter.c b/counter.c
+--- a/counter.c
++++ b/counter.c
+@@ -1,4 +1,5 @@
+ static void reset_counter(struct counter *counter)
+ {
++	counter->generation++;
+ 	counter->value = 0;
+ }

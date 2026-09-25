@@ -1,0 +1,13 @@
+diff --git a/record.c b/record.c
+--- a/record.c
++++ b/record.c
+@@ -1,6 +1,9 @@
+ static void update_record(struct record *record, int value)
+ {
+ 	if (!record->active)
+ 		return;
++	write_seqcount_begin(&record->state.seq);
+ 	record->value = value;
++	record->generation++;
++	write_seqcount_end(&record->state.seq);
+ }

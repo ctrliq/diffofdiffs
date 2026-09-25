@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-highlight="words" data-layout="review" data-shared="true" data-gaps="true" data-wrap="true" data-text-size="medium">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>diffofdiffs report</title><style>
+/* SPDX-License-Identifier: GPL-2.0-only */
+:root {
+	color-scheme: light;
+	--page: #f6f8fa;
+	--surface: #fff;
+	--text: #1f2328;
+	--muted: #59636e;
+	--border: #d1d9e0;
+	--header: #f0f3f6;
+	--function: #eaf4fb;
+	--accent: #0969da;
+	--add: #dafbe1;
+	--remove: #ffebe9;
+	--word-add: #aceebb;
+	--word-remove: #ffcecb;
+	--word-add-corner: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 2'><circle cx='1' cy='1' r='1' fill='%23aceebb'/></svg>");
+	--word-remove-corner: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 2'><circle cx='1' cy='1' r='1' fill='%23ffcecb'/></svg>");
+	--gutter-add: #aceebb;
+	--gutter-remove: #ffcecb;
+	--shared: #fff4ba;
+	--code-size: 13px;
+	--code-font: "Liberation Mono", "DejaVu Sans Mono", monospace;
+}
+html[data-text-size="small"] { --code-size: 12px; }
+html[data-text-size="large"] { --code-size: 15px; }
+html[data-theme="dark"] {
+	color-scheme: dark;
+	--page: #0e151b;
+	--surface: #14181e;
+	--text: #f0f5fc;
+	--muted: #b0bdcc;
+	--border: #35434e;
+	--header: #1e2a34;
+	--function: #1b3445;
+	--accent: #9bcef0;
+	--add: #1b2c24;
+	--remove: #2d2022;
+	--word-add: #245a32;
+	--word-remove: #7f3533;
+	--word-add-corner: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 2'><circle cx='1' cy='1' r='1' fill='%23245a32'/></svg>");
+	--word-remove-corner: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 2'><circle cx='1' cy='1' r='1' fill='%237f3533'/></svg>");
+	--gutter-add: #23492e;
+	--gutter-remove: #5a2c2c;
+	--shared: #423a20;
+}
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--text); background: var(--page); font: 14px/1.5 system-ui, sans-serif; }
+main { max-width: 1600px; margin: auto; padding: 24px 32px 48px; }
+h1 { margin: 0; font-size: 28px; letter-spacing: -.03em; }
+h2 { font-size: 19px; margin: 0; }
+h3 { margin: 0; font-size: 13px; }
+header > p, .legend { color: var(--muted); }
+button, select, input { font: inherit; }
+button, select {
+	min-height: 34px;
+	padding: 5px 10px;
+	border: 1px solid var(--border);
+	border-radius: 5px;
+	background: var(--surface);
+	color: var(--text);
+}
+button { cursor: pointer; }
+button:hover, select:hover { border-color: var(--accent); }
+button:disabled { cursor: default; opacity: .6; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.controls { display: none; }
+html[data-interactive] .controls { display: block; }
+.toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px; margin: 16px 0; }
+.toolbar label { display: flex; align-items: center; gap: 7px; }
+#file-select { max-width: min(460px, 65vw); }
+#change-position, #copy-status { color: var(--muted); font-size: 12px; }
+.preferences { margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+summary { cursor: pointer; }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.operands { margin: 18px 0; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); }
+.operands > div { padding: 12px 16px; overflow-wrap: anywhere; font-family: var(--code-font); }
+.operands > div + div { border-left: 1px solid var(--border); }
+.operand-subject { display: block; margin-top: 6px; font: 600 14px/1.5 system-ui, sans-serif; }
+.section-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 16px; margin-top: 28px; }
+.legend { margin: 8px 0 14px; font-size: 12px; }
+.chip { padding: 2px 5px; border-radius: 3px; color: var(--text); white-space: nowrap; }
+.chip.left { background: var(--word-remove); }
+.chip.right { background: var(--word-add); }
+.chip.shared { background: var(--shared); }
+.file-block { margin: 18px 0 28px; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
+.file-heading { background: var(--header); }
+.file-heading > span { min-width: 0; padding: 10px 14px; overflow-wrap: anywhere; }
+.file-heading > span + span { border-left: 1px solid var(--border); }
+.code-viewport { overflow-x: auto; }
+.hunk {
+	background-color: var(--header);
+	background-image: repeating-linear-gradient(135deg, transparent 0 5px, var(--page) 5px 10px);
+	font: var(--code-size)/1.55 var(--code-font);
+}
+
+/* One pattern per hunk keeps gap stripes aligned across fractional row heights */
+.code-pair, .gap { background: transparent; }
+.hunk + .hunk { border-top: 8px solid var(--page); }
+.side { min-width: 0; min-height: 1.55em; }
+.side + .side { border-left: 1px solid var(--border); }
+.source-side, .header-side {
+	display: grid;
+	grid-template-columns: 2ch var(--digits, 4ch) var(--digits, 4ch) minmax(0, 1fr);
+	--source-background: var(--surface);
+	background: var(--source-background);
+	color: var(--text);
+}
+.column-headings { background: var(--header); }
+.source-side.add { --source-background: var(--add); }
+.source-side.remove { --source-background: var(--remove); }
+html[data-shared="true"] .source-side.shared { --source-background: var(--shared); }
+html[data-shared="false"] .chip.shared { background: var(--header); }
+.gap { background: transparent; }
+html[data-gaps="false"] .hunk { background-image: none; }
+.sign, .number { color: var(--muted); user-select: none; text-align: right; padding-right: 1ch; }
+.sign { padding-right: .4ch; color: var(--text); }
+.source-side.add :is(.sign, .number) { background: var(--gutter-add); color: var(--text); }
+.source-side.remove :is(.sign, .number) { background: var(--gutter-remove); color: var(--text); }
+.source-text {
+	--highlight-gap: .75px;
+
+	/* Round the advance so spaces don't alternate between pixel widths */
+	letter-spacing: calc(round(1ch, 1px) - 1ch);
+	white-space: pre-wrap;
+	tab-size: var(--tab-size);
+	overflow-wrap: anywhere;
+	padding: 0 1ch;
+	min-width: 0;
+}
+html[data-wrap="false"] .hunk { min-width: var(--report-width, 160ch); }
+html[data-wrap="false"] .source-text { white-space: pre; overflow-wrap: normal; }
+.function-pair { background: var(--function); color: var(--accent); }
+.function-pair > div, .note-pair > div { white-space: pre-wrap; overflow-wrap: anywhere; padding: 5px 12px; }
+.note-pair { background: var(--header); }
+.newline-note { background: var(--surface); color: var(--muted); }
+.newline-note > div { padding: 0 12px; }
+.source-side[data-side="0"] {
+	--word-change: var(--word-remove);
+	--word-corner: var(--word-remove-corner);
+}
+.source-side[data-side="1"] {
+	--word-change: var(--word-add);
+	--word-corner: var(--word-add-corner);
+}
+html[data-highlight="words"] .word-change,
+html[data-highlight="characters"] .character-change,
+html:not([data-highlight="none"]) .indent-change {
+	--highlight-paint: var(--word-corner), var(--word-corner), var(--word-corner),
+		var(--word-corner),
+		linear-gradient(var(--word-change), var(--word-change)),
+		linear-gradient(var(--word-change), var(--word-change));
+}
+
+/*
+ * Paint each block separately so whitespace can't cut a word's rounded corners.
+ * Backgrounds inset the fill without affecting text shaping or tab stops. Four
+ * fixed-size SVG circles meet two solid strips to keep a 1px radius at any width
+ * or zoom. Joined spans extend the fill past their edges to hide the taper.
+ */
+.highlight-text, .whitespace-space, .whitespace-tab {
+	--gap-left: var(--highlight-gap);
+	--gap-right: var(--highlight-gap);
+	--join-left: 0px;
+	--join-right: 0px;
+	--paint-left: calc(var(--gap-left) - var(--join-left));
+	--paint-right: calc(var(--gap-right) - var(--join-right));
+	--paint-width: max(0px, calc(100% - var(--paint-left) - var(--paint-right)));
+	--corner-width: min(2px, var(--paint-width));
+	background-image: var(--highlight-paint, none);
+	background-position: left var(--paint-left) top,
+		right var(--paint-right) top, left var(--paint-left) bottom,
+		right var(--paint-right) bottom, left var(--paint-left) center,
+		left calc(var(--paint-left) + 1px) top;
+	background-size: var(--corner-width) 2px, var(--corner-width) 2px,
+		var(--corner-width) 2px, var(--corner-width) 2px,
+		var(--paint-width) calc(100% - 2px),
+		max(0px, calc(100% - var(--paint-left) - var(--paint-right) - 2px)) 100%;
+	background-repeat: no-repeat;
+	box-decoration-break: clone;
+	-webkit-box-decoration-break: clone;
+}
+.whitespace-tab { --highlight-gap: 2.25px; }
+html[data-highlight="words"] .word-join-left {
+	--gap-left: 0px;
+	--join-left: 1px;
+}
+html[data-highlight="words"] .word-join-right {
+	--gap-right: 0px;
+	--join-right: 1px;
+}
+.indent-label { background: var(--function); padding: 4px 12px; font: 12px/1.6 system-ui, sans-serif; }
+.indent-label span { margin-left: 12px; color: var(--muted); }
+html[data-highlight="none"] :is(.indent-label, .word-legend) { display: none; }
+.current-change { outline: 2px solid var(--accent); outline-offset: -2px; }
+html[data-layout="console"] main { max-width: none; padding: 20px; }
+html[data-layout="console"] :is(.operands, .file-block) { border-radius: 0; }
+html[data-layout="console"] :is(h1, h2, h3, .legend) { font-family: var(--code-font); }
+html[data-layout="console"] .file-heading { border-block: 2px solid var(--border); }
+@media (max-width: 700px) {
+	main, html[data-layout="console"] main { padding: 16px 10px 32px; }
+	h1 { font-size: 23px; }
+	.operands > div { padding: 10px; font-size: 12px; }
+	.toolbar { gap: 10px; }
+	.source-text { padding-inline: .5ch; }
+}
+@media print {
+	.controls, header > p, .word-legend { display: none; }
+	main { padding: 0; }
+	.code-viewport { overflow: visible; }
+	.hunk { min-width: 0 !important; }
+	.source-text { white-space: pre-wrap !important; }
+}
+</style></head><body><main><header><h1>diffofdiffs</h1><p>Patch mode: comparisons use only the source lines quoted in the patches.</p><div class="pair operands"><div>Backport patch: backport.patch</div><div>Upstream patch: upstream.patch</div></div></header>
+<!-- SPDX-License-Identifier: GPL-2.0-only -->
+<div class="controls">
+  <div class="toolbar">
+    <label>Show <select id="section-select"><option value="all">All differences</option><option value="delta">Delta differences</option><option value="context">Context differences</option></select></label>
+    <label>File <select id="file-select"><option value="">Choose a file</option></select></label>
+    <button type="button" id="previous-change" title="Previous difference group">Previous</button>
+    <button type="button" id="next-change" title="Next difference group">Next</button>
+    <span id="change-position" role="status"></span>
+    <button type="button" id="copy-report" title="Copy the complete plain-text report, including hidden sections">Copy report</button>
+    <button type="button" id="download-report" title="Save the complete plain-text report">Save text</button>
+    <span id="copy-status" role="status"></span>
+  </div>
+  <details class="preferences" open>
+    <summary>Viewing options</summary>
+    <div class="toolbar">
+      <label>Layout <select id="layout-select"><option value="review">Review</option><option value="console">Console</option></select></label>
+      <label>Theme <select id="theme-select"><option value="dark">Dark</option><option value="light">Light</option></select></label>
+      <label>Highlight <select id="highlight-select"><option value="words">Words</option><option value="characters">Exact characters</option><option value="none">Off</option></select></label>
+      <label><input id="shared-yellow" type="checkbox"> Yellow shared edits</label>
+      <label><input id="gap-hatching" type="checkbox"> Mark gaps</label>
+      <label><input id="wrap-lines" type="checkbox"> Wrap lines</label>
+      <label>Text size <select id="font-size"><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option></select></label>
+    </div>
+  </details>
+</div>
+<noscript><p>All source rows are shown below. Enable JavaScript to use the viewing controls.</p></noscript>
+<p class="legend word-legend">Within aligned pairs: <span class="chip left">left text</span> / <span class="chip right">right text</span> that differs, independently of patch signs. Whitespace uses the same colors: each highlighted space has its own block; tabs fill their tab stops. Hover for details.</p><div id="comparison"><section id="delta"><div class="section-heading"><h2>Delta differences</h2></div><p class="legend">Code changes that differ between the patches. Old / new are each patch’s parent / result line numbers. Signs belong to that patch. <span class="chip shared">Shared edits</span> are additions or removals both patches make.</p><article class="file-block" id="file-0-0"><h3 class="pair file-heading"><span>request.c</span><span>request.c</span></h3><div class="code-viewport"><div class="hunk"><div class="pair column-headings"><div class="side header-side"><span></span><span class="number">old</span><span class="number">new</span><span></span></div><div class="side header-side"><span></span><span class="number">old</span><span class="number">new</span><span></span></div></div><div class="pair code-pair" id="row-0"><div class="side source-side context" data-side="0" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">3</span><span class="number new" title="Result line number">3</span><span class="source-text">	int ret = -EAGAIN;</span></div><div class="side source-side gap" data-side="1" title="No aligned source line; this is a gap, not a blank source line."></div></div>
+<div class="pair code-pair" id="row-1"><div class="side source-side context" data-side="0" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">4</span><span class="number new" title="Result line number">4</span><span class="source-text"></span></div><div class="side source-side context" data-side="1" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">4</span><span class="number new" title="Result line number">4</span><span class="source-text"></span></div></div>
+<div class="pair code-pair" id="row-2"><div class="side source-side context" data-side="0" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">5</span><span class="number new" title="Result line number">5</span><span class="source-text">	if (req-&gt;ready)<span class="word-change" title="Text that differs within this aligned pair."><span class="character-change"><span class="whitespace-space" title="Space"> </span><span class="highlight-text">{</span></span></span></span></div><div class="side source-side context" data-side="1" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">5</span><span class="number new" title="Result line number">5</span><span class="source-text">	if (<span class="word-change" title="Text that differs within this aligned pair."><span class="character-change"><span class="highlight-text">!</span></span></span>req-&gt;ready)</span></div></div>
+<div class="pair code-pair" id="row-3"><div class="side source-side gap" data-side="0" title="No aligned source line; this is a gap, not a blank source line."></div><div class="side source-side context" data-side="1" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">6</span><span class="number new" title="Result line number">6</span><span class="source-text">		return -EAGAIN;</span></div></div>
+<div class="pair code-pair" id="row-4" data-change-start data-indent-shift="-8"><div class="side source-side add" data-side="0" data-newline="yes"><span class="sign">+</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">6</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."><span class="whitespace-tab" title="Tab">	</span></span>req-&gt;attempts++;</span></div><div class="side source-side add" data-side="1" data-newline="yes"><span class="sign">+</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">7</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."></span>req-&gt;attempts++;</span></div></div>
+<div class="pair code-pair" id="row-5" data-indent-shift="-8"><div class="side source-side add" data-side="0" data-newline="yes"><span class="sign">+</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">7</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."><span class="whitespace-tab" title="Tab">	</span></span>trace_submit(req);</span></div><div class="side source-side add" data-side="1" data-newline="yes"><span class="sign">+</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">8</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."></span>trace_submit(req);</span></div></div>
+<div class="pair code-pair" id="row-6" data-indent-shift="-8"><div class="side source-side context" data-side="0" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">6</span><span class="number new" title="Result line number">8</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."><span class="whitespace-tab" title="Tab">	</span></span>ret = queue_request(req);</span></div><div class="side source-side context" data-side="1" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">7</span><span class="number new" title="Result line number">9</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."></span>ret = queue_request(req);</span></div></div>
+<div class="pair code-pair" id="row-7" data-indent-shift="-8"><div class="side source-side context" data-side="0" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">7</span><span class="number new" title="Result line number">9</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."><span class="whitespace-tab" title="Tab">	</span></span>if (!ret)</span></div><div class="side source-side context" data-side="1" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">8</span><span class="number new" title="Result line number">10</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."></span>if (!ret)</span></div></div>
+<div class="pair code-pair" id="row-8" data-indent-shift="-8"><div class="side source-side context" data-side="0" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">8</span><span class="number new" title="Result line number">10</span><span class="source-text">		<span class="indent-change" title="Leading whitespace differs."><span class="whitespace-tab" title="Tab">	</span></span>req-&gt;submitted = true;</span></div><div class="side source-side context" data-side="1" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">9</span><span class="number new" title="Result line number">11</span><span class="source-text">		<span class="indent-change" title="Leading whitespace differs."></span>req-&gt;submitted = true;</span></div></div>
+</div></div></article>
+<article class="file-block" id="file-0-1"><h3 class="pair file-heading"><span>counter.c</span><span>counter.c</span></h3><div class="code-viewport"><div class="hunk"><div class="pair column-headings"><div class="side header-side"><span></span><span class="number">old</span><span class="number">new</span><span></span></div><div class="side header-side"><span></span><span class="number">old</span><span class="number">new</span><span></span></div></div><div class="pair function-pair"><div class="side">static void reset_counter(struct counter *counter)</div><div class="side">static void reset_counter(struct counter *counter)</div></div>
+<div class="pair code-pair" id="row-9"><div class="side source-side context" data-side="0" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">1</span><span class="number new" title="Result line number">1</span><span class="source-text">static void reset_counter(struct counter *counter)</span></div><div class="side source-side context" data-side="1" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">1</span><span class="number new" title="Result line number">1</span><span class="source-text">static void reset_counter(struct counter *counter)</span></div></div>
+<div class="pair code-pair" id="row-10"><div class="side source-side context" data-side="0" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">2</span><span class="number new" title="Result line number">2</span><span class="source-text">{</span></div><div class="side source-side context" data-side="1" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">2</span><span class="number new" title="Result line number">2</span><span class="source-text">{</span></div></div>
+<div class="pair code-pair" id="row-11" data-change-start data-indent-shift="0"><div class="side source-side add" data-side="0" data-newline="yes"><span class="sign">+</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">3</span><span class="source-text"><span class="indent-change" title="Leading whitespace differs."><span class="whitespace-space" title="Space"> </span><span class="whitespace-space" title="Space"> </span><span class="whitespace-space" title="Space"> </span><span class="whitespace-space" title="Space"> </span><span class="whitespace-space" title="Space"> </span><span class="whitespace-space" title="Space"> </span><span class="whitespace-space" title="Space"> </span><span class="whitespace-space" title="Space"> </span></span>counter-&gt;generation++;</span></div><div class="side source-side add" data-side="1" data-newline="yes"><span class="sign">+</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">3</span><span class="source-text"><span class="indent-change" title="Leading whitespace differs."><span class="whitespace-tab" title="Tab">	</span></span>counter-&gt;generation++;</span></div></div>
+<div class="pair code-pair" id="row-12"><div class="side source-side context" data-side="0" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">3</span><span class="number new" title="Result line number">4</span><span class="source-text">	counter-&gt;value = 0;</span></div><div class="side source-side context" data-side="1" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">3</span><span class="number new" title="Result line number">4</span><span class="source-text">	counter-&gt;value = 0;</span></div></div>
+<div class="pair code-pair" id="row-13"><div class="side source-side context" data-side="0" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">4</span><span class="number new" title="Result line number">5</span><span class="source-text">}</span></div><div class="side source-side context" data-side="1" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number">4</span><span class="number new" title="Result line number">5</span><span class="source-text">}</span></div></div>
+</div></div></article>
+</section>
+<section id="context"><div class="section-heading"><h2>Context differences</h2></div><p class="legend">Surrounding code in the results. Signs mark lines present in only one result: − left, + right.</p><article class="file-block" id="file-1-0"><h3 class="pair file-heading"><span>request.c</span><span>request.c</span></h3><div class="code-viewport"><div class="hunk"><div class="pair column-headings"><div class="side header-side"><span></span><span class="number"></span><span class="number">new</span><span></span></div><div class="side header-side"><span></span><span class="number"></span><span class="number">new</span><span></span></div></div><div class="pair code-pair" id="row-14"><div class="side source-side context" data-side="0" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">4</span><span class="source-text"></span></div><div class="side source-side context" data-side="1" data-newline="yes"><span class="sign"> </span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">4</span><span class="source-text"></span></div></div>
+<div class="pair code-pair" id="row-15" data-change-start><div class="side source-side remove" data-side="0" data-newline="yes"><span class="sign">-</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">5</span><span class="source-text">	if (req-&gt;ready)<span class="word-change" title="Text that differs within this aligned pair."><span class="character-change"><span class="whitespace-space" title="Space"> </span><span class="highlight-text">{</span></span></span></span></div><div class="side source-side add" data-side="1" data-newline="yes"><span class="sign">+</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">5</span><span class="source-text">	if (<span class="word-change" title="Text that differs within this aligned pair."><span class="character-change"><span class="highlight-text">!</span></span></span>req-&gt;ready)</span></div></div>
+<div class="pair code-pair" id="row-16"><div class="side source-side gap" data-side="0" title="No aligned source line; this is a gap, not a blank source line."></div><div class="side source-side add" data-side="1" data-newline="yes"><span class="sign">+</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">6</span><span class="source-text">		return -EAGAIN;</span></div></div>
+<div class="pair code-pair" id="row-17" data-indent-shift="-8"><div class="side source-side remove" data-side="0" data-newline="yes"><span class="sign">-</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">6</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."><span class="whitespace-tab" title="Tab">	</span></span>req-&gt;attempts++;</span></div><div class="side source-side add" data-side="1" data-newline="yes"><span class="sign">+</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">7</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."></span>req-&gt;attempts++;</span></div></div>
+<div class="pair code-pair" id="row-18" data-indent-shift="-8"><div class="side source-side remove" data-side="0" data-newline="yes"><span class="sign">-</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">7</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."><span class="whitespace-tab" title="Tab">	</span></span>trace_submit(req);</span></div><div class="side source-side add" data-side="1" data-newline="yes"><span class="sign">+</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">8</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."></span>trace_submit(req);</span></div></div>
+<div class="pair code-pair" id="row-19" data-indent-shift="-8"><div class="side source-side remove" data-side="0" data-newline="yes"><span class="sign">-</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">8</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."><span class="whitespace-tab" title="Tab">	</span></span>ret = queue_request(req);</span></div><div class="side source-side add" data-side="1" data-newline="yes"><span class="sign">+</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">9</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."></span>ret = queue_request(req);</span></div></div>
+<div class="pair code-pair" id="row-20" data-indent-shift="-8"><div class="side source-side remove" data-side="0" data-newline="yes"><span class="sign">-</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">9</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."><span class="whitespace-tab" title="Tab">	</span></span>if (!ret)</span></div><div class="side source-side add" data-side="1" data-newline="yes"><span class="sign">+</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">10</span><span class="source-text">	<span class="indent-change" title="Leading whitespace differs."></span>if (!ret)</span></div></div>
+<div class="pair code-pair" id="row-21" data-indent-shift="-8"><div class="side source-side remove" data-side="0" data-newline="yes"><span class="sign">-</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">10</span><span class="source-text">		<span class="indent-change" title="Leading whitespace differs."><span class="whitespace-tab" title="Tab">	</span></span>req-&gt;submitted = true;</span></div><div class="side source-side add" data-side="1" data-newline="yes"><span class="sign">+</span><span class="number old" title="Parent line number"></span><span class="number new" title="Result line number">11</span><span class="source-text">		<span class="indent-change" title="Leading whitespace differs."></span>req-&gt;submitted = true;</span></div></div>
+</div></div></article>
+</section>
+</div></main>
+<template id="plain-report">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+              Backport patch: backport.patch               ┃              Upstream patch: upstream.patch
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Patch mode: comparisons use only the source lines quoted in the patches.
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    DELTA DIFFERENCES - code changes that differ between the patches                                                 *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark edits made by only that patch. A sign-less line with one number is an edit both patches make: a new number
+means both add it, an old number means both remove it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│request.c                                         ┃ old new│request.c
+        │@@                                                ┃        │@@
+   3   3│	int ret = -EAGAIN;                         ┃        │
+   4   4│                                                  ┃   4   4│
+   5   5│	if (req-&gt;ready) {                          ┃   5   5│	if (!req-&gt;ready)
+        │                                                  ┃   6   6│		return -EAGAIN;
++      6│		req-&gt;attempts++;                   ┃+      7│	req-&gt;attempts++;
++      7│		trace_submit(req);                 ┃+      8│	trace_submit(req);
+   6   8│		ret = queue_request(req);          ┃   7   9│	ret = queue_request(req);
+   7   9│		if (!ret)                          ┃   8  10│	if (!ret)
+   8  10│			req-&gt;submitted = true;     ┃   9  11│		req-&gt;submitted = true;
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ old new│counter.c                                         ┃ old new│counter.c
+        │@@ static void reset_counter(struct counter *count┃        │@@ static void reset_counter(struct counter *count
+        │er)                                               ┃        │er)
+   1   1│static void reset_counter(struct counter *counter)┃   1   1│static void reset_counter(struct counter *counter)
+   2   2│{                                                 ┃   2   2│{
++      3│        counter-&gt;generation++;                    ┃+      3│	counter-&gt;generation++;
+   3   4│	counter-&gt;value = 0;                        ┃   3   4│	counter-&gt;value = 0;
+   4   5│}                                                 ┃   4   5│}
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+*    CONTEXT DIFFERENCES - surrounding code differences between the patches                                           *
+═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+Signs mark lines present in only one result: - Backport, + Upstream.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     new│request.c                                         ┃     new│request.c
+        │@@                                                ┃        │@@
+       4│                                                  ┃       4│
+-      5│	if (req-&gt;ready) {                          ┃+      5│	if (!req-&gt;ready)
+        │                                                  ┃+      6│		return -EAGAIN;
+-      6│		req-&gt;attempts++;                   ┃+      7│	req-&gt;attempts++;
+-      7│		trace_submit(req);                 ┃+      8│	trace_submit(req);
+-      8│		ret = queue_request(req);          ┃+      9│	ret = queue_request(req);
+-      9│		if (!ret)                          ┃+     10│	if (!ret)
+-     10│			req-&gt;submitted = true;     ┃+     11│		req-&gt;submitted = true;
+</template>
+<style>:root { --digits: 4ch; --report-width: 128ch; --tab-size: 8; }</style>
+<script>
+/* SPDX-License-Identifier: GPL-2.0-only */
+(() => {
+	'use strict';
+	const root = document.documentElement;
+	const report = document.querySelector('#comparison');
+	const sections = [...report.querySelectorAll('section')];
+	const fileSelect = document.querySelector('#file-select');
+	const position = document.querySelector('#change-position');
+	const status = document.querySelector('#copy-status');
+	const plainReport =
+		document.querySelector('#plain-report').content.textContent;
+	const selectors = [
+		['theme-select', 'theme'],
+		['layout-select', 'layout'],
+		['highlight-select', 'highlight'],
+		['font-size', 'textSize']
+	];
+	const checkboxes = [
+		['shared-yellow', 'shared'],
+		['gap-hatching', 'gaps'],
+		['wrap-lines', 'wrap']
+	];
+	const viewUpdates = [];
+	let groups = [];
+	let groupIndex = -1;
+
+	function bindViewControl(id, apply) {
+		const control = document.getElementById(id);
+		const update = () => apply(control);
+
+		control.addEventListener('change', update);
+		viewUpdates.push(update);
+		return control;
+	}
+
+	function applyViewControls() {
+		for (const update of viewUpdates)
+			update();
+	}
+
+	function downloadText(filename, text) {
+		const blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+
+		link.href = url;
+		link.download = filename;
+		link.click();
+		setTimeout(() => URL.revokeObjectURL(url), 1000);
+	}
+
+	function updateNavigation() {
+		const shown = sections.filter(section => !section.hidden);
+		groups = shown.flatMap(section => {
+			return [...section.querySelectorAll('[data-change-start]')];
+		});
+		groupIndex = -1;
+		for (const row of report.querySelectorAll('.current-change'))
+			row.classList.remove('current-change');
+		position.textContent = `${groups.length} difference groups`;
+		for (const id of ['previous-change', 'next-change'])
+			document.getElementById(id).disabled = !groups.length;
+	}
+
+	function addSectionFiles(section) {
+		const name = section.id === 'delta' ? 'Delta' : 'Context';
+		for (const file of section.querySelectorAll('.file-block')) {
+			const heading = file.querySelector('.file-heading');
+			const paths = Array.from(heading.children,
+				span => span.textContent);
+			const path = paths[0] === paths[1] ? paths[0] :
+				paths.filter(Boolean).join(' → ');
+			fileSelect.add(new Option(`${name} · ${path}`, file.id));
+		}
+	}
+
+	function setView(value) {
+		fileSelect.replaceChildren(new Option('Choose a file', ''));
+		for (const section of sections) {
+			section.hidden = value !== 'all' && section.id !== value;
+			if (!section.hidden)
+				addSectionFiles(section);
+		}
+		updateNavigation();
+	}
+
+	function moveChange(step) {
+		let row;
+
+		if (!groups.length)
+			return;
+
+		groups[groupIndex]?.classList.remove('current-change');
+		groupIndex = groupIndex < 0 ?
+			(step < 0 ? groups.length - 1 : 0) :
+			(groupIndex + step + groups.length) % groups.length;
+		row = groups[groupIndex];
+		row.classList.add('current-change');
+		row.scrollIntoView({block: 'center', inline: 'nearest'});
+		position.textContent = `${groupIndex + 1} of ${groups.length} difference groups`;
+	}
+
+	function createIndentationLabel(run) {
+		const shift = Number(run[0].dataset.indentShift);
+		const label = document.createElement('div');
+		const name = document.createElement('strong');
+		const detail = document.createElement('span');
+		const lines = run.length === 1 ? 'line' : 'lines';
+		const sign = shift > 0 ? '+' : '';
+		const change = shift ?
+			`right side ${sign}${shift} columns` :
+			'tabs / spaces changed';
+
+		label.className = 'indent-label';
+		name.textContent = 'Indentation only';
+		detail.textContent = `${run.length} ${lines} · ${change}`;
+		label.title = 'Source text matches exactly after removing only leading spaces and tabs.';
+		label.append(name, detail);
+		return label;
+	}
+
+	/*
+	 * Group adjacent rows only when their exact indentation checks found
+	 * the same shift.
+	 */
+	report.querySelectorAll('.hunk').forEach(hunk => {
+		let run = [];
+		function finishRun() {
+			if (!run.length)
+				return;
+
+			run[0].before(createIndentationLabel(run));
+			run = [];
+		}
+		[...hunk.children].forEach(row => {
+			const shift = row.dataset.indentShift;
+
+			if (!row.hasAttribute('data-indent-shift')) {
+				finishRun();
+				return;
+			}
+			if (run.length && run[0].dataset.indentShift !== shift)
+				finishRun();
+			run.push(row);
+		});
+		finishRun();
+	});
+
+	/* Embedded defaults also style the report when JavaScript is disabled */
+	for (const [id, property] of selectors) {
+		const select = bindViewControl(id, control => {
+			root.dataset[property] = control.value;
+		});
+
+		select.value = root.dataset[property];
+	}
+	for (const [id, property] of checkboxes) {
+		const checkbox = bindViewControl(id, control => {
+			root.dataset[property] = String(control.checked);
+		});
+
+		checkbox.checked = root.dataset[property] === 'true';
+	}
+	bindViewControl('section-select', control => setView(control.value));
+	fileSelect.addEventListener('change', () => {
+		document.getElementById(fileSelect.value)?.scrollIntoView({
+			block: 'start', inline: 'nearest'
+		});
+	});
+	document.querySelector('#previous-change')
+		.addEventListener('click', () => moveChange(-1));
+	document.querySelector('#next-change')
+		.addEventListener('click', () => moveChange(1));
+	document.querySelector('#copy-report')
+		.addEventListener('click', async () => {
+			try {
+				await navigator.clipboard.writeText(
+					plainReport);
+				status.textContent = 'Complete report copied';
+			} catch {
+				status.textContent = 'Clipboard unavailable here. Use Save text instead.';
+			}
+		});
+	document.querySelector('#download-report')
+		.addEventListener('click', () => {
+			downloadText('diffofdiffs.txt', plainReport);
+		});
+
+	/*
+	 * Browsers can restore controls after this script runs without sending
+	 * change events. Apply the restored state when the document is shown.
+	 */
+	window.addEventListener('pageshow', applyViewControls);
+	applyViewControls();
+	root.dataset.interactive = '';
+})();
+</script></body></html>
