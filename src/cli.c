@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include <cli.h>
 #include <display.h>
@@ -26,6 +27,7 @@ enum highlight_mode highlight_mode = HIGHLIGHT_WORDS;
 enum display_theme display_theme = THEME_DARK;
 bool backport_labels;
 const char *git_tree_dir = NULL;
+const char *git_tree_hint;
 const char *output_path;
 
 /*
@@ -38,11 +40,15 @@ static void usage(int err)
 
 	fprintf(stream,
 		"usage: %s [OPTIONS] patch1 patch2\n"
-		"       %s [OPTIONS] --git-tree=DIR rev1 rev2\n"
+		"       %s [OPTIONS] [--git-tree=DIR] rev1 rev2\n"
 		"       %s --help|--version\n"
 		"\n"
 		"Compare the original changes in patch1 and patch2. Either operand may be\n"
-		"a single \"-\" to read standard input, but not both.\n"
+		"a single '-' to read standard input, but not both.\n"
+		"\n"
+		"When both path lookups report missing operands, '--git-tree=.' is implied.\n"
+		"Standard input ('-'), existing paths, and other lookup errors keep patch mode.\n"
+		"An explicit --git-tree selects tree mode even when files match the names.\n"
 		"\n"
 		"With --git-tree, each operand names a commit in DIR. Its patch describes\n"
 		"the changes from its first parent, or an empty tree if it has no parent.\n"
@@ -115,6 +121,20 @@ static int parse_count(const char *arg)
 		usage(1);
 
 	return value;
+}
+
+/*
+ * Streams and dangling symlinks still name patch inputs. Only missing paths can
+ * select tree mode; other lookup errors belong to the file reader.
+ */
+static bool is_patch_operand(const char *name)
+{
+	struct stat st;
+
+	if (!strcmp(name, "-") || !lstat(name, &st))
+		return true;
+
+	return errno != ENOENT && errno != ENOTDIR;
 }
 
 void cli_parse(int argc, char **argv, const char **patch1, const char **patch2)
@@ -221,6 +241,19 @@ void cli_parse(int argc, char **argv, const char **patch1, const char **patch2)
 
 	if (optind + 2 != argc)
 		usage(1);
+
+	for (int i = 0; i < 2; i++) {
+		if (!argv[optind + i][0])
+			die("operand %d is empty; give a patch path or revision",
+			    i + 1);
+	}
+
+	if (!git_tree_dir && !is_patch_operand(argv[optind]) &&
+	    !is_patch_operand(argv[optind + 1])) {
+		git_tree_dir = ".";
+		git_tree_hint =
+			"\ndiffofdiffs: neither path exists. Did you mean patch files?";
+	}
 
 	/* In tree mode, operands name revisions and cannot consume stdin */
 	if (git_tree_dir) {

@@ -704,6 +704,194 @@ def create_git_store(name):
     return repo, git
 
 
+def implicit_tree_cases():
+    """Infer revisions only when both operands are absent as patch inputs."""
+    global CHECKS
+    repo, git = create_git_store('implicit-tree')
+    before = b'old\n'
+    after = [b'left\n', b'right\n']
+    inputs = [patch(lines(before), lines(text)) for text in after]
+
+    def commit(text, *parents):
+        blob = git('hash-object', '-w', '--stdin', data=text).strip().decode()
+        tree = git('mktree', data=f'100644 blob {blob}\tf.c\n'.encode()).strip().decode()
+        args = [arg for parent in parents for arg in ('-p', parent)]
+        return git('commit-tree', tree, *args, data=b'Change source\n').strip().decode()
+
+    parent = commit(before)
+    tips = [commit(text, parent) for text in after]
+    for name, revision in zip(('base', 'left', 'right'), [parent, *tips]):
+        git('update-ref', f'refs/tags/{name}', revision)
+    git('update-ref', 'refs/heads/main', tips[0])
+    git('symbolic-ref', 'HEAD', 'refs/heads/main')
+    checkout = repo.parent / 'checkout'
+    shutil.rmtree(checkout, ignore_errors=True)
+    git('clone', '--quiet', str(repo), str(checkout))
+
+    # The shortcut must preserve the same rows, labels, and HTML metadata
+    forms = [('left', 'right'), tips, ('base..left', 'base..right'),
+             ('right', 'left')]
+    for store, operands, html in product((repo, checkout), forms, (False, True)):
+        options = ['--html'] if html else ['--color=never']
+        explicit = subprocess.run([BINARY, *options, '--git-tree=.', *operands],
+                                  cwd=store, env=ENV, capture_output=True, timeout=20)
+        implicit = subprocess.run([BINARY, *options, *operands], cwd=store,
+                                  env=ENV, capture_output=True, timeout=20)
+        assert explicit.returncode == 0 and explicit.stdout and not explicit.stderr
+        assert (implicit.returncode, implicit.stdout, implicit.stderr) == (
+            0, explicit.stdout, b''), (store, operands, implicit.stderr)
+        if not html:
+            order = (1, 0) if operands[0] == 'right' else (0, 1)
+            sources = [{'f.c': [dict(enumerate(lines(before))),
+                                dict(enumerate(lines(after[leg])))]} for leg in order]
+            check_review([inputs[leg] for leg in order], implicit.stdout, sources)
+        CHECKS += 1
+
+    def run(*operands, data=None):
+        return subprocess.run([BINARY, '--color=never', *operands], cwd=checkout,
+                              env=ENV, input=data, capture_output=True, timeout=20)
+
+    # Missing patch paths can select tree mode, so lookup failures explain it
+    hint = b'\ndiffofdiffs: neither path exists. Did you mean patch files?\n'
+    missing = 'missing.patch'
+    failure = (f"diffofdiffs: cannot resolve '{missing}' in "
+               "the current directory's Git repository").encode()
+    for store, operands, explicit, html in product(
+            (repo, checkout), ((missing, 'right'), ('left', missing)),
+            (False, True), (False, True)):
+        options = ['--git-tree=.'] if explicit else []
+        if html:
+            options.append('--html')
+        result = subprocess.run([BINARY, *options, *operands], cwd=store,
+                                env=ENV, capture_output=True, timeout=20)
+        expected_error = failure + (b'\n' if explicit else hint)
+        assert (result.returncode, result.stdout, result.stderr) == (
+            1, b'', expected_error), (store, operands, result.stderr)
+        CHECKS += 1
+
+    # Neither an unrelated directory nor a repository's subdirectory is searched
+    subdirectory = checkout / 'subdirectory'
+    subdirectory.mkdir()
+    failure = (b'diffofdiffs: no Git repository found in the current directory; '
+               b'parent directories are not searched')
+    for directory, explicit in product((repo.parent, subdirectory), (False, True)):
+        options = ['--git-tree=.'] if explicit else []
+        result = subprocess.run([BINARY, *options, missing, 'other.patch'],
+                                cwd=directory, env=ENV, capture_output=True, timeout=20)
+        expected_error = failure + (b'\n' if explicit else hint)
+        assert (result.returncode, result.stdout, result.stderr) == (
+            1, b'', expected_error), result.stderr
+        CHECKS += 1
+
+    # Explicit selection names the supplied repository without the inference hint
+    for directory in (repo, repo.parent / 'missing-repository'):
+        result = run(f'--git-tree={directory}', missing, 'right')
+        location = f"the Git repository at '{directory}'"
+        message = (f"cannot resolve '{missing}' in {location}"
+                   if directory == repo else
+                   f"no Git repository found at '{directory}'; parent directories are not searched")
+        assert (result.returncode, result.stdout, result.stderr) == (
+            1, b'', f'diffofdiffs: {message}\n'.encode()), result.stderr
+        CHECKS += 1
+
+    # Empty reports stay quiet, and output failures don't suggest changing inputs
+    result = run('left', 'left')
+    assert (result.returncode, result.stdout, result.stderr) == (0, b'', b'')
+    result = run('-o', 'missing-directory/report', 'left', 'right')
+    assert result.returncode == 1 and not result.stdout
+    assert b'cannot open missing-directory/report for output' in result.stderr
+    assert b'patch files' not in result.stderr
+    CHECKS += 2
+
+    # Empty shell variables must fail before either input mode reads a source
+    empty_pairs = [('', ''), ('', 'left'), ('right', ''), ('', '-'), ('-', '')]
+    for operands, explicit, html in product(empty_pairs, (False, True), (False, True)):
+        options = ['--git-tree=.'] if explicit else []
+        if html:
+            options.append('--html')
+        result = run(*options, *operands, data=b'')
+        index = 1 if not operands[0] else 2
+        assert result.returncode == 1 and not result.stdout
+        assert f'operand {index} is empty'.encode() in result.stderr, result.stderr
+        CHECKS += 1
+
+    # A bare store's HEAD file still takes precedence; the flag disambiguates it
+    for operands in (('HEAD', 'right'), ('right', 'HEAD')):
+        result = subprocess.run([BINARY, *operands], cwd=repo, env=ENV,
+                                capture_output=True, timeout=20)
+        assert result.returncode == 1 and not result.stdout
+        assert b'right: ' in result.stderr, result.stderr
+        result = subprocess.run([BINARY, '--git-tree=.', *operands], cwd=repo,
+                                env=ENV, capture_output=True, timeout=20)
+        assert result.returncode == 0 and not result.stderr
+        order = (0, 1) if operands[0] == 'HEAD' else (1, 0)
+        sources = [{'f.c': [dict(enumerate(lines(before))),
+                            dict(enumerate(lines(after[leg])))]} for leg in order]
+        check_review([inputs[leg] for leg in order], result.stdout, sources)
+        CHECKS += 2
+
+    # File names take precedence over matching refs unless tree mode is explicit
+    baseline = run('--git-tree=.', 'left', 'right')
+    paths = [checkout / name for name in ('left', 'right')]
+    for path, data in zip(paths, inputs):
+        path.write_bytes(data)
+    result = run('left', 'right')
+    assert result.returncode == 0 and not result.stderr
+    check_report_titles(result.stdout, ['Patch 1: left', 'Patch 2: right'])
+    check_review(inputs, result.stdout)
+    result = run('--git-tree=.', 'left', 'right')
+    assert (result.returncode, result.stdout, result.stderr) == (
+        0, baseline.stdout, b'')
+    CHECKS += 2
+
+    # One file, or stdin, keeps both operands in patch mode
+    paths[1].unlink()
+    for operands in (('left', 'right'), ('right', 'left')):
+        result = run(*operands)
+        assert result.returncode == 1 and not result.stdout
+        assert b'right: ' in result.stderr, result.stderr
+        CHECKS += 1
+    paths[0].unlink()
+    for operands in (('-', 'right'), ('right', '-')):
+        result = run(*operands, data=inputs[0])
+        assert result.returncode == 1 and not result.stdout
+        assert b'right: ' in result.stderr, result.stderr
+        CHECKS += 1
+
+    # A dangling symlink must report its missing target instead of reading a ref
+    paths[0].symlink_to('missing.patch')
+    result = run('left', 'right')
+    assert result.returncode == 1 and not result.stdout
+    assert b'left: ' in result.stderr, result.stderr
+    paths[0].unlink()
+    CHECKS += 1
+
+    # Failed lookups are not proof that an operand isn't a file
+    blocked = checkout / 'blocked'
+    blocked.mkdir()
+    blocked.chmod(0)
+    try:
+        if os.geteuid() != 0:
+            result = run('blocked/left', 'right')
+            assert result.returncode == 1 and not result.stdout
+            assert b'blocked/left: ' in result.stderr, result.stderr
+            CHECKS += 1
+    finally:
+        blocked.chmod(0o700)
+
+    # Failed traversal and overlong names retain the patch reader's diagnostics
+    loop = checkout / 'loop'
+    loop.symlink_to('loop')
+    try:
+        for missing in ('loop/left', 'x' * 256):
+            result = run(missing, 'right')
+            assert result.returncode == 1 and not result.stdout
+            assert (missing + ': ').encode() in result.stderr, result.stderr
+            CHECKS += 1
+    finally:
+        loop.unlink()
+
+
 def shallow_history_cases():
     """A comparison needs its selected parent, not the parent's ancestors."""
     global CHECKS
@@ -2127,6 +2315,7 @@ def main():
     title_cases()
     stream_title_cases()
     tree_cases()
+    implicit_tree_cases()
     shallow_history_cases()
     gitlink_cases()
     directory_transition_cases()

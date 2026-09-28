@@ -1,9 +1,13 @@
 usage: diffofdiffs [OPTIONS] patch1 patch2
-       diffofdiffs [OPTIONS] --git-tree=DIR rev1 rev2
+       diffofdiffs [OPTIONS] [--git-tree=DIR] rev1 rev2
        diffofdiffs --help|--version
 
 Compare the original changes in patch1 and patch2. Either operand may be
-a single "-" to read standard input, but not both.
+a single '-' to read standard input, but not both.
+
+When both path lookups report missing operands, '--git-tree=.' is implied.
+Standard input ('-'), existing paths, and other lookup errors keep patch mode.
+An explicit --git-tree selects tree mode even when files match the names.
 
 With --git-tree, each operand names a commit in DIR. Its patch describes
 the changes from its first parent, or an empty tree if it has no parent.

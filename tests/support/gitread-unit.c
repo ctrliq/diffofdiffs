@@ -327,7 +327,7 @@ static void case_resolve_forms(void)
 	memcpy(abbrev, full, 7);
 	abbrev[7] = '\0';
 
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 	print_resolved(gr, full);
 	print_resolved(gr, abbrev);
 	print_resolved(gr, "x");
@@ -342,7 +342,7 @@ static void case_resolve_missing(void)
 
 	quiet_leak_checker();
 	git_repository_free(mk_basic("s", false, NULL, NULL));
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 	print_resolved(gr, "nosuch");
 }
 
@@ -359,7 +359,7 @@ static void case_resolve_not_commit(void)
 	git_repository_free(repo);
 	git_oid_tostr(hex, sizeof(hex), &blob);
 
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 	print_resolved(gr, hex);
 }
 
@@ -401,7 +401,7 @@ static void case_resolve_ambiguous(void)
 	if (!prefix[0])
 		die("no 4-hex collision in 4096 blobs");
 
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 	print_resolved(gr, prefix);
 }
 
@@ -434,7 +434,7 @@ static void case_resolve_tag(void)
 	git_repository_free(repo);
 	git_oid_tostr(hex, sizeof(hex), &tag);
 
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 	print_resolved(gr, "v1");
 	print_resolved(gr, hex);
 	gitread_close(&gr);
@@ -466,14 +466,14 @@ static void case_refs_loose_over_packed(void)
 	write_text(packed, line);
 	free(line);
 
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 	print_resolved(gr, "x");
 	gitread_close(&gr);
 
 	if (unlink(loose))
 		edie(errno, "cannot remove the loose reference %s", loose);
 
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 	print_resolved(gr, "x");
 	gitread_close(&gr);
 	free(packed);
@@ -503,16 +503,16 @@ static void case_open_forms(void)
 	if (symlink("../w/.git", "l/.git"))
 		edie(errno, "cannot link l/.git");
 
-	gitread_open(&gr, "w");
+	gitread_open(&gr, "w", NULL);
 	print_resolved(gr, "HEAD");
 	gitread_close(&gr);
-	gitread_open(&gr, "b.git");
+	gitread_open(&gr, "b.git", NULL);
 	print_resolved(gr, "HEAD");
 	gitread_close(&gr);
-	gitread_open(&gr, "g");
+	gitread_open(&gr, "g", NULL);
 	print_resolved(gr, "HEAD");
 	gitread_close(&gr);
-	gitread_open(&gr, "l");
+	gitread_open(&gr, "l", NULL);
 	print_resolved(gr, "HEAD");
 	gitread_close(&gr);
 }
@@ -526,7 +526,7 @@ static void case_open_missing(void)
 	if (mkdir("e", 0777))
 		edie(errno, "cannot create e");
 
-	gitread_open(&gr, "e");
+	gitread_open(&gr, "e", NULL);
 }
 
 /*
@@ -556,7 +556,7 @@ static void case_alternates_recursive(void)
 	memcpy(abbrev, full, 7);
 	abbrev[7] = '\0';
 
-	gitread_open(&gr, "s3");
+	gitread_open(&gr, "s3", NULL);
 	print_resolved(gr, full);
 	print_resolved(gr, abbrev);
 	gitread_resolve_commit(gr, full, &commit);
@@ -606,7 +606,7 @@ static void case_packed_objects(void)
 	memcpy(abbrev, full, 7);
 	abbrev[7] = '\0';
 
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 	print_resolved(gr, "x");
 	print_resolved(gr, abbrev);
 	gitread_resolve_commit(gr, "x", &commit);
@@ -636,7 +636,7 @@ static void case_garbage_idx(void)
 	git_repository_free(mk_basic("s", false, NULL, NULL));
 	write_text("s/.git/objects/pack/pack-junk.idx", "garbage\n");
 	write_text("s/.git/objects/pack/pack-junk.pack", "");
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 }
 
 /* A real index magic naming version 3 refuses by version number at open */
@@ -648,7 +648,7 @@ static void case_idx_version(void)
 	quiet_leak_checker();
 	git_repository_free(mk_basic("s", false, NULL, NULL));
 	write_bytes("s/.git/objects/pack/pack-junk.idx", head, sizeof(head));
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 }
 
 /*
@@ -701,7 +701,7 @@ static void case_fail_loud(const char *which)
 
 	free(line);
 	git_repository_free(repo);
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 }
 
 /*
@@ -717,7 +717,7 @@ static void case_blob_read(void)
 	u32 mode;
 
 	git_repository_free(mk_basic("s", false, NULL, NULL));
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 	gitread_resolve_commit(gr, "x", &commit);
 	gitread_oid_hex(&commit, hex);
 
@@ -753,7 +753,7 @@ static void case_blob_symlink(void)
 	put_commit(repo, "refs/heads/ln", &tree, NULL, "L", NULL);
 	git_repository_free(repo);
 
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 	gitread_resolve_commit(gr, "ln", &commit);
 
 	if (!gitread_blob_by_path(gr, &commit, "ln", &buf, &mode))
@@ -780,7 +780,7 @@ static void case_blob_gitlink(void)
 	put_commit(repo, "refs/heads/g", &tree, NULL, "G", NULL);
 	git_repository_free(repo);
 
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 	gitread_resolve_commit(gr, "g", &commit);
 	gitread_blob_by_path(gr, &commit, "mod", &buf, &mode);
 }
@@ -809,7 +809,7 @@ static void case_blob_over_ceiling(void)
 	put_commit(repo, "refs/heads/big", &tree, NULL, "big", NULL);
 	git_repository_free(repo);
 
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 	gitread_resolve_commit(gr, "big", &commit);
 	gitread_blob_by_path(gr, &commit, "big", &buf, &mode);
 }
@@ -864,7 +864,7 @@ static void case_parents(bool shallow)
 		write_text("s/.git/shallow", boundaries);
 	}
 
-	gitread_open(&gr, "s");
+	gitread_open(&gr, "s", NULL);
 	for (size_t i = 0; i < ARRAY_SIZE(names); i++)
 		gitread_resolve_commit(gr, ids[i], &resolved[i]);
 
@@ -972,7 +972,7 @@ static void diff_refs(const char *dir, const char *old_name,
 	struct treediff_map map;
 	struct gitread *gr;
 
-	gitread_open(&gr, dir);
+	gitread_open(&gr, dir, NULL);
 	gitread_resolve_commit(gr, new_name, &new_id);
 
 	if (old_name) {
@@ -1350,7 +1350,7 @@ static void assemble_refs(const char *dir, const char *old_name,
 	struct iomem_buf doc;
 	struct gitread *gr;
 
-	gitread_open(&gr, dir);
+	gitread_open(&gr, dir, NULL);
 	gitread_resolve_commit(gr, old_name, &old_id);
 	gitread_resolve_commit(gr, new_name, &new_id);
 	treediff_build(gr, &old_id, &new_id, &map);
@@ -2749,7 +2749,7 @@ static void case_probe(int argc, char **argv)
 	if (argc < 1)
 		die("probe needs a repository directory");
 
-	gitread_open(&gr, argv[0]);
+	gitread_open(&gr, argv[0], NULL);
 
 	for (int i = 1; i < argc; i++)
 		print_resolved(gr, argv[i]);

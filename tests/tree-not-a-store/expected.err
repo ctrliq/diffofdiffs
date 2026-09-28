@@ -1,1 +1,1 @@
-diffofdiffs: cannot open a git repository at repo
+diffofdiffs: no Git repository found at 'repo'; parent directories are not searched

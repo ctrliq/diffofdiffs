@@ -65,8 +65,27 @@ cannot recover those missing lines.
 To compare commits using the complete files before and after each change:
 
 ```sh
+diffofdiffs commit1 commit2
+```
+
+Run this from the repository's root. When both path lookups report that the
+operands are missing, diffofdiffs assumes `--git-tree=.`. Standard input
+(`-`), existing paths, and other lookup errors, such as denied access, keep
+patch mode. Use `--git-tree=DIR` to select the repository explicitly. With
+this option, the two arguments are treated as Git revisions, even if their
+names match local files:
+
+```sh
 diffofdiffs --git-tree=/path/to/repository commit1 commit2
 ```
+
+In a bare repository, `HEAD` is an actual file. Pass `--git-tree=.` to compare
+it as a revision.
+
+Misspelling both patch filenames also selects tree mode. If the repository or
+a revision cannot be found, the error names the current directory's Git
+repository and asks whether you meant to compare patch files. In that case,
+check that both paths are correct.
 
 Tree mode reads Git objects without checking out revisions or changing the
 index. The repository can be a working tree or a bare repository. Use commit

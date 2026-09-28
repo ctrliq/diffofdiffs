@@ -85,7 +85,16 @@ may be `-` for standard input, but not both.
 ### Tree mode
 
 Compare two commits using the complete source files before and after each
-commit:
+commit. From the repository's root:
+
+```sh
+diffofdiffs commit1 commit2
+```
+
+When both path lookups report that the operands are missing, diffofdiffs
+assumes `--git-tree=.`. Standard input (`-`), existing paths, and other lookup
+errors keep patch mode. To select another repository, or use a commit name
+that also names a local file, pass `--git-tree` explicitly:
 
 ```sh
 diffofdiffs --git-tree=/path/to/repository commit1 commit2

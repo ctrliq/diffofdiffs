@@ -56,7 +56,8 @@ int main(int argc, char **argv)
 		die("cannot initialize libgit2");
 
 	if (git_tree_dir) {
-		gittree_begin(git_tree_dir, names[0], names[1], 3, &b1, &b2);
+		gittree_begin(git_tree_dir, git_tree_hint, names[0], names[1],
+			      3, &b1, &b2);
 	} else {
 		if (!iomem_acquire(&b1, names[0]))
 			display_names[0] = NULL;

@@ -66,14 +66,14 @@ static void resolve_operand(struct gitread *gr, const char *spec,
 	*have_old = gitread_commit_parents(gr, new, old) > 0;
 }
 
-void gittree_begin(const char *dir, const char *rev1, const char *rev2,
-		   unsigned int context, struct iomem_buf *doc1,
-		   struct iomem_buf *doc2)
+void gittree_begin(const char *dir, const char *lookup_hint, const char *rev1,
+		   const char *rev2, unsigned int context,
+		   struct iomem_buf *doc1, struct iomem_buf *doc2)
 {
 	struct iomem_buf *docs[2] = { doc1, doc2 };
 	const char *revs[2] = { rev1, rev2 };
 
-	gitread_open(&run.gr, dir);
+	gitread_open(&run.gr, dir, lookup_hint);
 
 	for (int i = 0; i < 2; i++) {
 		struct treediff_map map __cleanup(treediff_map_free) = {};

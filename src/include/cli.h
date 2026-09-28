@@ -67,11 +67,14 @@ extern bool backport_labels;
 extern const char *output_path;
 
 /*
- * The --git-tree repository, or NULL for a patch-only run. When it's set, the
- * two positional operands are commit-ish names resolved in this repository's
- * store rather than patch files.
+ * The repository selected explicitly or inferred as ".", or NULL for patch
+ * mode. When it's set, the two positional operands are commit-ish names
+ * resolved in this repository's store rather than patch files.
  */
 extern const char *git_tree_dir;
+
+/* Explain automatic tree mode after a failed repository or revision lookup */
+extern const char *git_tree_hint;
 
 /*
  * Parses argv[1..argc), exiting on --help, --version, or any parse error. On

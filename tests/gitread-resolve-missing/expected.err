@@ -1,1 +1,1 @@
-gitread-unit: cannot resolve nosuch to an object or reference in the repository
+gitread-unit: cannot resolve 'nosuch' in the Git repository at 's'

@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 		die("usage: derive-patch DIR REV [PARENT]");
 
 	mem_limit_init_tree();
-	gitread_open(&reader, argv[1]);
+	gitread_open(&reader, argv[1], NULL);
 	gitread_resolve_commit(reader, argv[2], &tip);
 	have_parent = gitread_commit_parents(reader, &tip, &parent) > 0;
 	if (argc == 4) {

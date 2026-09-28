@@ -35,6 +35,8 @@ _Static_assert(GITREAD_OID_RAWSZ == GIT_OID_SHA1_SIZE,
 struct gitread {
 	git_repository *repo;
 	git_odb *odb;
+	char *description;
+	const char *lookup_hint;
 };
 
 static void oid_from_libgit2(struct gitread_oid *out, const git_oid *oid)
@@ -277,7 +279,8 @@ static void check_pack_indexes(git_repository *repo, const char *dir)
 	closedir(pd);
 }
 
-void gitread_open(struct gitread **out, const char *dir)
+void gitread_open(struct gitread **out, const char *dir,
+		  const char *lookup_hint)
 {
 	struct gitread *gr;
 	int ret;
@@ -301,6 +304,14 @@ void gitread_open(struct gitread **out, const char *dir)
 		die("cannot confine the git object reader to the repository's own configuration");
 
 	gr = xzalloc(sizeof(*gr));
+	gr->lookup_hint = lookup_hint ? lookup_hint : "";
+
+	/* Retain the chosen location so failed revision lookups can name it */
+	if (!strcmp(dir, "."))
+		gr->description =
+			xstrdup("the current directory's Git repository");
+	else
+		xasprintf(&gr->description, "the Git repository at '%s'", dir);
 
 	/*
 	 * Without NO_SEARCH, an invalid directory could resolve to a repository
@@ -310,7 +321,16 @@ void gitread_open(struct gitread **out, const char *dir)
 				      GIT_REPOSITORY_OPEN_NO_SEARCH, NULL);
 	if (ret) {
 		dbg_last_error("repository open");
-		die("cannot open a git repository at %s", dir);
+		if (ret == GIT_ENOTFOUND) {
+			if (!strcmp(dir, "."))
+				die("no Git repository found in the current directory; parent directories are not searched%s",
+				    gr->lookup_hint);
+
+			die("no Git repository found at '%s'; parent directories are not searched%s",
+			    dir, gr->lookup_hint);
+		}
+
+		die("cannot open %s%s", gr->description, gr->lookup_hint);
 	}
 
 	if (git_repository_oid_type(gr->repo) != GIT_OID_SHA1)
@@ -338,6 +358,7 @@ void gitread_close(struct gitread **gr)
 
 	git_odb_free((*gr)->odb);
 	git_repository_free((*gr)->repo);
+	free((*gr)->description);
 	free(*gr);
 	*gr = NULL;
 	git_libgit2_shutdown();
@@ -409,8 +430,8 @@ void gitread_resolve_commit(struct gitread *gr, const char *name,
 		ret = git_reference_dwim(&ref, gr->repo, name);
 		if (ret) {
 			dbg_last_error("name resolution");
-			die("cannot resolve %s to an object or reference in the repository",
-			    name);
+			die("cannot resolve '%s' in %s%s", name,
+			    gr->description, gr->lookup_hint);
 		}
 
 		ret = git_reference_resolve(&resolved, ref);

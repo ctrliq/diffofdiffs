@@ -22,11 +22,13 @@ enum gittree_leg {
  * against its first parent (a parentless commit derives against the empty
  * tree), or BASE..TIP naming which parent of TIP to derive against instead; a
  * BASE that isn't a parent of TIP is rejected. Every resolution or derivation
- * failure dies here, before anything reaches stdout.
+ * failure dies here, before anything reaches stdout. An optional lookup_hint
+ * explains input selection after a failed repository or revision lookup; its
+ * storage must remain valid until gittree_end().
  */
-void gittree_begin(const char *dir, const char *rev1, const char *rev2,
-		   unsigned int context, struct iomem_buf *doc1,
-		   struct iomem_buf *doc2);
+void gittree_begin(const char *dir, const char *lookup_hint, const char *rev1,
+		   const char *rev2, unsigned int context,
+		   struct iomem_buf *doc1, struct iomem_buf *doc2);
 
 /* True between gittree_begin() and gittree_end() */
 bool gittree_active(void);

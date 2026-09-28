@@ -30,8 +30,11 @@ struct gitread;
  * Open dir as a working or bare repository, without searching its ancestors.
  * Reject unsupported formats and history features before lookup. Read failures
  * terminate the program; path lookups return false for missing entries.
+ * lookup_hint is an optional diagnostic suffix for a failed repository or
+ * revision lookup. Its storage must remain valid until gitread_close().
  */
-void gitread_open(struct gitread **out, const char *dir);
+void gitread_open(struct gitread **out, const char *dir,
+		  const char *lookup_hint);
 void gitread_close(struct gitread **gr);
 
 /*
