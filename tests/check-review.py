@@ -1534,7 +1534,10 @@ def output_failure_cases():
     """Failures must retain their full diagnostic and report lost output."""
     global CHECKS
     missing = WORK / ('a' * 180) / ('b' * 180) / 'missing.patch'
-    result = subprocess.run([BINARY, missing, missing], env=ENV, capture_output=True)
+
+    # Stdin keeps this on the patch reader's file-error path
+    result = subprocess.run([BINARY, missing, '-'], input=b'', env=ENV,
+                            capture_output=True)
     assert result.returncode != 0 and os.fsencode(missing) in result.stderr, result.stderr
     CHECKS += 1
 
