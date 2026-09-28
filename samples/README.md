@@ -1,8 +1,8 @@
-<!-- SPDX-License-Identifier: GPL-2.0-only -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 
 # Sample reports
 
-These self-contained example patches show how diffofdiffs presents changes
+These synthetic example patches show how diffofdiffs presents changes
 made against different versions of a source file. Each HTML report contains
 the complete output, including its delta and context sections. Download a
 report and open it locally to try the viewing controls.

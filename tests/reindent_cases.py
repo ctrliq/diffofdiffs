@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-2.0-only
+# SPDX-License-Identifier: Apache-2.0
 """Check indentation correspondence against independently chosen edit sites."""
 
 from collections import defaultdict

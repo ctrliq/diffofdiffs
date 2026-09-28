@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -184,37 +184,27 @@ void pr_dbg(const char *fmt, ...)
 	va_end(ap);
 }
 
+static void *checked_allocation(void *allocation, const char *operation)
+{
+	if (!allocation)
+		edie(errno, "%s", operation);
+
+	return allocation;
+}
+
 void *xmalloc(size_t size)
 {
-	void *ptr;
-
-	ptr = malloc(size);
-	if (!ptr)
-		error(EXIT_FAILURE, errno, "malloc");
-
-	return ptr;
+	return checked_allocation(malloc(size), "malloc");
 }
 
 void *xzalloc(size_t size)
 {
-	void *ptr;
-
-	ptr = calloc(1, size);
-	if (!ptr)
-		error(EXIT_FAILURE, errno, "calloc");
-
-	return ptr;
+	return checked_allocation(calloc(1, size), "calloc");
 }
 
 void *xrealloc(void *ptr, size_t size)
 {
-	void *new_ptr;
-
-	new_ptr = realloc(ptr, size);
-	if (!new_ptr)
-		error(EXIT_FAILURE, errno, "realloc");
-
-	return new_ptr;
+	return checked_allocation(realloc(ptr, size), "realloc");
 }
 
 static size_t array_bytes(size_t nmemb, size_t size)
@@ -244,11 +234,7 @@ void *xrealloc_array(void *ptr, size_t nmemb, size_t size)
 
 char *xstrdup(const char *s)
 {
-	size_t len = strlen(s) + 1;
-	char *dup = xmalloc(len);
-
-	memcpy(dup, s, len);
-	return dup;
+	return checked_allocation(strdup(s), "strdup");
 }
 
 char *memdup(const char *s, size_t n)
@@ -270,7 +256,7 @@ int xasprintf(char **strp, const char *fmt, ...)
 	va_end(args);
 
 	if (len < 0)
-		error(EXIT_FAILURE, errno, "vasprintf");
+		edie(errno, "vasprintf");
 
 	return len;
 }
@@ -281,7 +267,7 @@ FILE *xopen_memstream(char **bufp, size_t *sizep)
 
 	fp = open_memstream(bufp, sizep);
 	if (!fp)
-		error(EXIT_FAILURE, errno, "open_memstream");
+		edie(errno, "open_memstream");
 
 	return fp;
 }

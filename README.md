@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: GPL-2.0-only -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 
 # diffofdiffs
 
@@ -156,22 +156,26 @@ sudo make install
 
 Use `make V=1` to show the full build commands.
 
-The default destination is `/usr/local/bin/diffofdiffs`. To install for the
-current user without root access:
+The executable installs to `/usr/local/bin/diffofdiffs`, and license and
+attribution files go to `/usr/local/share/doc/diffofdiffs`. To install for
+the current user without root access:
 
 ```sh
 make install prefix="$HOME/.local"
 ```
 
-The Makefile supports `prefix`, `exec_prefix`, and `bindir`. By default,
-`exec_prefix` follows `prefix`, and `bindir` is `$(exec_prefix)/bin`. Packagers
-can use `DESTDIR` to stage an installation without changing its final prefix:
+The Makefile supports `prefix`, `exec_prefix`, `bindir`, `datarootdir`, and
+`docdir`. By default, `exec_prefix` follows `prefix`, `bindir` is
+`$(exec_prefix)/bin`, and `docdir` is `$(datarootdir)/doc/diffofdiffs`, with
+`datarootdir` set to `$(prefix)/share`. Packagers can use `DESTDIR` to stage
+an installation without changing its final prefix:
 
 ```sh
 make install DESTDIR="$PWD/stage" prefix=/usr
 ```
 
-This writes `stage/usr/bin/diffofdiffs`. To remove an installation, run
+This writes `stage/usr/bin/diffofdiffs` and the notices under
+`stage/usr/share/doc/diffofdiffs`. To remove an installation, run
 `make uninstall` with the same directory settings and permissions used for
 installation. For example:
 
@@ -202,10 +206,12 @@ validation. Read [CODING_STYLE.md](CODING_STYLE.md) before contributing code;
 
 ## License and origin
 
-diffofdiffs is licensed under [GPL-2.0-only](LICENSE). It grew out of
+diffofdiffs is licensed under [Apache-2.0](LICENSE). It grew out of
 `interdiff --fuzzy` in
 [Sultan Alsawaf's fork of patchutils.](https://github.com/kerneltoast/patchutils)
 
-The bundled Userspace RCU list headers retain their
-[LGPL-2.1-or-later license](vendor/urcu/LICENSE). See
-the [vendoring notes](vendor/urcu/README.md) for their source and local changes.
+The bundled Userspace RCU headers, GitHub Primer palette values, Linux-derived
+formatting configuration, and test data retain their separate licenses.
+See [THIRD_PARTY.md](THIRD_PARTY.md) for the scope, attribution, and dependency
+terms. Releases through v1.0.0 were distributed under GPL-2.0-only and retain
+that license.

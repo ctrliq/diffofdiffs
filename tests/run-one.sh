@@ -1,5 +1,5 @@
 #!/bin/sh
-# SPDX-License-Identifier: GPL-2.0-only
+# SPDX-License-Identifier: Apache-2.0
 #
 # tests/run-one.sh - execute a single test directory and report PASS/FAIL.
 #

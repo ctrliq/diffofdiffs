@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-2.0-only
+# SPDX-License-Identifier: Apache-2.0
 """Read actual Git blobs independently of the program's libgit2 reader."""
 
 from pathlib import Path

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -31,9 +31,6 @@ static void token_sequence_free(struct token_sequence *tokens)
 	free(tokens->spans);
 	free(tokens->bytes);
 }
-
-DEFINE_FREE(token_sequence, struct token_sequence, token_sequence_free(&_T))
-DEFINE_FREE(udiff_matches, struct udiff_matches, udiff_matches_free(&_T))
 
 void text_highlight_free(struct text_highlight *highlight)
 {
@@ -138,9 +135,9 @@ static size_t refine_replacement(const char *const text[2],
 				 const size_t start[2], const size_t end[2],
 				 struct text_highlight *out)
 {
-	struct token_sequence right __free(token_sequence) = {};
-	struct udiff_matches matches __free(udiff_matches) = {};
-	struct token_sequence left __free(token_sequence) = {};
+	struct token_sequence right __cleanup(token_sequence_free) = {};
+	struct udiff_matches matches __cleanup(udiff_matches_free) = {};
+	struct token_sequence left __cleanup(token_sequence_free) = {};
 	struct token_sequence *tokens[2] = { &left, &right };
 	size_t common = 0;
 
@@ -168,9 +165,9 @@ static size_t refine_replacement(const char *const text[2],
 static size_t highlight_words(const char *const text[2], const size_t len[2],
 			      struct text_highlight *out)
 {
-	struct token_sequence right __free(token_sequence) = {};
-	struct udiff_matches matches __free(udiff_matches) = {};
-	struct token_sequence left __free(token_sequence) = {};
+	struct token_sequence right __cleanup(token_sequence_free) = {};
+	struct udiff_matches matches __cleanup(udiff_matches_free) = {};
+	struct token_sequence left __cleanup(token_sequence_free) = {};
 	struct token_sequence *tokens[2] = { &left, &right };
 	size_t start[2] = { out->indent[0], out->indent[1] };
 	size_t common = 0;

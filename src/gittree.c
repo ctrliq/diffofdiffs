@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -43,7 +43,7 @@ static void resolve_operand(struct gitread *gr, const char *spec,
 	const char *dots = strstr(spec, "..");
 
 	if (dots) {
-		char *base_spec __free(free) = NULL;
+		char *base_spec __autofree = NULL;
 		const char *tip_spec = dots + 2;
 
 		if (dots == spec || !tip_spec[0] || tip_spec[0] == '.' ||
@@ -76,7 +76,7 @@ void gittree_begin(const char *dir, const char *rev1, const char *rev2,
 	gitread_open(&run.gr, dir);
 
 	for (int i = 0; i < 2; i++) {
-		struct treediff_map map __free(treediff_map) = {};
+		struct treediff_map map __cleanup(treediff_map_free) = {};
 		struct gitread_oid old = {}, new;
 		bool have_old = false;
 

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -112,7 +112,7 @@ static int spot_replace_ref(const char *name, void *payload)
  */
 static void check_history_guards(git_repository *repo, const char *dir)
 {
-	char *grafts __free(free) = NULL;
+	char *grafts __autofree = NULL;
 	bool replaced = false;
 	struct stat st;
 	int ret;
@@ -173,7 +173,7 @@ static void check_pack_index(const char *dir, const char *packdir,
 {
 	u8 head[IDX_V2_HEADER_SIZE], fan[sizeof(u32)];
 	off_t last_fanout = IDX_FANOUT_SIZE - sizeof(fan);
-	char *path __free(free) = NULL;
+	char *path __autofree = NULL;
 	u64 count, floor, ceiling;
 	struct stat st;
 	int fd;
@@ -245,7 +245,7 @@ static void check_pack_index(const char *dir, const char *packdir,
  */
 static void check_pack_indexes(git_repository *repo, const char *dir)
 {
-	char *packdir __free(free) = NULL;
+	char *packdir __autofree = NULL;
 	struct dirent *de;
 	DIR *pd;
 
@@ -704,7 +704,10 @@ static git_tree *lookup_subtree(struct gitread *gr, const git_tree_entry *entry,
 	return tree;
 }
 
-DEFINE_FREE(git_tree, git_tree *, git_tree_free(_T))
+static void git_tree_pointer_free(git_tree **tree)
+{
+	git_tree_free(*tree);
+}
 
 /*
  * Collect this tree's differing non-directory entries. Equal ids and raw modes
@@ -724,9 +727,9 @@ static void tree_collect(struct gitread *gr, const git_tree *tree,
 		const char *name = git_tree_entry_name(entry);
 		const git_tree_entry *peer =
 			other ? git_tree_entry_byname(other, name) : NULL;
-		git_tree *peer_sub __free(git_tree) = NULL;
-		git_tree *sub __free(git_tree) = NULL;
-		char *subdir __free(free) = NULL;
+		git_tree *peer_sub __cleanup(git_tree_pointer_free) = NULL;
+		git_tree *sub __cleanup(git_tree_pointer_free) = NULL;
+		char *subdir __autofree = NULL;
 
 		if (peer &&
 		    git_oid_equal(git_tree_entry_id(entry),
@@ -762,8 +765,9 @@ void gitread_tree_read(struct gitread *gr, const struct gitread_oid *commit,
 		       struct gitread_tree *out)
 {
 	char hex[2][GITREAD_OID_HEXSZ + 1] = {};
-	git_tree *tree __free(git_tree) = commit_tree(gr, commit, hex[0]);
-	git_tree *other __free(git_tree) =
+	git_tree *tree __cleanup(git_tree_pointer_free) =
+		commit_tree(gr, commit, hex[0]);
+	git_tree *other __cleanup(git_tree_pointer_free) =
 		commit_tree(gr, other_commit, hex[1]);
 	const char *labels[2] = { hex[0], hex[1] };
 	size_t cap = 0;

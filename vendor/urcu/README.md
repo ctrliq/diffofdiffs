@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: GPL-2.0-only -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 
 # Userspace RCU list headers
 
@@ -17,7 +17,9 @@ The source is [Userspace RCU v0.15.7][release], commit
 The `compiler.h` subset was extracted on 2026-09-23. Its other helpers and
 includes were omitted so that `list.h` doesn't pull in liburcu's generated
 configuration header. The retained macro is unchanged, including its argument
-type check and single evaluation of the input pointer.
+type check and single evaluation of the input pointer. The subset adds a
+notice describing the extraction and omits the original header description
+and the `<stddef.h>` include comment.
 Using other Userspace RCU headers requires an explicit update to the bundled
 subset.
 

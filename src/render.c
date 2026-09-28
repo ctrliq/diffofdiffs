@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -31,8 +31,6 @@
 #define ANSI_CYAN "\033[36m"
 #define ANSI_BRIGHT_RED "\033[91m"
 #define ANSI_BRIGHT_GREEN "\033[92m"
-
-DEFINE_FREE(text_highlight, struct text_highlight, text_highlight_free(&_T))
 
 enum glyph_role {
 	GUTTER,
@@ -373,7 +371,7 @@ static bool render_text_column(FILE *out, const struct layout *layout,
 static void expand_source_column(char **text, struct text_highlight *highlight,
 				 int leg, size_t common_indent)
 {
-	size_t *offsets __free(free) = NULL;
+	size_t *offsets __autofree = NULL;
 	char *expanded;
 
 	if (!strchr(*text, '\t'))
@@ -414,11 +412,11 @@ static void render_text_pair(FILE *out, const struct layout *layout,
 			     const struct review_row *const rows[2],
 			     enum line_kind kind)
 {
-	struct text_highlight highlight __free(text_highlight) = {};
+	struct text_highlight highlight __cleanup(text_highlight_free) = {};
 	char *(*format_text)(const char *, size_t) =
 		kind == SOURCE_LINE ? escape_source_text : expand_display_text;
-	char *right __free(free) = format_text(text[1].base, text[1].len);
-	char *left __free(free) = format_text(text[0].base, text[0].len);
+	char *right __autofree = format_text(text[1].base, text[1].len);
+	char *left __autofree = format_text(text[0].base, text[0].len);
 	const struct text_highlight *selected = NULL;
 	const char *displayed[2] = { left, right };
 	struct text_column columns[2] = {};
@@ -529,7 +527,7 @@ bool render_section_has_output(const struct review_file *file, int section)
 static void measure_source_row(const struct review_row *row, int leg,
 			       struct layout *layout)
 {
-	char *text __free(free) = NULL;
+	char *text __autofree = NULL;
 	size_t columns;
 
 	if (!row->text)
@@ -766,9 +764,8 @@ static void render_file_section(FILE *out, const struct layout *layout,
 	/* Preserve the engine's gaps rather than implying adjacent source */
 	for (size_t b = 0; b < section->nblocks; b++) {
 		const struct review_block *block = &section->blocks[b];
-		char *right __free(free) =
-			format_function_label(block->name[1]);
-		char *left __free(free) = format_function_label(block->name[0]);
+		char *right __autofree = format_function_label(block->name[1]);
+		char *left __autofree = format_function_label(block->name[0]);
 		const char *headings[2] = { left, right };
 
 		if (b)
@@ -783,8 +780,8 @@ static void render_file_section(FILE *out, const struct layout *layout,
 void render_report(FILE *out, const struct review_report *report,
 		   const char *const names[2])
 {
-	char *right __free(free) = format_operand_label(names[1], 1);
-	char *left __free(free) = format_operand_label(names[0], 0);
+	char *right __autofree = format_operand_label(names[1], 1);
+	char *left __autofree = format_operand_label(names[0], 0);
 	const char *identities[2] = { left, right };
 	bool present[2] = {};
 

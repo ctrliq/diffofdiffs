@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -358,7 +358,7 @@ char *patch_related_change(const struct patch_file *file,
 
 		if (operation_belongs(peer, depth) &&
 		    names_operation(file, peer->operation_name[0], depth)) {
-			char *to __free(free) =
+			char *to __autofree =
 				git_quote_name(peer->operation_name[1]);
 
 			xasprintf(&note,
@@ -374,7 +374,7 @@ char *patch_related_change(const struct patch_file *file,
 		const struct patch_file *peer = &other->files[i];
 
 		if (names_operation(peer, file->operation_name[0], depth)) {
-			char *from __free(free) =
+			char *from __autofree =
 				git_quote_name(file->operation_name[0]);
 
 			xasprintf(
@@ -697,7 +697,7 @@ static size_t collect_changes(struct patch_file *file, int leg,
 
 void patch_match_moved(struct patch_document docs[2])
 {
-	struct change_match *matches __free(free) = NULL;
+	struct change_match *matches __autofree = NULL;
 	size_t total = 0;
 
 	for (int leg = 0; leg < 2; leg++) {

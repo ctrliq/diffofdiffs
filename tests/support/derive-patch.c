@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /* Emit the exact native tree-mode operand for independent source audits */
 #include <stdio.h>
 

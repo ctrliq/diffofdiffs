@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0-only */
+/* SPDX-License-Identifier: Apache-2.0 */
 /* Original patch rows and the source views they describe */
 #ifndef PATCH_H
 #define PATCH_H
@@ -128,8 +128,5 @@ const struct patch_file *patch_row_partner(const struct patch_source *source,
 const char *patch_file_path(const struct patch_file *file);
 char *patch_related_change(const struct patch_file *file,
 			   const struct patch_document *other, int depth);
-
-DEFINE_FREE(patch_document, struct patch_document, patch_document_free(&_T))
-DEFINE_FREE(patch_source, struct patch_source, patch_source_free(&_T))
 
 #endif /* PATCH_H */

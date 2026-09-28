@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -60,9 +60,9 @@ static size_t read_retry_eintr(int fd, char *dest, size_t want,
 static bool is_descriptor_path(const char *name)
 {
 	static const char *const directories[] = { "/dev/fd", "/proc/self/fd" };
-	char *parent __free(free) = xstrdup(name);
+	char *parent __autofree = xstrdup(name);
 	struct stat directory, descriptors;
-	char *resolved __free(free) = NULL;
+	char *resolved __autofree = NULL;
 	char *slash = strrchr(parent, '/');
 
 	if (!strcmp(name, "/dev/stdin") || !strcmp(name, "/dev/stdout") ||

@@ -25,11 +25,24 @@ failed directory survives for inspection. The default binary is DIFFOFDIFFS.
 Large output can be recorded with `stdout-sha1` instead of `expected.out`.
 See `run-one.sh` for the spec keys and input generators.
 
+The line-loading fixtures use the test driver's `--dump-lines` option to
+record each line's length and literal bytes in hexadecimal. This keeps LF,
+CRLF, and a missing final newline visible without interpreting the output as
+source text.
+
 Both full suites include the native source-match and public review checks.
 The sanitizer suite keeps address, undefined-behavior, and leak checks enabled.
 It may need an ordinary process environment for LeakSanitizer's process
 inspection. Fixtures and review checks keep their inputs under `build/tests`;
 other focused checkers use temporary directories that they remove on exit.
+
+`make check-reader` checks timestamp boundaries, filename ranking, path
+stripping, and operand reversal against explicit expectations. It also checks
+scope-exit cleanup and array counts, including variable-length arrays and
+compile-time rejection of pointers. `make check-reader-asan` runs the same
+runtime checks with sanitizers. Both are included in their respective full
+suites and have a 20-second limit to catch repeated timestamp scans in a
+long header's whitespace.
 
 ## What establishes correctness
 

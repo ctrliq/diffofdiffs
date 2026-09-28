@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0-only */
+/* SPDX-License-Identifier: Apache-2.0 */
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -63,7 +63,10 @@ struct patch_name *patch_name_dup(const struct patch_name *name);
 struct patch_name *patch_name_strip(const struct patch_name *name, int depth);
 void patch_name_free(struct patch_name *name);
 
-DEFINE_FREE(patch_name, struct patch_name *, patch_name_free(_T))
+static inline void patch_name_pointer_free(struct patch_name **name)
+{
+	patch_name_free(*name);
+}
 
 /* Return a borrowed suffix, stopping at the basename if stripping too far */
 const char *stripped(const char *name, int num_components);

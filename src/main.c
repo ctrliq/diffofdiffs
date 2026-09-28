@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -28,7 +28,7 @@ const char *__asan_default_options(void)
 
 int main(int argc, char **argv)
 {
-	struct review_report report __free(review_report) = {};
+	struct review_report report __cleanup(review_report_free) = {};
 	struct iomem_buf b1 = {}, b2 = {};
 	const char *display_names[2] = {};
 	const char *names[2] = {};

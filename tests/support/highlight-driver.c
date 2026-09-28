@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /* Expose native ranges for tests without depending on source-row alignment */
 #include <locale.h>
 #include <string.h>
@@ -6,9 +6,6 @@
 #include <display.h>
 #include <highlight.h>
 #include <util.h>
-
-DEFINE_FREE(text_highlight, struct text_highlight, text_highlight_free(&_T))
-DEFINE_FREE(iomem_buf, struct iomem_buf, iomem_buf_free(&_T))
 
 /* Offsets index escaped UTF-8 bytes, not character or column counts */
 static void print_ranges(const struct highlight_ranges ranges[2],
@@ -26,12 +23,12 @@ static void print_ranges(const struct highlight_ranges ranges[2],
 
 int main(int argc, char **argv)
 {
-	struct text_highlight h __free(text_highlight) = {};
-	struct iomem_buf right __free(iomem_buf) = {};
-	struct iomem_buf left __free(iomem_buf) = {};
+	struct text_highlight h __cleanup(text_highlight_free) = {};
+	struct iomem_buf right __cleanup(iomem_buf_free) = {};
+	struct iomem_buf left __cleanup(iomem_buf_free) = {};
 	struct iomem_slice source[2];
-	char *b __free(free) = NULL;
-	char *a __free(free) = NULL;
+	char *b __autofree = NULL;
+	char *a __autofree = NULL;
 	const char *text[2];
 	size_t len[2];
 

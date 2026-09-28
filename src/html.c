@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -17,9 +17,6 @@
 #include <util.h>
 
 #include "../build/html-assets.h"
-
-DEFINE_FREE(text_highlight, struct text_highlight, text_highlight_free(&_T))
-DEFINE_FREE(iomem_buf, struct iomem_buf, iomem_buf_free(&_T))
 
 struct html_layout {
 	size_t width;
@@ -63,7 +60,7 @@ static void write_html_text(FILE *out, const char *text, size_t len)
 
 static void write_html_label(FILE *out, const char *text)
 {
-	char *expanded __free(free) =
+	char *expanded __autofree =
 		expand_display_text(text, text ? strlen(text) : 0);
 
 	write_html_text(out, expanded, strlen(expanded));
@@ -257,10 +254,10 @@ static ptrdiff_t indentation_shift(const char *const text[2],
 static void write_source_pair(FILE *out, const struct review_pair *pair,
 			      struct html_layout *layout, bool change_start)
 {
-	struct text_highlight h __free(text_highlight) = {};
+	struct text_highlight h __cleanup(text_highlight_free) = {};
 	struct iomem_slice source[2] = {};
-	char *right __free(free) = NULL;
-	char *left __free(free) = NULL;
+	char *right __autofree = NULL;
+	char *left __autofree = NULL;
 	struct iomem_slice raw[2] = {};
 	const char *notes[2] = {};
 	const char *text[2];
@@ -377,7 +374,7 @@ static void write_plain_report(FILE *out, const struct review_report *report,
 			       const char *const identities[2],
 			       const bool present[2])
 {
-	struct iomem_buf text __free(iomem_buf) = {};
+	struct iomem_buf text __cleanup(iomem_buf_free) = {};
 	struct iomem_writer writer = {};
 
 	/* Copying keeps the whole report, including hidden sections */
@@ -411,7 +408,14 @@ static void write_html_header(FILE *out, const char *const identities[2],
 	} else {
 		fputs("diffofdiffs report", out);
 	}
-	fputs("</title><style>\n", out);
+
+	/* Keep the viewer's license and notices with every standalone copy */
+	fputs("</title>\n<!--\n", out);
+	fputs(notice, out);
+	fputs("\nThe following license covers the report viewer. Quoted source retains its own license.\n\n",
+	      out);
+	fputs(license, out);
+	fputs("-->\n<style>\n", out);
 	fputs(html_css, out);
 	fputs("</style></head><body><main><header><h1>diffofdiffs</h1><p>",
 	      out);
@@ -436,9 +440,9 @@ static void write_html_header(FILE *out, const char *const identities[2],
 void render_html_report(FILE *out, const struct review_report *report,
 			const char *const identities[2], const bool present[2])
 {
-	char *left_subject __free(free) =
+	char *left_subject __autofree =
 		git_tree_dir ? gittree_commit_subject(GITTREE_PATCH1) : NULL;
-	char *right_subject __free(free) =
+	char *right_subject __autofree =
 		git_tree_dir ? gittree_commit_subject(GITTREE_PATCH2) : NULL;
 	const char *subjects[2] = { left_subject, right_subject };
 	struct html_layout layout = { .width = 2, .digits = 3 };

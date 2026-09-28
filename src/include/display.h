@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0-only */
+/* SPDX-License-Identifier: Apache-2.0 */
 #ifndef DISPLAY_H
 #define DISPLAY_H
 

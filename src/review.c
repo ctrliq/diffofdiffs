@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -43,8 +43,6 @@ struct comparison {
 static void comparison_free(struct comparison *review);
 static void compare_sources(struct comparison *review);
 
-DEFINE_FREE(comparison, struct comparison, comparison_free(&_T))
-
 static size_t source_mate(const struct comparison *review,
 			  const struct udiff_matches *matches, int leg,
 			  int stage, size_t row)
@@ -82,13 +80,11 @@ static size_t layout_mate(const struct comparison *review, int leg, int stage,
 			   row);
 }
 
-DEFINE_FREE(udiff_matches, struct udiff_matches, udiff_matches_free(&_T))
-
 static void match_interval(const struct udiff_image *images,
 			   struct udiff_matches *matches, const size_t *first,
 			   const size_t *end)
 {
-	struct udiff_matches part __free(udiff_matches) = {};
+	struct udiff_matches part __cleanup(udiff_matches_free) = {};
 	struct udiff_image window[2];
 
 	if (first[0] == end[0] || first[1] == end[1])
@@ -251,9 +247,9 @@ static void match_function_interval(const struct udiff_image *images,
 				    struct udiff_matches *matches,
 				    const size_t *first, const size_t *end)
 {
-	struct udiff_matches candidates __free(udiff_matches) = {};
+	struct udiff_matches candidates __cleanup(udiff_matches_free) = {};
 	size_t cursor[2] = { first[0], first[1] }, count = 0;
-	struct line_occurrence *keys __free(free) = NULL;
+	struct line_occurrence *keys __autofree = NULL;
 	struct udiff_image window[2];
 	bool missing = false;
 
@@ -334,11 +330,11 @@ static void match_complete(const struct comparison *quoted,
 {
 	const struct source_view *other_view = &quoted->source[1].view[0];
 	const struct source_view *view = &quoted->source[0].view[0];
-	struct udiff_matches edit_anchors __free(udiff_matches) = {};
+	struct udiff_matches edit_anchors __cleanup(udiff_matches_free) = {};
 	struct udiff_image window = { .lines = view->lines,
 				      .nlines = view->count };
 	const size_t *seed = quoted->matches[0].side[0];
-	struct line_occurrence *keys __free(free) = NULL;
+	struct line_occurrence *keys __autofree = NULL;
 	size_t first[2] = {}, end[2], count = 0;
 
 	init_unmatched_lines(images, matches);
@@ -394,8 +390,6 @@ static void reindentation_free(struct reindentation *indent)
 		free(indent->lines[leg]);
 	free(indent->keys);
 }
-
-DEFINE_FREE(reindentation, struct reindentation, reindentation_free(&_T))
 
 static void read_reindented_lines(struct reindentation *indent,
 				  const struct udiff_image *images,
@@ -593,8 +587,7 @@ static void merge_reindented_matches(struct comparison *review, int stage,
 {
 	struct udiff_matches *layout = &review->alignment[stage];
 	struct udiff_matches *exact = &review->matches[stage];
-	size_t *old __free(free) =
-		xmalloc_array(indent->count[0], sizeof(*old));
+	size_t *old __autofree = xmalloc_array(indent->count[0], sizeof(*old));
 	size_t first[2] = {};
 
 	/* Clone exact matches only when layout needs its own correspondence */
@@ -656,8 +649,8 @@ static void match_reindented_window(struct comparison *review, int stage,
 				    const struct udiff_image *images,
 				    const size_t *first, const size_t *end)
 {
-	struct reindentation indent __free(reindentation) = {};
-	bool *selected __free(free) = NULL;
+	struct reindentation indent __cleanup(reindentation_free) = {};
+	bool *selected __autofree = NULL;
 
 	if (first[0] == end[0] || first[1] == end[1])
 		return;
@@ -793,7 +786,7 @@ static void locate_edit_anchors(const struct comparison *quoted,
 	const struct source_view *view = &source->view[stage];
 	struct udiff_image window = { .lines = view->lines,
 				      .nlines = view->count };
-	struct line_occurrence *keys __free(free) = NULL;
+	struct line_occurrence *keys __autofree = NULL;
 	char sign = stage ? '+' : '-';
 	size_t count = 0;
 
@@ -926,8 +919,6 @@ static void scope_pairing_free(struct scope_pairing *pairing)
 		source_scopes_free(&pairing->side[leg]);
 	free(pairing->links);
 }
-
-DEFINE_FREE(scope_pairing, struct scope_pairing, scope_pairing_free(&_T))
 
 static void read_scope_name(struct udiff_line *name,
 			    const struct udiff_line *line)
@@ -1104,7 +1095,7 @@ static size_t *scope_body_matches(const struct udiff_image *images,
 				  const struct udiff_matches *retained)
 {
 	size_t *bodies = xmalloc_array(images[0].nlines, sizeof(*bodies));
-	struct line_occurrence *keys __free(free) = NULL;
+	struct line_occurrence *keys __autofree = NULL;
 	size_t count = 0;
 
 	keys = collect_line_occurrences(images, &images[0], matches->side[0],
@@ -1211,7 +1202,7 @@ static void pair_scope_bodies(struct scope_pairing *pairing,
 
 static size_t order_scope_pairs(struct source_scopes scopes[2])
 {
-	size_t *tails __free(free) =
+	size_t *tails __autofree =
 		xmalloc_array(scopes[0].count, sizeof(*tails));
 	size_t paired = 0, previous;
 
@@ -1292,12 +1283,12 @@ static void match_scopes(struct comparison *review,
 			 const struct udiff_image *images, int stage,
 			 const struct udiff_matches *retained)
 {
-	struct udiff_matches anchors __free(udiff_matches) = {};
-	struct scope_pairing pairing __free(scope_pairing) = {};
+	struct udiff_matches anchors __cleanup(udiff_matches_free) = {};
+	struct scope_pairing pairing __cleanup(scope_pairing_free) = {};
 	const struct source_scopes *right = &pairing.side[1];
 	const struct source_scopes *left = &pairing.side[0];
 	struct udiff_matches *matches = &review->matches[stage];
-	size_t *bodies __free(free) = NULL;
+	size_t *bodies __autofree = NULL;
 	size_t first[2] = {}, end[2];
 
 	for (int leg = 0; leg < 2; leg++)
@@ -1417,9 +1408,9 @@ static void match_results(struct comparison *review,
 			  struct udiff_matches *retained)
 {
 	const struct source_view *parent = &review->source[0].view[0];
-	struct udiff_matches anchors __free(udiff_matches) = {};
+	struct udiff_matches anchors __cleanup(udiff_matches_free) = {};
 	struct udiff_matches *matches = &review->matches[1];
-	struct line_occurrence *keys __free(free) = NULL;
+	struct line_occurrence *keys __autofree = NULL;
 	size_t first[2] = {}, end[2], count = 0;
 
 	keys = collect_line_occurrences(parents, &parents[0],
@@ -1632,8 +1623,8 @@ static void match_ambiguous_sources(struct comparison *review,
 
 static void compare_ordered(struct comparison *review)
 {
-	struct udiff_matches retained __free(udiff_matches) = {};
-	struct comparison quoted __free(comparison) = {};
+	struct udiff_matches retained __cleanup(udiff_matches_free) = {};
+	struct comparison quoted __cleanup(comparison_free) = {};
 	bool complete = review->source[0].complete;
 	struct udiff_image images[2][2];
 
@@ -1711,7 +1702,7 @@ static void compare_sources(struct comparison *review)
 /* Quoted source or a unique match can locate retained counterparts */
 static void select_counterparts(struct comparison *review, int stage)
 {
-	struct line_occurrence *keys __free(free) = NULL;
+	struct line_occurrence *keys __autofree = NULL;
 	struct udiff_image images[2];
 	size_t count = 0;
 
@@ -1809,7 +1800,7 @@ static void select_delta(struct comparison *review, unsigned int context,
 		select_counterparts(review, stage);
 	for (int leg = 0; leg < 2; leg++) {
 		const struct patch_source *source = &review->source[leg];
-		bool *seeds __free(free) =
+		bool *seeds __autofree =
 			xmalloc_array(source->nrows, sizeof(*seeds));
 
 		/* Freeze the seeds so newly selected context can't grow more */
@@ -1850,8 +1841,6 @@ static void paired_rows_free(struct paired_rows *pairs)
 {
 	free(pairs->rows);
 }
-
-DEFINE_FREE(paired_rows, struct paired_rows, paired_rows_free(&_T))
 
 static void append_pair(struct paired_rows *pairs, size_t a, size_t b,
 			bool equal)
@@ -1908,13 +1897,13 @@ static void align_fallback(struct paired_rows *pairs, size_t *at,
 static unsigned int replacement_similarity(const struct udiff_line *a,
 					   const struct udiff_line *b)
 {
-	struct udiff_matches matches __free(udiff_matches) = {};
+	struct udiff_matches matches __cleanup(udiff_matches_free) = {};
 	size_t total_bytes = a->len + b->len, count = 0, common = 0;
 	size_t identifiers;
 	const struct udiff_line *source[2] = { a, b };
-	struct udiff_line *lines __free(free) = NULL;
+	struct udiff_line *lines __autofree = NULL;
 	struct udiff_image image[2] = {};
-	char *bytes __free(free) = NULL;
+	char *bytes __autofree = NULL;
 
 	if (total_bytes > REPLACEMENT_MAX_BYTES || patch_row_equal(a, b))
 		return 0;
@@ -1988,7 +1977,7 @@ static void align_known_replacements(const struct comparison *review,
 {
 	size_t count[2] = { end[0] - at[0], end[1] - at[1] };
 	size_t first[2] = { at[0], at[1] }, last = SIZE_MAX;
-	struct replacement_match *best __free(free) = NULL;
+	struct replacement_match *best __autofree = NULL;
 	struct replacement_match *right;
 
 	/*
@@ -2436,8 +2425,8 @@ static void mark_known_context(const struct comparison *review,
 static void select_context(const struct comparison *review,
 			   struct paired_rows *pairs, unsigned int context)
 {
-	bool *right __free(free) = NULL;
-	bool *left __free(free) = NULL;
+	bool *right __autofree = NULL;
+	bool *left __autofree = NULL;
 	bool *near[2];
 
 	if (review->source[0].ambiguous || review->source[1].ambiguous)
@@ -2681,7 +2670,7 @@ static char *file_label(const struct patch_source *source,
 {
 	const struct patch_file *file = source->file ?: other->file;
 	const struct patch_name *name = file->record->file;
-	struct patch_name *stripped_name __free(patch_name) =
+	struct patch_name *stripped_name __cleanup(patch_name_pointer_free) =
 		patch_name_strip(name, name->prefix == PATCH_PREFIX_GIT);
 
 	return git_quote_name(stripped_name);
@@ -2727,9 +2716,9 @@ static char *format_file_metadata(const struct patch_file *file, bool show_id)
 	if (story->mode.new_mode[0])
 		fprintf(writer.fp, "New mode: %s\n", story->mode.new_mode);
 	if (file->operation_name[0]) {
-		char *old_text __free(free) =
+		char *old_text __autofree =
 			git_quote_name(file->operation_name[0]);
-		char *new_text __free(free) =
+		char *new_text __autofree =
 			git_quote_name(file->operation_name[1]);
 
 		fprintf(writer.fp, "%s: %s -> %s\n",
@@ -2757,8 +2746,8 @@ static void review_file_build(struct review_file *file,
 			      const struct patch_move *focus_a,
 			      const struct patch_move *focus_b)
 {
-	struct comparison review __free(
-		comparison) = { .focus = { focus_a, focus_b } };
+	struct comparison review __cleanup(
+		comparison_free) = { .focus = { focus_a, focus_b } };
 	const struct iomem_slice absent = {};
 	bool shared_deletion;
 	bool show_id = false;
@@ -2777,7 +2766,7 @@ static void review_file_build(struct review_file *file,
 
 	/* Moved matches add context; edits keep their original files */
 	for (int section = !!focus_a; section < 2; section++) {
-		struct paired_rows pairs __free(paired_rows) = {};
+		struct paired_rows pairs __cleanup(paired_rows_free) = {};
 
 		pair_rows(&review, &pairs, section);
 		if (section)
@@ -2820,7 +2809,7 @@ static void review_file_build(struct review_file *file,
 	    (a->binary.len != b->binary.len ||
 	     (a->binary.len &&
 	      memcmp(a->binary.base, b->binary.base, a->binary.len)))) {
-		char *previous __free(free) = file->note[0];
+		char *previous __autofree = file->note[0];
 
 		file->metadata_diff = true;
 		xasprintf(&file->note[0],

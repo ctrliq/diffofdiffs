@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: GPL-2.0-only
+# SPDX-License-Identifier: Apache-2.0
 """Check native ranges and renderer source preservation independently."""
 import difflib
 import fcntl
@@ -20,6 +20,7 @@ from pathlib import Path
 from review_oracle import check_review, display_text
 
 
+ROOT = Path(__file__).resolve().parents[1]
 ENV = dict(os.environ, LC_ALL='C.UTF-8', ASAN_OPTIONS='allocator_may_return_null=1:detect_leaks=1')
 ANSI = re.compile(rb'\x1b\[[0-9;]*m')
 SPANS = {'word-change': 'words', 'character-change': 'characters',
@@ -43,6 +44,7 @@ class Report(HTMLParser):
         self.subjects = []
         self.identities = []
         self.title = ''
+        self.comments = []
         self.feed(data)
         assert not self.stack
 
@@ -84,6 +86,9 @@ class Report(HTMLParser):
         assert opened == tag, (opened, tag)
         if self.current is not None and len(self.stack) == self.current['depth']:
             self.current = None
+
+    def handle_comment(self, data):
+        self.comments.append(data)
 
     def handle_data(self, data):
         if any(tag == 'style' for tag, _ in self.stack):
@@ -201,7 +206,16 @@ def renderer_cases(directory):
     for path, after in zip(paths, sources):
         path.write_bytes(patch(before, after))
     arguments = [TOOL, *map(str, paths)]
-    defaults = Report(subprocess.check_output([*arguments, '--html'], env=ENV).decode()).root
+    default_report = Report(subprocess.check_output([*arguments, '--html'], env=ENV).decode())
+    notices = ''.join(default_report.comments)
+    for name in ('LICENSE', 'NOTICE'):
+        notice = (ROOT / name).read_text()
+        assert '--' not in notice, f'{name} cannot be embedded verbatim in an HTML comment'
+        assert notice in notices, f'standalone report is missing {name}'
+    primer = (ROOT / 'LICENSES/Primer-MIT.txt').read_text()
+    styles = re.sub(r'^\s*\* ?', '', ''.join(default_report.styles), flags=re.M)
+    assert ' '.join(primer.split()) in ' '.join(styles.split()), 'missing Primer MIT notice'
+    defaults = default_report.root
     assert defaults['data-theme'] == 'dark'
     assert defaults['data-highlight'] == 'words'
     CHECKS += 1

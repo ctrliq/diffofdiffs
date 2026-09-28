@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPDX-License-Identifier: GPL-2.0-only
+# SPDX-License-Identifier: Apache-2.0
 #
 # tests/stress-test-fuzzy.sh - compare every commit in a range against
 # itself through diffofdiffs and report any non-empty output as a bug.

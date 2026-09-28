@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0-only */
+/* SPDX-License-Identifier: Apache-2.0 */
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 
 #define __unused __attribute__((__unused__))
@@ -24,14 +25,17 @@
 #define __printf(fmt, first) __attribute__((__format__(__printf__, fmt, first)))
 
 /*
- * Element count of a declared array. When the operand is a pointer rather than
- * an array, __must_be_array()'s bitfield width goes negative and the build
- * dies, so a decayed pointer can never slip through the division silently.
+ * Keep the count usable in constant expressions while diagnosing pointers,
+ * including inside sizeof. The assertion contributes no value to the count.
  */
-#define __same_type(a, b) __builtin_types_compatible_p(typeof(a), typeof(b))
-#define __must_be_array(a) \
-	((int)(sizeof(struct { int : (-!!(__same_type((a), &(a)[0]))); })))
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]) + __must_be_array(arr))
+#define ARRAY_SIZE(array) \
+	(sizeof(array) / sizeof((array)[0]) + \
+	 0 * sizeof(struct { \
+		 _Static_assert(!__builtin_types_compatible_p( \
+					typeof(array), typeof(&(array)[0])), \
+				"ARRAY_SIZE requires an array"); \
+		 char assertion; \
+	 }))
 
 /*
  * Marks a function whose return value must be used, so dropping the result
@@ -40,42 +44,20 @@
 #define __must_check __attribute__((__warn_unused_result__))
 
 /*
- * __free(name) calls __free_name() when a local leaves scope. DEFINE_FREE()
- * supplies the local's value as _T to the cleanup expression. no_free_ptr()
- * retrieves the value and clears the local, transferring ownership without
- * freeing it at scope exit. Its result must be used to avoid losing the only
- * reference to the allocation.
+ * GCC passes the local's address to its scope-exit callback. Struct destructors
+ * can receive that address directly; heap pointers need one dereference first.
  */
 #define __cleanup(func) __attribute__((__cleanup__(func)))
+#define __autofree __cleanup(heap_pointer_free)
 
-#define DEFINE_FREE(_name, _type, _free) \
-	static __always_inline void __free_##_name(void *p) \
-	{ \
-		_type _T = *(_type *)p; \
-		_free; \
-	}
-
-#define __free(_name) __cleanup(__free_##_name)
-
-#define __get_and_null(p, nullvalue) \
-	({ \
-		__auto_type __ptr = &(p); \
-		__auto_type __val = *__ptr; \
-		*__ptr = nullvalue; \
-		__val; \
-	})
-
-static __always_inline __must_check const volatile void *
-__must_check_fn(const volatile void *val)
+static inline void heap_pointer_free(void *slot)
 {
-	return val;
+	void *allocation;
+
+	/* memcpy avoids accessing a typed pointer through a void ** alias */
+	memcpy(&allocation, slot, sizeof(allocation));
+	free(allocation);
 }
-
-#define no_free_ptr(p) \
-	((typeof(p))__must_check_fn( \
-		(const volatile void *)__get_and_null(p, NULL)))
-
-DEFINE_FREE(free, void *, free(_T))
 
 /* Application diagnostic prefix supplied by set_progname() */
 extern const char *progname;

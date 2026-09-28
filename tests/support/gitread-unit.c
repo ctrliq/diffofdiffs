@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -823,7 +823,7 @@ static void case_parents(bool shallow)
 	static const char *const names[] = { "x~", "x", "m" };
 	struct gitread_oid resolved[ARRAY_SIZE(names)];
 	char ids[ARRAY_SIZE(names)][GITREAD_OID_HEXSZ + 1];
-	char *boundaries __free(free) = NULL;
+	char *boundaries __autofree = NULL;
 	struct gitread_oid commit, parent;
 	char hex[GITREAD_OID_HEXSZ + 1];
 	const git_commit *parents[2];
@@ -2698,7 +2698,7 @@ static void build_recipe(const char *target, const char *filename,
 		die("cannot initialize recipe store");
 
 	for (size_t i = 0; i < ARRAY_SIZE(inputs); i++) {
-		char *path __free(free) = NULL;
+		char *path __autofree = NULL;
 
 		xasprintf(&path, "%s/../%s", target, inputs[i]);
 		if (git_blob_create_from_disk(&blob, repo, path))

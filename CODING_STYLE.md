@@ -1,9 +1,9 @@
-<!-- SPDX-License-Identifier: GPL-2.0-only -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 
 # Coding style
 
 This project follows the Linux kernel's coding style, with its
-[.clang-format at 99df2a8eba34](https://github.com/torvalds/linux/blob/99df2a8eba34/.clang-format)
+[.clang-format at f5bbbfec59b4](https://github.com/torvalds/linux/blob/f5bbbfec59b4e2fb7520a91de3df8a6174325d6a/.clang-format)
 as the machine-readable base. The local file normalizes the SPDX identifier
 to GPL-2.0-only and makes three formatting changes.
 AllowShortEnumsOnASingleLine is set to false so short
@@ -195,10 +195,10 @@ those promotions, so an (int) cast on it pins nothing.
 
 ## Comments
 
-Comments are /* */ block comments. The only // in the tree is the SPDX tag
-that opens every .c file, per the kernel's own convention:
+Comments in project code use /* */ blocks. Reserve // for the SPDX tag
+that opens each .c file, per the kernel's own convention:
 
-	// SPDX-License-Identifier: GPL-2.0-only
+	// SPDX-License-Identifier: Apache-2.0
 
 Headers take the /* */ form of the same tag.
 
@@ -261,12 +261,11 @@ only to find the check can never fire. Don't write one.
 
 For project-authored files, the head-of-file block credits only the people
 who worked on the file itself.
-Code carried verbatim from another project keeps that project's copyright
-notice beside the code it covers, since the copyright genuinely holds over
-verbatim code. Ideas taken from another project take a citation where
-they're used and nothing more. Snippets of ten lines or fewer don't
-constitute copying in practice unless they're really unique algorithmic
-code.
+Code copied or adapted from another project keeps the applicable copyright
+notices and license terms. Check those terms before importing it, and record
+its source and scope in THIRD_PARTY.md. A short snippet is not automatically
+exempt from copyright or licensing requirements. Cite an algorithm's source
+when using its ideas without copying its implementation.
 
 Vendored files under vendor/ keep their upstream copyright notices, license
 text, and formatting. Don't apply the project's style rules to copied code.
@@ -350,24 +349,27 @@ is review's job; no grep can see types.
 ## Scope-exit cleanup
 
 A transient buffer that lives and dies inside one function declares its
-release at its declaration: `char *buf __free(free) = NULL;` runs
-free(buf) on every exit from the scope, so no return path can leak the
-buffer and the tails carry no free ladders. The macros are the kernel's
-cleanup.h idiom re-dressed over glibc in util.h; DEFINE_FREE() mints a
-hook per free routine, and the one shipped instance covers plain
-buffers.
+release at its declaration: `char *buf __autofree = NULL;` runs free(buf)
+on every exit from the scope. This uses GCC's cleanup attribute through
+util.h, so return paths need no manual free ladders.
+
+For a local struct, use `__cleanup(type_free)` to pass its address directly
+to its destructor. An owned pointer to an object with its own destructor
+needs a typed callback that dereferences the local pointer before calling
+that destructor. A cleanup callback receives the variable's address, not
+the value stored in it.
 
 A converted declaration always carries an initializer, since the hook
 runs on whatever the variable holds when its scope exits, including an
 exit taken before the first assignment. Hooks run in reverse
 declaration order, so a value that must outlive another declares first.
-A function that hands the buffer onward instead of freeing it moves the
-value out through no_free_ptr(), which nulls the local so the hook's free
-no-ops. The compiler rejects a dropped no_free_ptr() result, so a transfer
-can't quietly become a leak.
+A function that hands an owned value onward must set its local pointer to
+NULL before leaving the scope. For repeated transfers of the same type,
+use a typed helper marked __must_check that returns the value and nulls the
+local pointer, so dropping the transferred value produces a diagnostic.
 
-Keep return statements visible: write `return no_free_ptr(value);` at an
-ownership transfer. Do not put a function's return statement inside a macro.
+Keep return statements visible. Do not put a function's return statement
+inside a macro.
 
 ## Checked arithmetic
 

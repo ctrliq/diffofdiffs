@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * udiff-driver.c - the test driver for line comparison
  * Copyright (C) 2025-2026 Ctrl IQ, Inc.
@@ -49,141 +49,6 @@ const char *__asan_default_options(void);
 const char *__asan_default_options(void)
 {
 	return "allocator_may_return_null=1";
-}
-
-/*
- * SHA-1 (FIPS 180-4), embedded so --dump-lines can name a line's bytes
- * unambiguously without dragging a hashing library in.
- */
-struct sha1_ctx {
-	u32 h[5];
-	u64 nbytes;
-	u8 block[64];
-	size_t fill;
-};
-
-static void sha1_compress(struct sha1_ctx *ctx, const u8 *p)
-{
-	u32 a, b, cv, d, e, f, k, t;
-	u32 w[80];
-	int i;
-
-	for (i = 0; i < 16; i++) {
-		w[i] = ((u32)p[4 * i] << 24) | ((u32)p[4 * i + 1] << 16) |
-		       ((u32)p[4 * i + 2] << 8) | (u32)p[4 * i + 3];
-	}
-	for (i = 16; i < 80; i++) {
-		t = w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16];
-		w[i] = (t << 1) | (t >> 31);
-	}
-
-	a = ctx->h[0];
-	b = ctx->h[1];
-	cv = ctx->h[2];
-	d = ctx->h[3];
-	e = ctx->h[4];
-
-	for (i = 0; i < 80; i++) {
-		if (i < 20) {
-			f = (b & cv) | (~b & d);
-			k = 0x5a827999u;
-		} else if (i < 40) {
-			f = b ^ cv ^ d;
-			k = 0x6ed9eba1u;
-		} else if (i < 60) {
-			f = (b & cv) | (b & d) | (cv & d);
-			k = 0x8f1bbcdcu;
-		} else {
-			f = b ^ cv ^ d;
-			k = 0xca62c1d6u;
-		}
-		t = ((a << 5) | (a >> 27)) + f + e + k + w[i];
-		e = d;
-		d = cv;
-		cv = (b << 30) | (b >> 2);
-		b = a;
-		a = t;
-	}
-
-	ctx->h[0] += a;
-	ctx->h[1] += b;
-	ctx->h[2] += cv;
-	ctx->h[3] += d;
-	ctx->h[4] += e;
-}
-
-static void sha1_init(struct sha1_ctx *ctx)
-{
-	ctx->h[0] = 0x67452301u;
-	ctx->h[1] = 0xefcdab89u;
-	ctx->h[2] = 0x98badcfeu;
-	ctx->h[3] = 0x10325476u;
-	ctx->h[4] = 0xc3d2e1f0u;
-	ctx->nbytes = 0;
-	ctx->fill = 0;
-}
-
-static void sha1_update(struct sha1_ctx *ctx, const void *data, size_t len)
-{
-	const u8 *p = data;
-
-	ctx->nbytes += len;
-	while (len) {
-		size_t take = sizeof(ctx->block) - ctx->fill;
-
-		if (take > len)
-			take = len;
-		memcpy(ctx->block + ctx->fill, p, take);
-		ctx->fill += take;
-		p += take;
-		len -= take;
-		if (ctx->fill == sizeof(ctx->block)) {
-			sha1_compress(ctx, ctx->block);
-			ctx->fill = 0;
-		}
-	}
-}
-
-static void sha1_final(struct sha1_ctx *ctx, char *hex)
-{
-	static const char digits[] = "0123456789abcdef";
-	u64 bits = ctx->nbytes * 8;
-	u8 pad = 0x80;
-	u8 zero = 0;
-	u8 tail[8];
-	int i;
-
-	for (i = 0; i < 8; i++)
-		tail[i] = (bits >> (56 - 8 * i));
-
-	sha1_update(ctx, &pad, 1);
-	while (ctx->fill != 56)
-		sha1_update(ctx, &zero, 1);
-
-	/*
-	 * nbytes is meaningless past the padding; the length block goes in by
-	 * hand so the counter can't fold itself back into the digest.
-	 */
-	memcpy(ctx->block + 56, tail, 8);
-	sha1_compress(ctx, ctx->block);
-	ctx->fill = 0;
-
-	for (i = 0; i < 20; i++) {
-		unsigned v = (ctx->h[i / 4] >> (24 - 8 * (i % 4))) & 0xffu;
-
-		hex[2 * i] = digits[v >> 4];
-		hex[2 * i + 1] = digits[v & 0xfu];
-	}
-	hex[40] = '\0';
-}
-
-static void sha1_hex(const void *data, size_t len, char *hex)
-{
-	struct sha1_ctx ctx;
-
-	sha1_init(&ctx);
-	sha1_update(&ctx, data, len);
-	sha1_final(&ctx, hex);
 }
 
 /*
@@ -336,11 +201,15 @@ static void operand_free(struct operand *op)
 static void dump_lines(const struct operand *op)
 {
 	printf("file=%s nlines=%zu\n", op->path, op->nlines);
-	for (size_t k = 0; k < op->nlines; k++) {
-		char hex[41];
 
-		sha1_hex(op->lines[k].ptr, op->lines[k].len, hex);
-		printf("len=%zu sha1=%s\n", op->lines[k].len, hex);
+	/* Hex keeps embedded NULs and line endings visible in fixture output */
+	for (size_t k = 0; k < op->nlines; k++) {
+		const struct udiff_line *line = &op->lines[k];
+
+		printf("len=%zu hex=", line->len);
+		for (size_t i = 0; i < line->len; i++)
+			printf("%02x", (u8)line->ptr[i]);
+		putchar('\n');
 	}
 }
 
@@ -409,8 +278,8 @@ static const char *name_stub(void *ctx, unsigned long old_lineno,
 static void print_dp_cost(const struct operand *a, const struct operand *b)
 {
 	size_t na = a->nlines, nb = b->nlines;
-	size_t *r0 __free(free) = xzalloc_array(nb + 1, sizeof(*r0));
-	size_t *r1 __free(free) = xmalloc_array(nb + 1, sizeof(*r1));
+	size_t *r0 __autofree = xzalloc_array(nb + 1, sizeof(*r0));
+	size_t *r1 __autofree = xmalloc_array(nb + 1, sizeof(*r1));
 	size_t *prev, *cur;
 	size_t i, j, lcs;
 

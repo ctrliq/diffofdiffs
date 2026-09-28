@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: GPL-2.0-only -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 
 # Code design decisions
 
@@ -48,17 +48,17 @@ braces, keep braces on every branch.
 Use for loops for counted iteration and scans. Put advancement in the
 header when possible, and declare the iterator in the initializer when
 only the loop needs it. Keep an iterator outside the loop if its final
-value is used afterward, or if it is a parameter. This includes scans such
-as skip_to_blank(), and loop-local iterators in stripped() and
-scan_mode_line(). Cursor exhaustion and convergence loops may remain while
-loops when there is no useful counted iteration to express.
+value is used afterward, or if it is a parameter. The loops in stripped()
+and scan_mode_line() keep their iterators in their headers. Cursor
+exhaustion and convergence loops may remain while loops when there is no
+useful counted iteration to express.
 
 Mark unused parameters with __unused on the parameter declaration. Do not
 add meaningless (void)parameter statements to silence compiler warnings.
 
 Keep ternary expressions out of if conditions. Use explicit Boolean
 conditions or compute a selected value before testing it. Keep return
-statements visible, including ownership transfers through no_free_ptr().
+statements visible, including transfers of ownership out of a cleanup scope.
 Macros must not hide a function's return statement.
 
 Assign compound literals using typeof(lval), rather than repeating the

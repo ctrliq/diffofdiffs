@@ -1,0 +1,10 @@
+diffofdiffs
+Copyright (C) 2025-2026 Ctrl IQ, Inc.
+
+HTML reports use color values from GitHub Primer Primitives.
+Copyright (c) 2018 GitHub Inc.
+The Primer material is licensed under the MIT License; its notice is included
+in src/html.css, generated HTML reports, and LICENSES/Primer-MIT.txt.
+
+Separately licensed headers, development files, and test data are described
+in THIRD_PARTY.md. Their existing copyright notices and licenses still apply.

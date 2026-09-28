@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0-only */
+/* SPDX-License-Identifier: Apache-2.0 */
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -65,7 +65,5 @@ void treediff_build(struct gitread *gr, const struct gitread_oid *old_commit,
 		    const struct gitread_oid *new_commit,
 		    struct treediff_map *out);
 void treediff_map_free(struct treediff_map *map);
-
-DEFINE_FREE(treediff_map, struct treediff_map, treediff_map_free(&_T))
 
 #endif /* TREEDIFF_H */

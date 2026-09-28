@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -7,6 +7,7 @@
  */
 #define _GNU_SOURCE
 
+#include <ctype.h>
 #include <error.h>
 #include <limits.h>
 #include <stdio.h>
@@ -43,17 +44,24 @@ static bool name_is_dev_null(const char *name, size_t len)
 	       !memcmp(name, "/dev/null", len);
 }
 
-static int removable_path_components(const char *name)
+struct path_rank {
+	size_t length;
+	size_t basename;
+	int directories;
+};
+
+static void measure_path(const char *name, struct path_rank *rank)
 {
-	int num = 0;
-
-	while ((name = strchr(name, '/'))) {
-		for (; *name == '/'; name++)
-			;
-		num++;
+	*rank = (typeof(*rank)){};
+	for (size_t at = 0; name[at]; at++) {
+		rank->length++;
+		if (name[at] != '/') {
+			rank->basename++;
+		} else if (name[at + 1] != '/') {
+			rank->basename = 0;
+			rank->directories++;
+		}
 	}
-
-	return num;
 }
 
 /*
@@ -62,22 +70,17 @@ static int removable_path_components(const char *name)
  */
 const char *stripped(const char *name, int num_components)
 {
-	const char *basename = strrchr(name, '/');
-
 	if (name_is_dev_null(name, strlen(name)))
 		return name;
 
-	if (basename)
-		basename++;
-	else
-		basename = name;
-
-	for (int i = 0; i < num_components && (name = strchr(name, '/')); i++) {
-		for (; *name == '/'; name++)
-			;
+	for (const char *at = name; *at && num_components > 0; at++) {
+		if (*at == '/' && at[1] != '/') {
+			name = at + 1;
+			num_components--;
+		}
 	}
 
-	return name ? name : basename;
+	return name;
 }
 
 /*
@@ -88,39 +91,20 @@ const char *stripped(const char *name, int num_components)
 const struct patch_name *best_patch_name(const struct patch_name *oldname,
 					 const struct patch_name *newname)
 {
-	const struct patch_name *names[2] = { oldname, newname };
-	size_t best_baselen = SIZE_MAX, best_len = SIZE_MAX;
-	int best_components = INT_MAX, best = 0;
+	struct path_rank old, new;
 
-	for (int i = 0; i < 2; i++) {
-		const char *name = names[i]->text;
-		size_t len = strlen(name), baselen;
-		const char *base;
-		int components;
+	measure_path(oldname->text, &old);
+	measure_path(newname->text, &new);
+	if (name_is_dev_null(newname->text, new.length))
+		return oldname;
+	if (name_is_dev_null(oldname->text, old.length))
+		return newname;
 
-		if (name_is_dev_null(name, len))
-			continue;
-
-		components = removable_path_components(name);
-		base = strrchr(name, '/');
-		baselen = base ? strlen(base + 1) : len;
-		if (components > best_components)
-			continue;
-
-		if (components == best_components && baselen > best_baselen)
-			continue;
-
-		if (components == best_components && baselen == best_baselen &&
-		    len >= best_len)
-			continue;
-
-		best_components = components;
-		best_baselen = baselen;
-		best_len = len;
-		best = i;
-	}
-
-	return names[best];
+	if (old.directories != new.directories)
+		return old.directories < new.directories ? oldname : newname;
+	if (old.basename != new.basename)
+		return old.basename < new.basename ? oldname : newname;
+	return old.length <= new.length ? oldname : newname;
 }
 
 struct patch_name *patch_name_dup(const struct patch_name *name)
@@ -155,31 +139,25 @@ void patch_name_free(struct patch_name *name)
  * Recognize common diff timestamps to locate the filename boundary. The
  * fractional seconds and timezone need no parsing once the prefix matches.
  */
-static bool header_timestamp(const char *s)
+static bool header_has_date(const char *text)
 {
-	struct tm tm = {};
+	static const char *const formats[] = { "%Y-%m-%d %H:%M:%S",
+					       "%a %b %e %T %Y",
+					       "%b %Y %H:%M:%S" };
 
-	s += strspn(s, " \t");
+	for (size_t i = 0; i < ARRAY_SIZE(formats); i++) {
+		struct tm date = {};
 
-	return strptime(s, "%Y-%m-%d %H:%M:%S", &tm) ||
-	       strptime(s, "%a %b %e %T %Y", &tm) ||
-	       strptime(s, "%b %Y %H:%M:%S", &tm);
+		if (strptime(text, formats[i], &date))
+			return true;
+	}
+
+	return false;
 }
 
 static size_t skip_blank(const char *s, size_t len, size_t at)
 {
 	for (; at < len && (s[at] == ' ' || s[at] == '\t'); at++)
-		;
-
-	return at;
-}
-
-/* The offset of the first blank or line ending, or len when there is none */
-static size_t skip_to_blank(const char *s, size_t len, size_t at)
-{
-	for (; at < len && s[at] != ' ' && s[at] != '\t' && s[at] != '\n' &&
-	       s[at] != '\r';
-	     at++)
 		;
 
 	return at;
@@ -273,34 +251,63 @@ malformed:
 }
 
 /*
- * A tab, trailing blanks, or a timestamp ends the name. Spaces within it can
- * belong to the path, so probe the suffix before treating them as a delimiter.
- *
- * strptime() lets format whitespace match newlines. A terminated copy keeps its
- * timestamp probe from consuming the next patch line; length-based name parsing
- * still preserves embedded NUL bytes for later validation.
+ * Work backward so spaces in the path survive unless a later field establishes
+ * a boundary. The leftmost delimiter wins; an embedded line ending falls back
+ * to the first token when no timestamp or tab-led separator disambiguates it.
  */
 struct patch_name *filename_from_header(const char *base, size_t len)
 {
-	char *header __free(free) = memdup(base, len);
-	size_t first_blank = skip_to_blank(header, len, 0);
-	size_t at;
+	bool line_ending = false, date_checked = false, date = false;
+	char *header __autofree = memdup(base, len);
+	size_t boundary = len, first_blank = len;
 
-	for (at = first_blank; at < len && header[at] == ' ';) {
-		size_t past;
+	for (size_t at = len; at;) {
+		size_t past = at;
+		char c = header[--at];
 
-		past = skip_blank(header, len, at);
-		if (past >= len || header_timestamp(header + past))
-			break;
+		if (!isspace(c))
+			date_checked = false;
 
-		at = skip_to_blank(header, len, past + 1);
+		if (c == ' ' || c == '\t') {
+			for (; at && (header[at - 1] == ' ' ||
+				      header[at - 1] == '\t');
+			     at--)
+				;
+
+			first_blank = at;
+
+			/*
+			 * Numeric dates skip whitespace, so repeated reads can
+			 * rescan the same suffix. Only cache reads starting in
+			 * whitespace; month and weekday names must start at the
+			 * candidate boundary.
+			 */
+			if (!date_checked) {
+				date = header_has_date(header + past);
+				date_checked = isspace(header[past]);
+			}
+			if (header[at] == '\t' || past == len || date) {
+				boundary = at;
+				line_ending = false;
+			}
+		} else if (c == '\n' || c == '\r') {
+			size_t before = at;
+
+			for (; before && (header[before - 1] == ' ' ||
+					  header[before - 1] == '\t');
+			     before--)
+				;
+
+			/* A word after spaces starts with one literal byte */
+			if (before < at && header[before] == ' ')
+				continue;
+
+			first_blank = boundary = at;
+			line_ending = true;
+		}
 	}
 
-	if (at < len && (header[at] == '\n' || header[at] == '\r') &&
-	    at > first_blank)
-		at = first_blank;
-
-	return unquoted_name(header, at);
+	return unquoted_name(base, line_ending ? first_blank : boundary);
 }
 
 struct patch_name *unquoted_name(const char *base, size_t len)
@@ -323,7 +330,7 @@ struct patch_name *unquoted_name(const char *base, size_t len)
 static bool git_name_token(const char *base, size_t len,
 			   const struct patch_name *name, size_t *used)
 {
-	struct patch_name *parsed __free(patch_name) = NULL;
+	struct patch_name *parsed __cleanup(patch_name_pointer_free) = NULL;
 	size_t end;
 
 	if (!len || name->verbatim)
@@ -446,8 +453,8 @@ static bool git_prefixed_paths(const struct iomem_line *opener,
 			       const struct patch_name *dst)
 {
 	struct patch_name oldname, newname;
-	char *old __free(free) = NULL;
-	char *new __free(free) = NULL;
+	char *old __autofree = NULL;
+	char *new __autofree = NULL;
 
 	if (src->verbatim || dst->verbatim || strlen(src->text) != src->len ||
 	    strlen(dst->text) != dst->len)
@@ -470,10 +477,10 @@ enum patch_prefix patch_name_prefix(const struct iomem_buf *buf, long pos,
 				    const char *operand,
 				    const struct patch_name *key)
 {
-	struct patch_name *oldname __free(patch_name) = NULL;
-	struct patch_name *newname __free(patch_name) = NULL;
-	struct patch_name *src __free(patch_name) = NULL;
-	struct patch_name *dst __free(patch_name) = NULL;
+	struct patch_name *oldname __cleanup(patch_name_pointer_free) = NULL;
+	struct patch_name *newname __cleanup(patch_name_pointer_free) = NULL;
+	struct patch_name *src __cleanup(patch_name_pointer_free) = NULL;
+	struct patch_name *dst __cleanup(patch_name_pointer_free) = NULL;
 	long start = block_opener_above(buf, pos);
 	struct iomem_line opener = {}, line;
 	struct iomem_cursor cur;
@@ -876,7 +883,8 @@ static bool git_fileop_patch(const struct iomem_buf *buf)
 	iomem_cursor_init(&cur, buf);
 	while (iomem_cursor_next(&cur, &line)) {
 		if (line_starts(&line, "diff --git ")) {
-			struct patch_name *name __free(patch_name) =
+			struct patch_name *name __cleanup(
+				patch_name_pointer_free) =
 				git_block_name(buf, &line);
 
 			armed = true;
@@ -1050,7 +1058,8 @@ void validate_patch(struct iomem_buf *buf, const char *name, const char *which)
 
 	iomem_cursor_init(&cur, buf);
 	while (iomem_cursor_next(&cur, &line)) {
-		struct patch_name *block_name __free(patch_name) = NULL;
+		struct patch_name *block_name __cleanup(
+			patch_name_pointer_free) = NULL;
 		bool raw_cr, body, opener;
 
 		/*
@@ -1170,11 +1179,21 @@ void validate_patch(struct iomem_buf *buf, const char *name, const char *which)
 	error(0, 0, "%s doesn't contain a patch", name);
 }
 
+/* A returned name leaves the scope's ownership before its callback runs */
+static __must_check struct patch_name *
+patch_name_take(struct patch_name **owner)
+{
+	struct patch_name *name = *owner;
+
+	*owner = NULL;
+	return name;
+}
+
 static struct patch_name *git_opener_pair(const struct iomem_line *line,
 					  size_t split)
 {
-	struct patch_name *oldname __free(patch_name) = NULL;
-	struct patch_name *newname __free(patch_name) = NULL;
+	struct patch_name *oldname __cleanup(patch_name_pointer_free) = NULL;
+	struct patch_name *newname __cleanup(patch_name_pointer_free) = NULL;
 	size_t len = chomp_header(line->base, line->len);
 	size_t opener_len = sizeof("diff --git ") - 1;
 	size_t path_prefix_len = sizeof("a/") - 1;
@@ -1199,7 +1218,7 @@ static struct patch_name *git_opener_pair(const struct iomem_line *line,
 		return NULL;
 	}
 
-	return no_free_ptr(newname);
+	return patch_name_take(&newname);
 }
 
 /*
@@ -1210,9 +1229,9 @@ static struct patch_name *git_opener_pair(const struct iomem_line *line,
 struct patch_name *git_block_name(const struct iomem_buf *buf,
 				  const struct iomem_line *line)
 {
-	struct patch_name *best __free(patch_name) = NULL;
-	struct patch_name *src __free(patch_name) = NULL;
-	struct patch_name *dst __free(patch_name) = NULL;
+	struct patch_name *best __cleanup(patch_name_pointer_free) = NULL;
+	struct patch_name *src __cleanup(patch_name_pointer_free) = NULL;
+	struct patch_name *dst __cleanup(patch_name_pointer_free) = NULL;
 	size_t len = chomp_header(line->base, line->len);
 	size_t opener_len = sizeof("diff --git ") - 1;
 	const char *base = line->base;
@@ -1222,16 +1241,16 @@ struct patch_name *git_block_name(const struct iomem_buf *buf,
 	git_story_paths(buf, line, &src, &dst);
 	if (src && git_block_names(line, src, dst)) {
 		dst->prefix = PATCH_PREFIX_LITERAL;
-		return no_free_ptr(dst);
+		return patch_name_take(&dst);
 	}
 
 	if (src && git_prefixed_paths(line, src, dst)) {
-		char *text __free(free) = NULL;
+		char *text __autofree = NULL;
 
 		xasprintf(&text, "b/%s", dst->text);
 		best = unquoted_name(text, dst->len + sizeof("b/") - 1);
 		best->prefix = PATCH_PREFIX_GIT;
-		return no_free_ptr(best);
+		return patch_name_take(&best);
 	}
 
 	if (len <= opener_len + 1)
@@ -1259,7 +1278,7 @@ struct patch_name *git_block_name(const struct iomem_buf *buf,
 	split = opener_len + (len - opener_len) / 2;
 	best = git_opener_pair(line, split);
 	if (best && best->prefix != PATCH_PREFIX_UNKNOWN)
-		return no_free_ptr(best);
+		return patch_name_take(&best);
 
 	patch_name_free(best);
 	best = NULL;
@@ -1305,7 +1324,7 @@ static void skip_hunk_body(struct iomem_cursor *cur, unsigned long old_left,
  */
 void index_patch(const struct iomem_buf *buf, struct cds_list_head *list)
 {
-	struct patch_name *git_name __free(patch_name) = NULL;
+	struct patch_name *git_name __cleanup(patch_name_pointer_free) = NULL;
 	struct block_latch latch = {};
 	bool header_seen = false;
 	struct iomem_cursor cur;
@@ -1314,8 +1333,10 @@ void index_patch(const struct iomem_buf *buf, struct cds_list_head *list)
 
 	iomem_cursor_init(&cur, buf);
 	while (iomem_cursor_next(&cur, &line)) {
-		struct patch_name *name0 __free(patch_name) = NULL;
-		struct patch_name *name1 __free(patch_name) = NULL;
+		struct patch_name *name0 __cleanup(patch_name_pointer_free) =
+			NULL;
+		struct patch_name *name1 __cleanup(patch_name_pointer_free) =
+			NULL;
 		unsigned long old_count, new_count;
 		long pos = line.offset;
 
@@ -1465,7 +1486,7 @@ struct patch_name_resolution {
 void resolve_name_prefixes(struct cds_list_head *list1,
 			   struct cds_list_head *list2)
 {
-	struct patch_name_resolution *resolved __free(free) = NULL;
+	struct patch_name_resolution *resolved __autofree = NULL;
 	struct cds_list_head *lists[] = { list1, list2 };
 	struct file_list *at;
 	size_t count = 0;
@@ -1562,8 +1583,6 @@ static void file_groups_free(struct file_groups *groups)
 		free(groups->groups[i].records);
 	free(groups->groups);
 }
-
-DEFINE_FREE(file_groups, struct file_groups, file_groups_free(&_T))
 
 static void file_groups_read(struct file_groups *groups,
 			     struct cds_list_head *list)
@@ -1734,8 +1753,8 @@ static void pair_group_records(const struct file_group *group)
 void pair_file_lists(struct cds_list_head *list1, struct cds_list_head *list2,
 		     int depth)
 {
-	struct file_groups right __free(file_groups) = {};
-	struct file_groups left __free(file_groups) = {};
+	struct file_groups right __cleanup(file_groups_free) = {};
+	struct file_groups left __cleanup(file_groups_free) = {};
 
 	/* Repeated records of one path cannot compete as distinct identities */
 	file_groups_read(&left, list1);
@@ -1766,61 +1785,93 @@ void pair_file_lists(struct cds_list_head *list1, struct cds_list_head *list2,
 	}
 }
 
-/*
- * Choose the smallest strip depth that produces a shared file identity.
- */
+static int shared_name_strip_depth(const struct patch_name *left,
+				   const struct patch_name *right)
+{
+	struct path_rank a, b;
+	size_t shared = 0;
+	int depth = 0;
+
+	if (left->prefix == PATCH_PREFIX_AMBIGUOUS ||
+	    right->prefix == PATCH_PREFIX_AMBIGUOUS ||
+	    left->verbatim != right->verbatim)
+		return -1;
+
+	if (!strcmp(left->text, right->text) &&
+	    patch_names_equal(left, right, 0))
+		return 0;
+
+	measure_path(left->text, &a);
+	measure_path(right->text, &b);
+	if (name_is_dev_null(left->text, a.length) ||
+	    name_is_dev_null(right->text, b.length))
+		return -1;
+
+	/*
+	 * Stripping cannot change a basename. Unequal directory counts can only
+	 * converge after both paths reach it, because the same depth applies to
+	 * both authored names and excessive stripping stops at the basename.
+	 */
+	if (a.basename != b.basename ||
+	    memcmp(left->text + a.length - a.basename,
+		   right->text + b.length - b.basename, a.basename))
+		return -1;
+
+	if (a.directories != b.directories)
+		return MAX(a.directories, b.directories);
+
+	for (; shared < a.length && shared < b.length &&
+	       left->text[a.length - shared - 1] ==
+		       right->text[b.length - shared - 1];
+	     shared++)
+		;
+
+	/* A common tail must start at a component boundary on both sides */
+	for (size_t at = 0; at < a.length; at++) {
+		size_t other;
+
+		if (left->text[at] != '/' || left->text[at + 1] == '/')
+			continue;
+
+		depth++;
+		if (at + 1 < a.length - shared)
+			continue;
+
+		other = b.length - (a.length - at - 1);
+		if (other && right->text[other - 1] == '/')
+			return depth;
+	}
+
+	return -1;
+}
+
+/* Mode-only opener names cannot establish how authored headers strip */
 int determine_ignore_components(struct cds_list_head *list1,
 				struct cds_list_head *list2)
 {
-	struct cds_list_head *lists[] = { list1, list2 };
-	struct file_list *l, *l1, *l2;
-	int max_components = 0;
+	struct file_list *left, *right;
+	int best = INT_MAX;
 
-	for (size_t i = 0; i < ARRAY_SIZE(lists); i++) {
-		cds_list_for_each_entry(l, lists[i], node) {
-			int components;
+	cds_list_for_each_entry(left, list1, node) {
+		if (left->mode_only)
+			continue;
 
-			if (l->mode_only ||
-			    name_is_dev_null(l->file->text,
-					     strlen(l->file->text)))
+		cds_list_for_each_entry(right, list2, node) {
+			int depth;
+
+			if (right->mode_only)
 				continue;
 
-			components = removable_path_components(l->file->text);
-			if (components > max_components)
-				max_components = components;
+			depth = shared_name_strip_depth(left->file,
+							right->file);
+			if (!depth)
+				return 0;
+			if (depth > 0)
+				best = MIN(best, depth);
 		}
 	}
 
-	/*
-	 * Mode-only records sit this out, since their opener names cannot
-	 * determine how much an authored header should strip. A run whose every
-	 * record is mode-only settles at zero, where complete block names
-	 * establish the identities the pairing walk compares.
-	 *
-	 * Compare the authored spelling before normalized identity: stripping
-	 * is counted from that spelling, including any Git prefix. Identity
-	 * also rejects ambiguous names that happen to have the same displayed
-	 * text.
-	 */
-	for (int p = 0; p <= max_components; p++) {
-		cds_list_for_each_entry(l1, list1, node) {
-			const char *name1;
-
-			if (l1->mode_only)
-				continue;
-
-			name1 = stripped(l1->file->text, p);
-			cds_list_for_each_entry(l2, list2, node) {
-				if (!l2->mode_only &&
-				    !strcmp(name1,
-					    stripped(l2->file->text, p)) &&
-				    patch_names_equal(l1->file, l2->file, p))
-					return p;
-			}
-		}
-	}
-
-	return 0;
+	return best == INT_MAX ? 0 : best;
 }
 
 void file_list_free(struct cds_list_head *list)

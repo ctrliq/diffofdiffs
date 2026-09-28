@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2026 Ctrl IQ, Inc.
  *
@@ -178,8 +178,8 @@ static void compare_images(struct comparison *comparison, unsigned int context)
 {
 	const struct udiff_image *a = comparison->image[0];
 	const struct udiff_image *b = comparison->image[1];
-	char *right __free(free) = NULL;
-	char *left __free(free) = NULL;
+	char *right __autofree = NULL;
+	char *left __autofree = NULL;
 	git_diff_options options;
 	size_t sizes[2];
 	int status;

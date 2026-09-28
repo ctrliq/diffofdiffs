@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: GPL-2.0-only */
+/* SPDX-License-Identifier: Apache-2.0 */
 /* Selected original source, ready for layout without further matching */
 #ifndef REVIEW_H
 #define REVIEW_H
@@ -63,7 +63,5 @@ struct review_report {
 void review_report_build(struct review_report *report,
 			 const struct iomem_buf *a, const struct iomem_buf *b);
 void review_report_free(struct review_report *report);
-
-DEFINE_FREE(review_report, struct review_report, review_report_free(&_T))
 
 #endif /* REVIEW_H */

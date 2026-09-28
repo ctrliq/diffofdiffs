@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: Apache-2.0
 /* Return source correspondences for independent matching checks */
 #include <stdlib.h>
 #include <string.h>
@@ -18,9 +18,6 @@ static void match_input_free(struct match_input *input)
 	iomem_buf_free(&input->bytes);
 	free(input->lines);
 }
-
-DEFINE_FREE(match_input, struct match_input, match_input_free(&_T))
-DEFINE_FREE(udiff_matches, struct udiff_matches, udiff_matches_free(&_T))
 
 static void match_input_read(struct match_input *input, const char *name)
 {
@@ -49,9 +46,9 @@ static void match_input_read(struct match_input *input, const char *name)
 
 int main(int argc, char **argv)
 {
-	struct udiff_matches matches __free(udiff_matches) = {};
-	struct match_input a __free(match_input) = {};
-	struct match_input b __free(match_input) = {};
+	struct udiff_matches matches __cleanup(udiff_matches_free) = {};
+	struct match_input a __cleanup(match_input_free) = {};
+	struct match_input b __cleanup(match_input_free) = {};
 	size_t previous = 0;
 	bool seen = false;
 

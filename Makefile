@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-2.0-only
+# SPDX-License-Identifier: Apache-2.0
 # Copyright (C) 2026 Ctrl IQ, Inc.
 #
 # Normal, sanitizer, and AFL builds use separate object directories so objects
@@ -24,9 +24,15 @@ endif
 
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL) -m 644
 prefix = /usr/local
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
+datarootdir = $(prefix)/share
+docdir = $(datarootdir)/doc/diffofdiffs
+LICENSE_FILES = LICENSE NOTICE THIRD_PARTY.md \
+	LICENSES/GPL-2.0.txt LICENSES/Primer-MIT.txt \
+	vendor/urcu/LICENSE vendor/urcu/README.md
 
 # AFL builds use the same sources and flags with an instrumenting compiler
 AFL_CC ?= afl-clang-fast
@@ -57,9 +63,9 @@ GIT2_LDLIBS := -lgit2
 HEADERS := $(wildcard src/include/*.h) \
 	vendor/urcu/compiler.h vendor/urcu/list.h
 
-build/html-assets.h: scripts/embed-assets.py src/html.css src/html.js src/html-controls.html
+build/html-assets.h: scripts/embed-assets.py src/html.css src/html.js src/html-controls.html LICENSE NOTICE
 	$(call show,GEN,$@)
-	$(Q)"$(PYTHON)" scripts/embed-assets.py $@ src/html.css src/html.js src/html-controls.html
+	$(Q)"$(PYTHON)" scripts/embed-assets.py $@ src/html.css src/html.js src/html-controls.html LICENSE NOTICE
 
 build/plain/html.o build/asan/html.o build/afl/html.o: build/html-assets.h
 
@@ -91,6 +97,8 @@ TIMEOUT_N := $(words $(TIMEOUT_DIRS))
 
 UDIFF_DRIVER_BINS := tests/support/udiff_driver tests/support/udiff_driver-asan
 GITREAD_UNIT_BINS := tests/support/gitread-unit tests/support/gitread-unit-asan
+READER_UNIT_BINS := tests/support/reader-unit tests/support/reader-unit-asan
+READER_UNIT_OBJS := reader.o iomem.o util.o support/reader-unit.o
 MATCH_DRIVER_BINS := tests/support/match-driver tests/support/match-driver-asan
 HIGHLIGHT_DRIVER_BINS := tests/support/highlight-driver tests/support/highlight-driver-asan
 HIGHLIGHT_DRIVER_OBJS := display.o highlight.o iomem.o udiff.o util.o
@@ -105,15 +113,28 @@ TOOL_SETUP_LIB := tests/support/tool-setup.so
 
 all: $(PLAIN_BINS)
 
-install: diffofdiffs
+install: diffofdiffs $(LICENSE_FILES)
 	$(call show,MKDIR,$(DESTDIR)$(bindir))
 	$(Q)$(INSTALL) -d "$(DESTDIR)$(bindir)"
 	$(call show,INSTALL,$(DESTDIR)$(bindir)/diffofdiffs)
 	$(Q)$(INSTALL_PROGRAM) diffofdiffs "$(DESTDIR)$(bindir)/diffofdiffs"
+	$(call show,INSTALL,$(DESTDIR)$(docdir))
+	$(Q)set -e; for file in $(LICENSE_FILES); do \
+		$(INSTALL) -d "$(DESTDIR)$(docdir)/$$(dirname "$$file")"; \
+		$(INSTALL_DATA) "$$file" "$(DESTDIR)$(docdir)/$$file"; \
+	done
 
 uninstall:
 	$(call show,RM,$(DESTDIR)$(bindir)/diffofdiffs)
 	$(Q)$(RM) "$(DESTDIR)$(bindir)/diffofdiffs"
+	$(call show,RM,license files in $(DESTDIR)$(docdir))
+	$(Q)set -e; for file in $(LICENSE_FILES); do \
+		$(RM) "$(DESTDIR)$(docdir)/$$file"; \
+	done
+	$(call show,RMDIR,empty directories in $(DESTDIR)$(docdir))
+	$(Q)for suffix in /vendor/urcu /vendor /LICENSES ''; do \
+		rmdir "$(DESTDIR)$(docdir)$$suffix" 2>/dev/null || :; \
+	done
 
 diffofdiffs: $(PLAIN_TOOL_OBJS)
 	$(call show,LD,$@)
@@ -215,6 +236,26 @@ check-matches: tests/support/match-driver
 
 check-matches-asan: tests/support/match-driver-asan
 	$(Q)"$(PYTHON)" tests/check-matches.py $<
+
+tests/support/reader-unit: $(addprefix build/plain/,$(READER_UNIT_OBJS))
+	$(call show,LD,$@)
+	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+
+tests/support/reader-unit-asan: $(addprefix build/asan/,$(READER_UNIT_OBJS))
+	$(call show,LD,$@)
+	$(Q)$(CC) $(CFLAGS) $(ASAN_FLAGS) $(LDFLAGS) -o $@ $^
+
+.PHONY: check-reader check-reader-asan check-array-size
+
+# The long-header case must finish without repeated scans of the same whitespace
+check-reader: tests/support/reader-unit check-array-size
+	$(Q)timeout 20 ./$<
+
+check-reader-asan: tests/support/reader-unit-asan check-array-size
+	$(Q)UBSAN_OPTIONS="$$UBSAN_OPTIONS:halt_on_error=1" timeout 20 ./$<
+
+check-array-size:
+	$(Q)bash tests/check-array-size.sh $(CC) $(CPPFLAGS) $(CFLAGS)
 
 # Libraries follow objects so static linking sees the references first
 tests/support/derive-patch: $(PLAIN_GITREAD_OBJS) build/plain/support/derive-patch.o
@@ -449,13 +490,13 @@ $(ASAN_RUN_GOALS): export GITREAD_UNIT := $(CURDIR)/tests/support/gitread-unit-a
 $(ASAN_RUN_GOALS): export TOOL_SETUP_SO := $(CURDIR)/$(TOOL_SETUP_LIB)
 $(ASAN_RUN_GOALS): export RUN_VARIANT := asan
 
-check: checkstyle check-matches check-review check-highlight $(PLAIN_BINS) tests/support/udiff_driver tests/support/gitread-unit $(TOOL_SETUP_LIB) $(PLAIN_RUN_GOALS)
+check: checkstyle check-reader check-matches check-review check-highlight $(PLAIN_BINS) tests/support/udiff_driver tests/support/gitread-unit $(TOOL_SETUP_LIB) $(PLAIN_RUN_GOALS)
 
-check-asan: checkstyle check-matches-asan check-review-asan check-highlight-asan $(ASAN_BINS) tests/support/udiff_driver-asan tests/support/gitread-unit-asan $(TOOL_SETUP_LIB) $(ASAN_RUN_GOALS)
+check-asan: checkstyle check-reader-asan check-matches-asan check-review-asan check-highlight-asan $(ASAN_BINS) tests/support/udiff_driver-asan tests/support/gitread-unit-asan $(TOOL_SETUP_LIB) $(ASAN_RUN_GOALS)
 
 clean:
 	$(call show,CLEAN,build files)
-	$(Q)rm -rf build $(PLAIN_BINS) $(ASAN_BINS) $(AFL_BINS) $(UDIFF_DRIVER_BINS) $(MATCH_DRIVER_BINS) $(GITREAD_UNIT_BINS) $(HIGHLIGHT_DRIVER_BINS) tests/support/derive-patch $(TOOL_SETUP_LIB) tests/support/no-locale.so
+	$(Q)rm -rf build $(PLAIN_BINS) $(ASAN_BINS) $(AFL_BINS) $(UDIFF_DRIVER_BINS) $(MATCH_DRIVER_BINS) $(GITREAD_UNIT_BINS) $(READER_UNIT_BINS) $(HIGHLIGHT_DRIVER_BINS) tests/support/derive-patch $(TOOL_SETUP_LIB) tests/support/no-locale.so
 
 .PHONY: check-highlight check-highlight-asan
 check-highlight: diffofdiffs tests/support/highlight-driver
