@@ -86,8 +86,8 @@ summary { cursor: pointer; }
 .chip.left { background: var(--word-remove); }
 .chip.right { background: var(--word-add); }
 .chip.shared { background: var(--shared); }
-.file-block { margin: 18px 0 28px; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
-.file-heading { background: var(--header); }
+.file-block { margin: 18px 0 28px; border: 1px solid var(--border); border-radius: 7px; overflow: clip; }
+.file-heading { position: sticky; top: 0; z-index: 1; background: var(--header); }
 .file-heading > span { min-width: 0; padding: 10px 14px; overflow-wrap: anywhere; }
 .file-heading > span + span { border-left: 1px solid var(--border); }
 .code-viewport { overflow-x: auto; }
@@ -210,6 +210,7 @@ html[data-layout="console"] .file-heading { border-block: 2px solid var(--border
 @media print {
 	.controls, header > p, .word-legend { display: none; }
 	main { padding: 0; }
+	.file-heading { position: static; }
 	.code-viewport { overflow: visible; }
 	.hunk { min-width: 0 !important; }
 	.source-text { white-space: pre-wrap !important; }
