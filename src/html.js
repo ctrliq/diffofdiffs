@@ -96,7 +96,12 @@
 			(groupIndex + step + groups.length) % groups.length;
 		row = groups[groupIndex];
 		row.classList.add('current-change');
-		row.scrollIntoView({block: 'center', inline: 'nearest'});
+
+		/* A sticky heading can sit far below its file's metadata */
+		if (row.classList.contains('file-heading'))
+			row.parentElement.scrollIntoView({block: 'start', inline: 'nearest'});
+		else
+			row.scrollIntoView({block: 'center', inline: 'nearest'});
 		position.textContent = `${groupIndex + 1} of ${groups.length} difference groups`;
 	}
 

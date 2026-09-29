@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en" data-theme="dark" data-highlight="words" data-layout="review" data-shared="true" data-gaps="true" data-wrap="true" data-text-size="medium">
-<head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MvY2AT12N5AOnLtav0Jesc4nwUooVt2KFD0SWat8cMs='; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>diffofdiffs report</title>
+<head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-UwjUP5+VMNiMIH05NA2Ezsk9LAolp//1KQhdHzCloj8='; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>diffofdiffs report</title>
 <!--
 diffofdiffs
 Copyright (C) 2025-2026 Ctrl IQ, Inc.
@@ -204,8 +204,8 @@ summary { cursor: pointer; }
 .chip.left { background: var(--word-remove); }
 .chip.right { background: var(--word-add); }
 .chip.shared { background: var(--shared); }
-.file-block { margin: 18px 0 28px; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
-.file-heading { background: var(--header); }
+.file-block { margin: 18px 0 28px; border: 1px solid var(--border); border-radius: 7px; overflow: clip; }
+.file-heading { position: sticky; top: 0; z-index: 1; background: var(--header); }
 .file-heading > span { min-width: 0; padding: 10px 14px; overflow-wrap: anywhere; }
 .file-heading > span + span { border-left: 1px solid var(--border); }
 .code-viewport { overflow-x: auto; }
@@ -328,6 +328,7 @@ html[data-layout="console"] .file-heading { border-block: 2px solid var(--border
 @media print {
 	.controls, header > p, .word-legend { display: none; }
 	main { padding: 0; }
+	.file-heading { position: static; }
 	.code-viewport { overflow: visible; }
 	.hunk { min-width: 0 !important; }
 	.source-text { white-space: pre-wrap !important; }
@@ -540,7 +541,12 @@ Signs mark lines present in only one result: - Backport, + Upstream.
 			(groupIndex + step + groups.length) % groups.length;
 		row = groups[groupIndex];
 		row.classList.add('current-change');
-		row.scrollIntoView({block: 'center', inline: 'nearest'});
+
+		/* A sticky heading can sit far below its file's metadata */
+		if (row.classList.contains('file-heading'))
+			row.parentElement.scrollIntoView({block: 'start', inline: 'nearest'});
+		else
+			row.scrollIntoView({block: 'center', inline: 'nearest'});
 		position.textContent = `${groupIndex + 1} of ${groups.length} difference groups`;
 	}
 
