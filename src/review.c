@@ -38,6 +38,7 @@ struct comparison {
 	size_t *edits[2];
 	bool *selected[2];
 	bool *shared[2];
+	bool *ignored_whitespace[2];
 };
 
 static void comparison_free(struct comparison *review);
@@ -1767,6 +1768,8 @@ static void select_margin(const struct patch_source *source, bool *selected,
 	}
 }
 
+static void ignore_whitespace_replacements(struct comparison *review);
+
 static void select_delta(struct comparison *review, unsigned int context,
 			 bool shared_deletion)
 {
@@ -1777,7 +1780,13 @@ static void select_delta(struct comparison *review, unsigned int context,
 			source->nrows, sizeof(*review->selected[leg]));
 		review->shared[leg] = xzalloc_array(
 			source->nrows, sizeof(*review->shared[leg]));
+		if (ignore_whitespace)
+			review->ignored_whitespace[leg] = xzalloc_array(
+				source->nrows,
+				sizeof(*review->ignored_whitespace[leg]));
 	}
+	if (ignore_whitespace)
+		ignore_whitespace_replacements(review);
 
 	/* Shared edits stay out of delta, including cross-file moves */
 	for (int leg = 0; leg < 2; leg++) {
@@ -1787,6 +1796,9 @@ static void select_delta(struct comparison *review, unsigned int context,
 			const struct patch_row *row = &source->rows[i];
 
 			if (row->sign != '-' && row->sign != '+')
+				continue;
+			if (ignore_whitespace &&
+			    review->ignored_whitespace[leg][i])
 				continue;
 
 			if ((shared_deletion && row->sign == '-') ||
@@ -1803,7 +1815,6 @@ static void select_delta(struct comparison *review, unsigned int context,
 			review->selected[leg][i] = true;
 		}
 	}
-
 	/* Include retained counterparts before growing context margins */
 	for (int stage = 0; stage < 2; stage++)
 		select_counterparts(review, stage);
@@ -2200,12 +2211,103 @@ static void align_parents(const struct comparison *review,
 	align_replacements(review, pairs, at, end, NULL);
 }
 
+static bool same_ignoring_whitespace(const struct udiff_line *a,
+				     const struct udiff_line *b)
+{
+	size_t at[2] = {};
+	const struct udiff_line *lines[2] = { a, b };
+
+	for (;;) {
+		for (int leg = 0; leg < 2; leg++) {
+			while (at[leg] < lines[leg]->len &&
+			       (lines[leg]->ptr[at[leg]] == ' ' ||
+				lines[leg]->ptr[at[leg]] == '\t'))
+				at[leg]++;
+		}
+		if (at[0] == a->len || at[1] == b->len)
+			return at[0] == a->len && at[1] == b->len;
+		if (a->ptr[at[0]++] != b->ptr[at[1]++])
+			return false;
+	}
+}
+
+static void ignore_whitespace_replacements(struct comparison *review)
+{
+	for (int leg = 0; leg < 2; leg++) {
+		const struct patch_source *source = &review->source[leg];
+		bool *ignored = review->ignored_whitespace[leg];
+
+		for (size_t first = 0; first < source->nrows;) {
+			const struct patch_row *row = &source->rows[first];
+			size_t end = first, old = first, new = first;
+
+			if ((row->sign != '-' && row->sign != '+') ||
+			    row->hunk == SIZE_MAX) {
+				first++;
+				continue;
+			}
+			while (end < source->nrows &&
+			       source->rows[end].hunk == row->hunk &&
+			       (source->rows[end].sign == '-' ||
+				source->rows[end].sign == '+'))
+				end++;
+			while (old < end && new < end) {
+				while (old < end &&
+				       source->rows[old].sign != '-')
+					old++;
+				while (new < end &&
+				       source->rows[new].sign != '+')
+					new++;
+				if (old == end || new == end)
+					break;
+				if (!patch_row_equal(&source->rows[old].text,
+						     &source->rows[new].text) &&
+				    same_ignoring_whitespace(
+					    &source->rows[old].text,
+					    &source->rows[new].text)) {
+					ignored[old] = true;
+					ignored[new] = true;
+				}
+				old++;
+				new++;
+			}
+			first = end;
+		}
+	}
+}
+
+static void ignore_whitespace_pairs(struct comparison *review,
+				    struct paired_rows *pairs, bool context)
+{
+	for (size_t i = 0; i < pairs->count; i++) {
+		struct row_pair *pair = &pairs->rows[i];
+		const struct patch_row *rows[2];
+
+		if (pair->equal || pair->side[0] == SIZE_MAX ||
+		    pair->side[1] == SIZE_MAX)
+			continue;
+		for (int leg = 0; leg < 2; leg++)
+			rows[leg] = &review->source[leg].rows[pair->side[leg]];
+		if (rows[0]->sign == '?' || rows[1]->sign == '?' ||
+		    (!context && rows[0]->sign != rows[1]->sign &&
+		     rows[0]->sign != ' ' && rows[1]->sign != ' ') ||
+		    patch_row_equal(&rows[0]->text, &rows[1]->text) ||
+		    !same_ignoring_whitespace(&rows[0]->text, &rows[1]->text))
+			continue;
+		pair->equal = true;
+		if (!context) {
+			review->ignored_whitespace[0][pair->side[0]] = true;
+			review->ignored_whitespace[1][pair->side[1]] = true;
+		}
+	}
+}
+
 /*
  * Both sections use one ordered pair sequence. Result correspondence supplies
  * the main sequence; delta also keeps original deletions in their own gaps.
  */
-static void pair_rows(const struct comparison *review,
-		      struct paired_rows *pairs, bool context)
+static void pair_rows(struct comparison *review, struct paired_rows *pairs,
+		      bool context)
 {
 	const struct udiff_matches *matches = display_matches(review, 1);
 	const struct source_view *views[2] = { &review->source[0].view[1],
@@ -2253,6 +2355,9 @@ static void pair_rows(const struct comparison *review,
 			}
 		}
 	}
+	if (ignore_whitespace) {
+		ignore_whitespace_pairs(review, pairs, context);
+	}
 }
 
 static void select_pairs(const struct comparison *review,
@@ -2263,12 +2368,20 @@ static void select_pairs(const struct comparison *review,
 
 		for (int leg = 0; leg < 2; leg++) {
 			size_t at = pair->side[leg];
+			bool ignored = at != SIZE_MAX &&
+				       review->ignored_whitespace[leg] &&
+				       review->ignored_whitespace[leg][at];
 
-			pair->selected[leg] = at != SIZE_MAX &&
+			pair->selected[leg] = !ignored && at != SIZE_MAX &&
 					      review->selected[leg][at];
 		}
 		for (int leg = 0; pair->equal && leg < 2; leg++) {
-			if (pair->selected[!leg] &&
+			size_t at = pair->side[leg];
+			bool ignored = at != SIZE_MAX &&
+				       review->ignored_whitespace[leg] &&
+				       review->ignored_whitespace[leg][at];
+
+			if (!ignored && pair->selected[!leg] &&
 			    review->source[leg].rows[pair->side[leg]].hunk !=
 				    SIZE_MAX)
 				pair->selected[leg] = true;
@@ -2673,6 +2786,7 @@ static void comparison_free(struct comparison *review)
 		free(review->edits[leg]);
 		free(review->selected[leg]);
 		free(review->shared[leg]);
+		free(review->ignored_whitespace[leg]);
 	}
 }
 

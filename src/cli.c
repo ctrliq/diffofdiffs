@@ -25,6 +25,7 @@ enum output_format output_format = OUTPUT_TEXT;
 enum highlight_mode highlight_mode = HIGHLIGHT_WORDS;
 enum display_theme display_theme = THEME_DARK;
 bool backport_labels;
+bool ignore_whitespace;
 const char *git_tree_dir = NULL;
 const char *output_path;
 
@@ -54,6 +55,8 @@ static void usage(int err)
 		"OPTIONS are:\n"
 		"  -U N, --unified=N       keep N context lines before and after each differing\n"
 		"                          block; the default is 3\n"
+		"\n"
+		"  --ignore-whitespace     omit paired changes differing only in spaces or tabs\n"
 		"\n"
 		"  --max-column-width=N    cap each source column at N display columns (at least\n"
 		"                          2); the default uses up to the terminal width, or 100\n"
@@ -135,6 +138,7 @@ void cli_parse(int argc, char **argv, const char **patch1, const char **patch2)
 		{ "html", no_argument, NULL, 1000 + 'm' },
 		{ "highlight", required_argument, NULL, 1000 + 'h' },
 		{ "theme", required_argument, NULL, 1000 + 't' },
+		{ "ignore-whitespace", no_argument, NULL, 1000 + 'W' },
 		{ "unified", required_argument, NULL, 'U' },
 		{ "output", required_argument, NULL, 'o' },
 		{ NULL, 0, NULL, 0 }
@@ -173,6 +177,9 @@ void cli_parse(int argc, char **argv, const char **patch1, const char **patch2)
 			break;
 		case 1000 + 'b':
 			backport_labels = true;
+			break;
+		case 1000 + 'W':
+			ignore_whitespace = true;
 			break;
 		case 1000 + 'c': {
 			const char *when = optarg ? optarg : "auto";

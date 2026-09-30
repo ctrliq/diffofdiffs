@@ -16,6 +16,8 @@ OPTIONS are:
   -U N, --unified=N       keep N context lines before and after each differing
                           block; the default is 3
 
+  --ignore-whitespace     omit paired changes differing only in spaces or tabs
+
   --max-column-width=N    cap each source column at N display columns (at least
                           2); the default uses up to the terminal width, or 100
                           per source column when no terminal size is available

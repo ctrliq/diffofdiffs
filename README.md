@@ -112,6 +112,11 @@ Use `-o FILE` or `--output=FILE` to save either text or HTML output. Without
 this option, output goes to standard output; `-o -` also selects standard
 output.
 
+Use `--ignore-whitespace` to omit replacement pairs within each patch hunk
+that differ only in spaces or tabs, even when only one patch makes that
+whitespace-only replacement. Other unpaired changes and differences in line
+endings remain visible.
+
 Terminal color is enabled automatically and disabled when output is
 redirected. To keep color and highlight individual character changes:
 

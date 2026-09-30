@@ -1903,6 +1903,62 @@ def main():
     b = patch([head, old, tail], [head, b'pear\n', tail])
     paths, _, _ = run_case('different-additions', a, b, expected(a, b))
     run_case('identical', a, a, [Counter(), Counter()])
+    whitespace_before = [b'int value;\n']
+    whitespace_a = patch(whitespace_before, [b'int  value;\n'])
+    whitespace_b = patch(whitespace_before, [b'int\tvalue;\n'])
+    whitespace_paths, _, _ = run_case(
+        'whitespace-only-difference', whitespace_a, whitespace_b,
+        expected(whitespace_a, whitespace_b))
+    ignored = subprocess.run([BINARY, '--ignore-whitespace', *whitespace_paths],
+                             env=ENV, capture_output=True, timeout=20)
+    assert ignored.returncode == 0, ignored
+    assert b'int  value;' not in ignored.stdout and b'int\tvalue;' not in ignored.stdout
+    ignored_html = subprocess.run([BINARY, '--ignore-whitespace', '--html',
+                                   *whitespace_paths], env=ENV, capture_output=True,
+                                   timeout=20)
+    assert ignored_html.returncode == 0, ignored_html
+    assert b'int  value;' not in ignored_html.stdout and b'int\tvalue;' not in ignored_html.stdout
+    CHECKS += 2
+    meaningful_a = patch(whitespace_before, [b'int  value;\n'])
+    meaningful_b = patch(whitespace_before, [b'long\tvalue;\n'])
+    meaningful_paths, _, _ = run_case(
+        'whitespace-option-keeps-content-differences', meaningful_a,
+        meaningful_b, expected(meaningful_a, meaningful_b))
+    meaningful = subprocess.check_output(
+        [BINARY, '--ignore-whitespace', *meaningful_paths], env=ENV)
+    assert b'int  value;' not in meaningful and b'long\tvalue;' in meaningful
+    CHECKS += 1
+    # Suppress a one-sided whitespace replacement but retain unrelated edits.
+    unpaired_before = [b'int value;\n', b'old marker\n']
+    unpaired_a = patch(unpaired_before,
+                       [b'int  value;\n', b'unpaired addition\n',
+                        b'old marker\n'])
+    unpaired_b = patch(unpaired_before,
+                       [b'int value;\n', b'new marker\n'])
+    unpaired_paths, _, _ = run_case(
+        'whitespace-option-one-sided-replacement', unpaired_a, unpaired_b,
+        expected(unpaired_a, unpaired_b))
+    unpaired = subprocess.check_output(
+        [BINARY, '--ignore-whitespace', *unpaired_paths], env=ENV)
+    assert b'int  value;' not in unpaired
+    assert b'unpaired addition' in unpaired
+    assert b'old marker' in unpaired and b'new marker' in unpaired
+    unpaired_reverse = subprocess.check_output(
+        [BINARY, '--ignore-whitespace', *unpaired_paths[::-1]], env=ENV)
+    assert b'int  value;' not in unpaired_reverse
+    assert b'unpaired addition' in unpaired_reverse
+    assert b'old marker' in unpaired_reverse and b'new marker' in unpaired_reverse
+    CHECKS += 2
+    newline_a = patch([b'old\n'], [b'new'])
+    newline_b = patch([b'old\n'], [b'new\n'])
+    newline_paths, _, newline_report = run_case(
+        'whitespace-option-keeps-final-newline', newline_a, newline_b,
+        expected(newline_a, newline_b))
+    newline_output = subprocess.check_output(
+        [BINARY, '--ignore-whitespace', *newline_paths], env=ENV)
+    newline_report = check_review([newline_a, newline_b], newline_output)
+    assert any(not row.newline for row in newline_report['rows'])
+    CHECKS += 1
     run_case('unchanged-context-differs',
              patch([b'left\n', old, tail], [b'left\n', new, tail]),
              patch([b'right\n', old, tail], [b'right\n', new, tail]),
