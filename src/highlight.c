@@ -37,7 +37,88 @@ void text_highlight_free(struct text_highlight *highlight)
 	for (int leg = 0; leg < 2; leg++) {
 		free(highlight->words[leg].spans);
 		free(highlight->characters[leg].spans);
+		free(highlight->separate_spaces[leg]);
 	}
+}
+
+static bool horizontal_whitespace(char c)
+{
+	return c == ' ' || c == '\t';
+}
+
+static struct text_span whitespace_run(const char *text, size_t at, bool *tab)
+{
+	struct text_span span = { at, at };
+
+	*tab = false;
+	for (; span.start && horizontal_whitespace(text[span.start - 1]);
+	     span.start--)
+		;
+	for (span.end = span.start; horizontal_whitespace(text[span.end]);
+	     span.end++)
+		*tab |= text[span.end] == '\t';
+	return span;
+}
+
+static void mark_whitespace_pair(const char *const text[2], const size_t at[2],
+				 struct text_highlight *out)
+{
+	struct text_span run[2];
+	bool tab[2];
+
+	/* Include unchanged whitespace adjoining either highlight boundary */
+	for (int leg = 0; leg < 2; leg++)
+		run[leg] = whitespace_run(text[leg], at[leg], &tab[leg]);
+	if (!tab[0] && !tab[1])
+		return;
+
+	for (int leg = 0; leg < 2; leg++) {
+		for (size_t i = run[leg].start; i < run[leg].end; i++)
+			out->separate_spaces[leg][i] = true;
+	}
+}
+
+static void mark_adjacent_whitespace(const char *const text[2],
+				     const size_t start[2], const size_t end[2],
+				     struct text_highlight *out)
+{
+	/*
+	 * Whitespace tokens can match across runs. Use shared visible tokens to
+	 * relate adjacent runs, and scan each run only at its ends.
+	 */
+	if (horizontal_whitespace(text[0][start[0]]))
+		return;
+
+	mark_whitespace_pair(text, start, out);
+	mark_whitespace_pair(text, end, out);
+}
+
+static void highlight_whitespace(const char *const text[2], const size_t len[2],
+				 struct text_highlight *out)
+{
+	const size_t start[2] = {};
+
+	/* Mixed runs need separate space blocks even without an opposite run */
+	for (int leg = 0; leg < 2; leg++) {
+		out->separate_spaces[leg] = xzalloc_array(
+			len[leg], sizeof(*out->separate_spaces[leg]));
+		for (size_t at = 0; at < len[leg];) {
+			struct text_span run;
+			bool tab;
+
+			if (!horizontal_whitespace(text[leg][at])) {
+				at++;
+				continue;
+			}
+			run = whitespace_run(text[leg], at, &tab);
+			if (tab) {
+				for (size_t i = run.start; i < run.end; i++)
+					out->separate_spaces[leg][i] = true;
+			}
+			at = run.end;
+		}
+	}
+	mark_whitespace_pair(text, start, out);
 }
 
 static bool word_character(const char *text, size_t len)
@@ -152,9 +233,15 @@ static size_t refine_replacement(const char *const text[2],
 				append_range(&out->characters[leg], span->start,
 					     span->end);
 			} else if (!leg) {
+				const struct text_span *other =
+					&tokens[1]->spans[matches.side[0][i]];
+				size_t from[2] = { span->start, other->start };
+				size_t to[2] = { span->end, other->end };
+
 				common +=
 					word_character(text[leg] + span->start,
 						       span->end - span->start);
+				mark_adjacent_whitespace(text, from, to, out);
 			}
 		}
 	}
@@ -198,6 +285,7 @@ static size_t highlight_words(const char *const text[2], const size_t len[2],
 			next[1] = tokens[1]->spans[j].end;
 			common +=
 				count_word_characters(text[0], end[0], next[0]);
+			mark_adjacent_whitespace(text, end, next, out);
 		}
 		if (start[0] != end[0] || start[1] != end[1]) {
 			for (int leg = 0; leg < 2; leg++) {
@@ -243,6 +331,8 @@ void highlight_pair(const struct iomem_slice source[2],
 	}
 	if (len[0] + len[1] > HIGHLIGHT_LIMIT)
 		return;
+
+	highlight_whitespace(text, len, out);
 
 	/* Equal-width indentation can still differ in its source bytes */
 	for (size_t i = 0; i < MIN(out->indent[0], out->indent[1]) &&

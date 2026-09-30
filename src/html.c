@@ -66,20 +66,26 @@ static void write_html_label(FILE *out, const char *text)
 	write_html_text(out, expanded, strlen(expanded));
 }
 
-static void write_highlight_spans(FILE *out, const char *text, size_t start,
-				  size_t end, size_t word_start,
-				  size_t word_end)
+static bool separate_whitespace(const char *text, const bool *spaces, size_t at)
+{
+	return text[at] == '\t' || (text[at] == ' ' && spaces[at]);
+}
+
+static void write_highlight_spans(FILE *out, const char *text,
+				  const bool *spaces, size_t start, size_t end,
+				  size_t word_start, size_t word_end)
 {
 	/*
-	 * Give each highlighted space its own block to distinguish it from
-	 * tabs. The text nodes keep the original bytes; CSS controls the
-	 * visible gaps.
+	 * Keep ordinary spaces inside the text highlight. Separate blocks
+	 * distinguish spaces from tabs only in the runs marked by the native
+	 * comparison; the text nodes retain the original bytes in both cases.
 	 */
 	for (size_t at = start, next; at < end; at = next) {
-		bool space = text[at] == ' ', tab = text[at] == '\t';
+		bool space = text[at] == ' ' && spaces[at];
+		bool tab = text[at] == '\t';
 
 		for (next = at + 1; next < end && !space && !tab &&
-				    text[next] != ' ' && text[next] != '\t';
+				    !separate_whitespace(text, spaces, next);
 		     next++)
 			;
 		if (tab) {
@@ -93,10 +99,10 @@ static void write_highlight_spans(FILE *out, const char *text, size_t start,
 			 * Character refinement can split a token across spans.
 			 * Keep its word highlight connected across them.
 			 */
-			bool left = at > word_start && text[at - 1] != ' ' &&
-				    text[at - 1] != '\t';
-			bool right = next < word_end && text[next] != ' ' &&
-				     text[next] != '\t';
+			bool left = at > word_start &&
+				    !separate_whitespace(text, spaces, at - 1);
+			bool right = next < word_end &&
+				     !separate_whitespace(text, spaces, next);
 
 			fprintf(out, "<span class=\"highlight-text%s%s\">",
 				left ? " word-join-left" : "",
@@ -109,7 +115,8 @@ static void write_highlight_spans(FILE *out, const char *text, size_t start,
 
 static void write_character_spans(FILE *out, const char *text, size_t start,
 				  size_t end,
-				  const struct highlight_ranges *ranges)
+				  const struct highlight_ranges *ranges,
+				  const bool *spaces)
 {
 	size_t at = start;
 
@@ -120,13 +127,13 @@ static void write_character_spans(FILE *out, const char *text, size_t start,
 		if (from >= to)
 			continue;
 
-		write_highlight_spans(out, text, at, from, start, end);
+		write_highlight_spans(out, text, spaces, at, from, start, end);
 		fputs("<span class=\"character-change\">", out);
-		write_highlight_spans(out, text, from, to, start, end);
+		write_highlight_spans(out, text, spaces, from, to, start, end);
 		fputs("</span>", out);
 		at = to;
 	}
-	write_highlight_spans(out, text, at, end, start, end);
+	write_highlight_spans(out, text, spaces, at, end, start, end);
 }
 
 static void write_highlighted_text(FILE *out, const char *text,
@@ -141,8 +148,8 @@ static void write_highlighted_text(FILE *out, const char *text,
 		write_html_text(out, text, first);
 		fputs("<span class=\"indent-change\" title=\"Leading whitespace differs.\">",
 		      out);
-		write_highlight_spans(out, text, first, h->indent[leg], first,
-				      h->indent[leg]);
+		write_highlight_spans(out, text, h->separate_spaces[leg], first,
+				      h->indent[leg], first, h->indent[leg]);
 		fputs("</span>", out);
 		at = h->indent[leg];
 	}
@@ -153,7 +160,8 @@ static void write_highlighted_text(FILE *out, const char *text,
 		fputs("<span class=\"word-change\" title=\"Text that differs within this aligned pair.\">",
 		      out);
 		write_character_spans(out, text, span->start, span->end,
-				      &h->characters[leg]);
+				      &h->characters[leg],
+				      h->separate_spaces[leg]);
 		fputs("</span>", out);
 		at = span->end;
 	}
@@ -455,7 +463,7 @@ void render_html_report(FILE *out, const struct review_report *report,
 		theme_names[display_theme], highlight_names[highlight_mode]);
 	write_html_header(out, identities, subjects);
 	fputs(html_controls_html, out);
-	fputs("<p class=\"legend word-legend\">Within aligned pairs: <span class=\"chip left\">left text</span> / <span class=\"chip right\">right text</span> that differs, independently of patch signs. Whitespace uses the same colors: each highlighted space has its own block; tabs fill their tab stops. Hover for details.</p>",
+	fputs("<p class=\"legend word-legend\">Within aligned pairs: <span class=\"chip left\">left text</span> / <span class=\"chip right\">right text</span> that differs, independently of patch signs. Whitespace uses the same colors: separate space blocks distinguish spaces from tabs; tabs fill their tab stops. Hover for details.</p>",
 	      out);
 	fputs("<div id=\"comparison\">", out);
 	for (int s = 0; s < 2; s++) {

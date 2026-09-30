@@ -27,6 +27,9 @@ struct text_highlight {
 	/* Both range sets exclude leading indentation */
 	struct highlight_ranges words[2];
 	struct highlight_ranges characters[2];
+
+	/* Mark spaces in runs containing or corresponding to tabs */
+	bool *separate_spaces[2];
 	size_t indent[2];
 	size_t indent_columns[2];
 	size_t common_indent;
@@ -37,7 +40,8 @@ struct text_highlight {
 /*
  * Source slices retain the final LF; display text omits it and comes from
  * escape_source_text(). Missing sides have a NULL base; an empty source line
- * still has a base. The caller initializes out to zero and owns its ranges.
+ * still has a base. The caller initializes out to zero and releases it with
+ * text_highlight_free().
  */
 void highlight_pair(const struct iomem_slice source[2],
 		    const char *const text[2], struct text_highlight *out);

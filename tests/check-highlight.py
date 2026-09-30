@@ -25,7 +25,7 @@ ENV = dict(os.environ, LC_ALL='C.UTF-8', ASAN_OPTIONS='allocator_may_return_null
 ANSI = re.compile(rb'\x1b\[[0-9;]*m')
 SPANS = {'word-change': 'words', 'character-change': 'characters',
          'indent-change': 'indentation', 'whitespace-tab': 'tabs',
-         'whitespace-space': 'spaces'}
+         'whitespace-space': 'spaces', 'highlight-text': 'paint'}
 CHECKS = 0
 
 
@@ -73,9 +73,12 @@ class Report(HTMLParser):
             assert self.current is None
             self.current = dict(gap='gap' in classes, source='', sign='', old='', new='',
                                 newline=attrs.get('data-newline'), depth=len(self.stack),
+                                paint_classes=[],
                                 **{key: [] for key in SPANS.values()})
             self.cells.append(self.current)
         if self.current is not None:
+            if 'highlight-text' in classes:
+                self.current['paint_classes'].append(set(classes))
             for name, key in SPANS.items():
                 if name in classes:
                     self.current[key].append('')
@@ -456,6 +459,41 @@ def whitespace_cases(directory):
                 check_whitespace_rendering(command, shifted, before, after, order, offset)
 
 
+def expression_space_cases(directory):
+    global CHECKS
+    before = ['void blocks(void)\n', '{\n', '\told_value();\n', '}\n']
+    paths = [directory / 'expression-left.patch', directory / 'expression-right.patch']
+
+    # Tabs in another whitespace run must not split an expression's highlight
+    for indent, trailing, order, mode in product(
+            ('', '\t\t'), ('', '\t'), ((0, 1), (1, 0)),
+            ('words', 'characters', 'none')):
+        sources = [indent + 'blksize = NBD_DEF_BLKSIZE;' + trailing,
+                   indent + 'blksize = 1u << NBD_DEF_BLKSIZE_BITS;' + trailing]
+        for path, side in zip(paths, order):
+            path.write_bytes(patch(before, [*before[:2], sources[side] + '\n', before[-1]]))
+        html = subprocess.check_output([TOOL, '--html', f'--highlight={mode}',
+                                        *map(str, paths)], env=ENV).decode()
+        parsed = Report(html)
+        for leg, side in enumerate(order):
+            cells = [cell for cell in parsed.cells[leg::2]
+                     if cell['source'] == sources[side] and cell['sign'] == '+']
+            assert cells, (sources, parsed.cells)
+            cell = cells[0]
+            assert not cell['spaces'] and not cell['tabs'], cell
+            assert cell['words'] == [['NBD_DEF_BLKSIZE'],
+                                     ['1u << NBD_DEF_BLKSIZE_BITS']][side], cell
+            assert cell['characters'] == [[], ['1u << ', '_BITS']][side], cell
+            assert cell['paint'] == [['NBD_DEF_BLKSIZE'],
+                                    ['1u << ', 'NBD_DEF_BLKSIZE', '_BITS']][side], cell
+            if side:
+                assert [classes & {'word-join-left', 'word-join-right'}
+                        for classes in cell['paint_classes']] == [
+                            {'word-join-right'}, {'word-join-left', 'word-join-right'},
+                            {'word-join-left'}], cell
+        CHECKS += 1
+
+
 def whitespace_blocks_cases(directory):
     global CHECKS
     cases = [
@@ -467,15 +505,15 @@ def whitespace_blocks_cases(directory):
         ('\t ', '\t  ', (0, 1)),
         ('call( a);', 'call(\ta);', (1, 0)),
         ('call(\t a);', 'call(\t  a);', (1, 2)),
-        ('call(  a);', 'call(    a);', (2, 4)),
-        ('  call();', '    call();', (0, 2)),
-        ('        call();', '                call();', (0, 8)),
-        ('return  value;', 'return    value;', (2, 4)),
+        ('call(  a);', 'call(    a);', (0, 0)),
+        ('  call();', '    call();', (0, 0)),
+        ('        call();', '                call();', (0, 0)),
+        ('return  value;', 'return    value;', (0, 0)),
         ('call(a,\told);', 'call(a,  new);', (0, 2)),
         ('call(\t a, old);', 'call(\t a, new);', (0, 0)),
-        ('call(a,  b, \tc);', 'call(a,    b,    c);', (3, 8)),
+        ('call(a,  b, \tc);', 'call(a,    b,    c);', (1, 4)),
         (' \tcall();', '  \tcall();', (0, 1)),
-        ('\tcall(); ', '\tcall();  ', (1, 2)),
+        ('\tcall(); ', '\tcall();  ', (0, 0)),
         ('\t\t *      1. read state', '\t\t * \t1. read state', (6, 1)),
         ('do {                                           \\', 'do {\t\t\t\t\t\t\\', (43, 0)),
         ('\t\t\t* comment', '\t\t\t * comment', (0, 1)),
@@ -771,6 +809,7 @@ def main():
         renderer_cases(directory)
         replacement_cases(directory)
         whitespace_cases(directory)
+        expression_space_cases(directory)
         whitespace_blocks_cases(directory)
         commit_subject_cases(directory)
         terminal_whitespace_cases(directory)

@@ -262,9 +262,13 @@ HTML uses --tab-width for tab-size and the existing red/green changed-span
 palette for indentation, without a separate gray or blue fill. A byte-identical
 leading prefix stays unhighlighted; tabs and spaces that occupy the same width
 still receive distinct ranges. Use GitHub-like color blocks for highlighted
-whitespace, without dots or arrows. Every highlighted space gets its own
-color block; tabs fill their tab stops. Blocks have a slight corner taper
-and wide fills, with 0.75-pixel space insets, 1.5-pixel gaps between spaces,
+whitespace, without dots or arrows. Give each highlighted space its own block
+when its contiguous whitespace run contains a tab or corresponds to a run
+containing a tab on the other side. Include unchanged whitespace when checking
+the run; tabs elsewhere on the line do not qualify it. Ordinary spaces stay
+inside a continuous text highlight, including edits to space-only runs.
+Tabs fill their tab stops. Blocks have a slight corner taper and wide fills,
+with 0.75-pixel space insets, 1.5-pixel gaps between spaces,
 and a one-pixel corner radius. Tab insets are 2.25 pixels, keeping a
 three-pixel gap beside spaces. Keep these insets uniform within their
 monospace cells. Round the source character advance to a whole CSS pixel so
@@ -272,10 +276,11 @@ the blocks do not alternate in width or spacing at the default display
 scale. Leave a wider gap at tab boundaries so adjacent space and tab blocks
 remain distinct. Give word blocks the same one-pixel corner radius and
 0.75-pixel insets as spaces: the word/space gap must equal the space/space
-gap, with rounded corners on both ends of each block. Paint each text run
-separately from its neighboring whitespace. Character refinement may split
-a word into several spans; join their fills in word mode without introducing
-internal gaps or rounded corners.
+gap, with rounded corners on both ends of each block. Separate text from
+neighboring whitespace only when that whitespace needs its own block.
+Character refinement may split a word or expression into several spans;
+join their fills in word mode without introducing internal gaps or rounded
+corners.
 
 Use background-only painting with fixed-size SVG corners and solid strips
 for smooth, uniform corners at high zoom. Keep the corner colors consistent
@@ -285,15 +290,15 @@ radius differently between browsers at high zoom. Padding balanced by negative
 margins still disrupts Firefox tab stops and text shaping across combining
 characters. Keep paint spans in normal inline flow without padding or margins:
 even an empty positioned child interrupts hanging whitespace and changes
-line breaks with pre-wrap. This also covers pure-space edits,
-whose continuous fills could resemble tabs. Apply the same rule to spaces
-beside unchanged tabs, trailing whitespace, whitespace-only lines, and tabs
-that occupy just one display column. Paint separators without adding source
+line breaks with pre-wrap. Check for tab/space ambiguity beside unchanged
+tabs, in trailing whitespace, on whitespace-only lines, and with tabs that
+occupy just one display column. Paint separators without adding source
 characters or changing native tab handling, line-breaking rules, selection,
-or copy. Keep this in the renderer; matching and highlight ranges do not
-need whitespace-type classification. Hide these decorations with highlighting
-disabled. Keep the indentation-only label and show tabs/spaces changed when
-there is no change in display width.
+or copy. The native highlighter marks eligible runs using its existing word
+and character matches; this metadata changes neither highlight ranges nor
+source correspondence. Keep the painting in the renderer. Hide these
+decorations with highlighting disabled. Keep the indentation-only label and
+show tabs/spaces changed when there is no change in display width.
 
 Git-backed HTML reports show both result commits' subjects below their
 identifiers and in the document title. Read the already resolved result

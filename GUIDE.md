@@ -304,11 +304,14 @@ changed, leaving it without an unchanged neighbor; character highlighting
 can isolate the extra spaces within that run. Wrapping doesn't change the
 adjacency decision, and code characters aren't underlined or made bold.
 
-HTML uses stronger red and green backgrounds behind changed text. Each
-highlighted space has its own block, while a highlighted tab fills its tab
-stop. `--tab-width=N` sets the tab stops, with eight columns by default.
-Hover over a whitespace block to see its character type. These blocks
-decorate the existing source; they don't replace tabs or spaces with symbols.
+HTML uses stronger red and green backgrounds behind changed text. Ordinary
+spaces stay inside the surrounding highlight. Separate space blocks appear
+when spaces and tabs share a whitespace run, or when corresponding whitespace
+uses tabs on one side and spaces on the other. Each highlighted tab fills its
+tab stop. `--tab-width=N` sets the tab stops, with eight columns by default.
+Hover over a separate whitespace block to see whether it marks a space or a
+tab. These blocks decorate the existing source; they don't replace tabs or
+spaces with symbols.
 
 An HTML "Indentation only" label means the nonblank text agrees exactly after
 removing leading spaces and tabs. Internal whitespace, trailing whitespace,
