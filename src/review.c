@@ -2239,7 +2239,12 @@ static void ignore_whitespace_replacements(struct comparison *review)
 
 		for (size_t first = 0; first < source->nrows;) {
 			const struct patch_row *row = &source->rows[first];
-			size_t end = first, old = first, new = first;
+			struct replacement_match *best __free(free) = NULL;
+			size_t *deleted_rows __free(free) = NULL;
+			size_t *added_rows __free(free) = NULL;
+			size_t end = first, ndeleted = 0, nadded = 0;
+			size_t deleted = 0, added = 0, last = SIZE_MAX;
+			bool ordered = true;
 
 			if ((row->sign != '-' && row->sign != '+') ||
 			    row->hunk == SIZE_MAX) {
@@ -2249,27 +2254,72 @@ static void ignore_whitespace_replacements(struct comparison *review)
 			while (end < source->nrows &&
 			       source->rows[end].hunk == row->hunk &&
 			       (source->rows[end].sign == '-' ||
-				source->rows[end].sign == '+'))
+				source->rows[end].sign == '+')) {
+				if (source->rows[end].sign == '-')
+					ndeleted++;
+				else
+					nadded++;
 				end++;
-			while (old < end && new < end) {
-				while (old < end &&
-				       source->rows[old].sign != '-')
-					old++;
-				while (new < end &&
-				       source->rows[new].sign != '+')
-					new++;
-				if (old == end || new == end)
-					break;
-				if (!patch_row_equal(&source->rows[old].text,
-						     &source->rows[new].text) &&
-				    same_ignoring_whitespace(
-					    &source->rows[old].text,
-					    &source->rows[new].text)) {
-					ignored[old] = true;
-					ignored[new] = true;
+			}
+			if (!ndeleted || !nadded ||
+			    ndeleted > REPLACEMENT_MAX_PAIRS / nadded) {
+				first = end;
+				continue;
+			}
+
+			deleted_rows =
+				xmalloc_array(ndeleted, sizeof(*deleted_rows));
+			added_rows = xmalloc_array(nadded, sizeof(*added_rows));
+			best = xzalloc_array(ndeleted + nadded, sizeof(*best));
+			for (size_t i = first; i < end; i++) {
+				if (source->rows[i].sign == '-')
+					deleted_rows[deleted++] = i;
+				else
+					added_rows[added++] = i;
+			}
+
+			for (size_t i = 0; i < ndeleted; i++) {
+				for (size_t j = 0; j < nadded; j++) {
+					const struct udiff_line *old =
+						&source->rows[deleted_rows[i]]
+							 .text;
+					const struct udiff_line *new =
+						&source->rows[added_rows[j]]
+							 .text;
+
+					if (patch_row_equal(old, new) ||
+					    !same_ignoring_whitespace(old, new))
+						continue;
+					consider_replacement(&best[i], j, 1);
+					consider_replacement(
+						&best[ndeleted + j], i, 1);
 				}
-				old++;
-				new++;
+			}
+			for (size_t i = 0; i < ndeleted; i++) {
+				size_t mate = best[i].mate;
+
+				if (!best[i].score || mate == SIZE_MAX ||
+				    !best[ndeleted + mate].score ||
+				    best[ndeleted + mate].mate != i)
+					continue;
+				if (last != SIZE_MAX && mate < last) {
+					ordered = false;
+					break;
+				}
+				last = mate;
+			}
+			if (ordered) {
+				for (size_t i = 0; i < ndeleted; i++) {
+					size_t mate = best[i].mate;
+
+					if (!best[i].score ||
+					    mate == SIZE_MAX ||
+					    !best[ndeleted + mate].score ||
+					    best[ndeleted + mate].mate != i)
+						continue;
+					ignored[deleted_rows[i]] = true;
+					ignored[added_rows[mate]] = true;
+				}
 			}
 			first = end;
 		}

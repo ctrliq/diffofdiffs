@@ -62,6 +62,7 @@ extern unsigned int tab_width;
 
 /* Optional Backport/Upstream labels instead of patch1/patch2 */
 extern bool backport_labels;
+
 /* Omit paired source rows that differ only in horizontal whitespace */
 extern bool ignore_whitespace;
 

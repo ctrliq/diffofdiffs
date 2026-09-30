@@ -1931,13 +1931,13 @@ def main():
     # Suppress a one-sided whitespace replacement but retain unrelated edits.
     unpaired_before = [b'int value;\n', b'old marker\n']
     unpaired_a = patch(unpaired_before,
-                       [b'int  value;\n', b'unpaired addition\n',
+                       [b'unpaired addition\n', b'int  value;\n',
                         b'old marker\n'])
     unpaired_b = patch(unpaired_before,
                        [b'int value;\n', b'new marker\n'])
     unpaired_paths, _, _ = run_case(
-        'whitespace-option-one-sided-replacement', unpaired_a, unpaired_b,
-        expected(unpaired_a, unpaired_b))
+        'whitespace-option-unpaired-addition-before-replacement',
+        unpaired_a, unpaired_b, expected(unpaired_a, unpaired_b))
     unpaired = subprocess.check_output(
         [BINARY, '--ignore-whitespace', *unpaired_paths], env=ENV)
     assert b'int  value;' not in unpaired
