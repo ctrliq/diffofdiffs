@@ -443,6 +443,14 @@ but they don't make unequal source into a shared edit. Highlighting decorates
 the selected pairs; it doesn't establish that two changes mean the same thing.
 Unrelated pairs and very long lines can appear without inline highlights.
 
+Resource limits apply to every comparison to help keep unusually large or
+deeply nested inputs from exhausting memory or the stack. Each version of a
+file is limited to 64 MiB, and process limits constrain memory growth. Tree
+mode also stops directory walks at 256 levels to protect the stack. Exceeding
+a limit returns an error; it never means that the inputs match. These
+safeguards are part of diffofdiffs' design for safe use in CI pipelines that
+generate HTML artifacts from untrusted patches or repositories.
+
 Files with different basenames aren't paired, though differing leading
 directories can still match. Identical edits can be shared across separate
 files, so a change of path alone doesn't guarantee a report. When the edits

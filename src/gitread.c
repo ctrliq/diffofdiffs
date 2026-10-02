@@ -32,6 +32,9 @@
 _Static_assert(GITREAD_OID_RAWSZ == GIT_OID_SHA1_SIZE,
 	       "SHA-1 object ID sizes must agree");
 
+/* Bound recursive directory walks before they exhaust the stack */
+#define TREE_DEPTH_LIMIT 256u
+
 struct gitread {
 	git_repository *repo;
 	git_odb *odb;
@@ -739,9 +742,13 @@ static void git_tree_pointer_free(git_tree **tree)
 static void tree_collect(struct gitread *gr, const git_tree *tree,
 			 const git_tree *other, const char *dir,
 			 const char *const hex[2], struct gitread_tree *out,
-			 size_t *cap)
+			 size_t *cap, size_t depth)
 {
 	size_t count = git_tree_entrycount(tree);
+
+	if (count && depth == TREE_DEPTH_LIMIT)
+		die("git tree exceeds the %u-level traversal limit",
+		    TREE_DEPTH_LIMIT);
 
 	for (size_t i = 0; i < count; i++) {
 		const git_tree_entry *entry = git_tree_entry_byindex(tree, i);
@@ -769,7 +776,8 @@ static void tree_collect(struct gitread *gr, const git_tree *tree,
 		if (peer && git_tree_entry_type(peer) == GIT_OBJECT_TREE)
 			peer_sub = lookup_subtree(gr, peer, dir, hex[1]);
 		xasprintf(&subdir, "%s%s/", dir, name);
-		tree_collect(gr, sub, peer_sub, subdir, hex, out, cap);
+		tree_collect(gr, sub, peer_sub, subdir, hex, out, cap,
+			     depth + 1);
 	}
 }
 
@@ -793,7 +801,7 @@ void gitread_tree_read(struct gitread *gr, const struct gitread_oid *commit,
 	const char *labels[2] = { hex[0], hex[1] };
 	size_t cap = 0;
 
-	tree_collect(gr, tree, other, "", labels, out, &cap);
+	tree_collect(gr, tree, other, "", labels, out, &cap, 0);
 	if (out->n > 1)
 		qsort(out->entries, out->n, sizeof(*out->entries),
 		      tree_entry_cmp);

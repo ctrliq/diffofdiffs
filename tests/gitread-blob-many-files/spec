@@ -1,0 +1,6 @@
+# Reading files one at a time must preserve every source byte even when their
+# combined size exceeds diffofdiffs' default memory allowance. Each image fits
+# the per-image limit, and each buffer is freed before reading the next file.
+bin: GITREAD_UNIT
+args: blob-many-files
+exit: 0

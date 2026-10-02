@@ -205,6 +205,14 @@ parents at shallow boundaries. Those boundaries do not change the patch: a
 missing selected parent is an error, while unavailable older ancestors or
 unselected merge parents do not prevent comparison.
 
+Source images are limited to 64 MiB and directory walks to 256 levels. When
+`/proc/self/statm` is available, process memory growth is limited to 768 MiB above
+startup usage, preserving tighter inherited limits. Patch mode uses `RLIMIT_AS`;
+tree mode uses `RLIMIT_DATA` to allow large read-only Git mappings.
+
+If you use diffofdiffs to generate HTML artifacts in your CI pipeline, these
+limits help protect the runner from resource exhaustion.
+
 The independent Python checker validates displayed source, coordinates,
 original signs, final newlines, and edit accounting. These checks cannot prove
 every correspondence. The suite also uses independently chosen locations,

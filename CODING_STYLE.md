@@ -240,12 +240,10 @@ plain ASCII with no unicode punctuation and no em dashes, including `--` used
 as one. Never describe anything as "load-bearing" or use "shape" as a noun;
 say specifically what depends on what.
 
-Worst-case reasoning is written as what it is: a pathological input, a cost
-bound, the work a run can force. Never frame it as an adversary, an attack,
-or a hostile or malicious input. This program compares two versions of a
-patch and has no security dimension, so that vocabulary misdescribes the
-code and sends the next reader looking for a threat model that was never
-there.
+Describe worst-case work in concrete terms: the input condition, its cost,
+and the bound being enforced. Security explanations must identify the actual
+trust boundary, such as rendering source in a browser or processing a pull
+request on a CI runner. Avoid speculative claims about exploitation.
 
 ## The program is not a library
 

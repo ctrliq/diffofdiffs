@@ -737,6 +737,66 @@ static void case_blob_read(void)
 	gitread_close(&gr);
 }
 
+/*
+ * Read every file in a wide directory, freeing each buffer before the next. The
+ * combined source exceeds diffofdiffs' default memory allowance, but releasing
+ * each buffer keeps the working set small. Shared content keeps the repository
+ * small while every returned buffer still gets a full byte check.
+ */
+static void case_blob_many_files(void)
+{
+	static const char line[] = "int value = 1;\n";
+	const size_t len = (sizeof(line) - 1) * 65536;
+	char *bytes __autofree = xmalloc(len);
+	git_treebuilder *builder = NULL;
+	struct gitread_oid commit;
+	const size_t files = 1200;
+	git_repository *repo;
+	struct gitread *gr;
+	git_oid blob, tree;
+
+	for (size_t at = 0; at < len; at += sizeof(line) - 1)
+		memcpy(bytes + at, line, sizeof(line) - 1);
+
+	repo = mk_basic("s", false, NULL, NULL);
+	put_blob(repo, bytes, len, &blob);
+	if (git_treebuilder_new(&builder, repo, NULL))
+		die("cannot open a tree builder");
+
+	for (size_t i = 0; i < files; i++) {
+		char name[sizeof("file-0000.c")];
+
+		snprintf(name, sizeof(name), "file-%04zu.c", i);
+		if (git_treebuilder_insert(NULL, builder, name, &blob,
+					   GIT_FILEMODE_BLOB))
+			die("cannot insert %s into a tree", name);
+	}
+	if (git_treebuilder_write(&tree, builder))
+		die("cannot write a tree");
+
+	git_treebuilder_free(builder);
+	put_commit(repo, "refs/heads/many", &tree, NULL, "many", NULL);
+	git_repository_free(repo);
+
+	gitread_open(&gr, "s", NULL);
+	gitread_resolve_commit(gr, "many", &commit);
+	for (size_t i = 0; i < files; i++) {
+		struct iomem_buf buf __cleanup(iomem_buf_free) = {};
+		char name[sizeof("file-0000.c")];
+		u32 mode;
+
+		snprintf(name, sizeof(name), "file-%04zu.c", i);
+		if (!gitread_blob_by_path(gr, &commit, name, &buf, &mode))
+			die("%s is missing", name);
+
+		if (mode != GIT_FILEMODE_BLOB || buf.len != len ||
+		    memcmp(buf.base, bytes, len))
+			die("%s has different source bytes or mode", name);
+	}
+	gitread_close(&gr);
+	printf("read %zu files, %zu bytes each\n", files, len);
+}
+
 /* A symlink entry: the mode prints 120000 and the bytes are the target */
 static void case_blob_symlink(void)
 {
@@ -2812,6 +2872,8 @@ int main(int argc, char **argv)
 		case_fail_loud(argv[1] + strlen("fail-"));
 	} else if (!strcmp(argv[1], "blob-read")) {
 		case_blob_read();
+	} else if (!strcmp(argv[1], "blob-many-files")) {
+		case_blob_many_files();
 	} else if (!strcmp(argv[1], "blob-symlink")) {
 		case_blob_symlink();
 	} else if (!strcmp(argv[1], "blob-gitlink")) {
