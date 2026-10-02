@@ -168,11 +168,29 @@ start of the whole output row; their pane positions affect tab measurement.
 Widths aren't rounded to those stops. Source columns have a minimum width of
 two cells, or eight when redirected source contains tabs, even if a requested
 cap or terminal width is smaller. UTF-8 display width controls wrapping;
-nonprinting bytes are escaped. In a single-byte locale, the program first
-tries C.UTF-8.
-Continuations receive no new sign or coordinate. Colored spans end before
-padding, and layout adds no trailing spaces; trailing source whitespace is
-preserved. Plain and colored output share all layout code.
+nonprinting bytes are escaped. Unicode direction overrides, invisible format
+characters, and line separators use the same byte escapes even when the locale
+would treat them as printable. Escaping them prevents hidden text from
+concealing or visually rearranging source differences, while matching still
+sees the original bytes. In a single-byte locale, the program first tries
+C.UTF-8. Continuations receive no new sign or coordinate. Colored spans end
+before padding, and layout adds no trailing spaces; trailing source whitespace
+is preserved. Plain and colored output share all layout code.
+
+The HTML renderer escapes source text, filenames, and commit subjects so the
+browser displays them as text, even if they contain material intended to
+change the page's structure or behavior. Every report also carries a Content
+Security Policy that permits only its embedded viewer script and blocks
+network access. These safeguards are useful when users integrate diffofdiffs
+into their own CI pipelines, where reviewers open automatically generated
+HTML artifacts.
+
+The policy appears before any input-derived content and permits the embedded
+viewer by its SHA-256 hash, inline styles, and the data images used to round
+highlight corners. Other resources, network connections, base URLs, and form
+submissions are disabled. The build hashes the exact script bytes, including
+the newline after the opening tag. Reports can receive theme changes from a
+containing page without modifying that script.
 
 ## Git input and verification
 

@@ -347,9 +347,12 @@ layout.
 
 Long source lines wrap without repeating their signs or line numbers on
 continuation lines. UTF-8 characters remain intact, and other nonprinting
-bytes are escaped as `\xNN`. Borders use box-drawing characters in an effective
-UTF-8 locale and ASCII otherwise; in a single-byte locale, the program first
-tries `C.UTF-8`.
+bytes are escaped as `\xNN`. Both text and HTML output show invisible Unicode
+format characters, direction overrides, and line separators as byte escapes
+so they cannot silently alter the report's appearance.
+
+Borders use box-drawing characters in an effective UTF-8 locale and ASCII
+otherwise; in a single-byte locale, the program first tries `C.UTF-8`.
 
 ### Saving and copying
 
@@ -391,6 +394,13 @@ scripts, and viewing controls, so it needs no server or network connection.
 The HTML and text reports use the same paired source rows. For Git inputs,
 HTML also shows each result commit's subject beneath its identifier and in
 the browser tab title.
+
+Input text, filenames, and commit subjects are escaped so the browser displays
+them as text, even if they were written to alter the page or run code. Every
+report also includes a Content Security Policy that restricts scripts to its
+own viewer and blocks network access. These safeguards also help when you
+use diffofdiffs in your own CI pipeline to generate HTML reports as build
+artifacts for reviewers.
 
 ### Viewing controls
 

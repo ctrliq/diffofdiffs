@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
 """Check native ranges and renderer source preservation independently."""
+import base64
 import difflib
 import fcntl
+import hashlib
 import os
 import pty
 import re
@@ -37,6 +39,8 @@ class Report(HTMLParser):
         self.current = None
         self.plain = ''
         self.scripts = 0
+        self.script_text = ''
+        self.policy = None
         self.root = None
         self.styles = []
         self.resources = []
@@ -47,10 +51,23 @@ class Report(HTMLParser):
         self.comments = []
         self.feed(data)
         assert not self.stack
+        assert self.policy is not None
+        digest = base64.b64encode(hashlib.sha256(self.script_text.encode()).digest()).decode()
+        assert f"script-src 'sha256-{digest}'" in self.policy
+        assert "default-src 'none'" in self.policy
+        assert "img-src data:" in self.policy
+        assert "base-uri 'none'" in self.policy and "form-action 'none'" in self.policy
+        assert "'unsafe-eval'" not in self.policy
+        assert self.script_text == '\n' + (ROOT / 'src/html.js').read_text(encoding='utf-8')
 
     def handle_starttag(self, tag, attributes):
         attrs = dict(attributes)
         classes = attrs.get('class', '').split()
+        if tag == 'meta' and attrs.get('http-equiv') == 'Content-Security-Policy':
+            assert self.policy is None
+            self.policy = attrs['content']
+        if tag in ('script', 'style', 'title'):
+            assert self.policy is not None
         if tag in ('meta', 'input', 'br'):
             return
 
@@ -94,6 +111,8 @@ class Report(HTMLParser):
         self.comments.append(data)
 
     def handle_data(self, data):
+        if any(tag == 'script' for tag, _ in self.stack):
+            self.script_text += data
         if any(tag == 'style' for tag, _ in self.stack):
             self.styles[-1] += data
         if any(tag == 'title' for tag, _ in self.stack):
@@ -777,6 +796,24 @@ def html_operand_title_cases(directory):
         CHECKS += 1
 
 
+def hidden_character_cases(directory):
+    global CHECKS
+    before = ['label = "original";\n']
+    characters = '\u00ad\u200b\u2028\u202e\u2066\ufe0f\U000e0100'
+    escaped = ''.join(f'\\x{byte:02x}' for byte in characters.encode())
+    paths = [directory / 'hidden-left.patch', directory / 'hidden-right.patch']
+    after = [f'label = "café{characters}";\n', 'label = "café";\n']
+    for path, line in zip(paths, after):
+        path.write_bytes(patch(before, [line]))
+    arguments = [TOOL, '--max-column-width=200', *map(str, paths)]
+    plain = subprocess.check_output([*arguments, '--color=never'], env=ENV).decode()
+    report = Report(subprocess.check_output([*arguments, '--html'], env=ENV).decode())
+    assert escaped in plain and escaped in report.plain
+    assert any('café' + escaped in cell['source'] for cell in report.cells)
+    assert all(char not in plain and char not in report.plain for char in characters)
+    CHECKS += 1
+
+
 def display_character_cases(directory):
     global CHECKS
     cases = [
@@ -784,6 +821,13 @@ def display_character_cases(directory):
         ('é'.encode(), 2, 1),
         ('界'.encode(), 3, 2),
         ('\u0301'.encode(), 2, 0),
+        ('\u00ad'.encode(), 2, -1),
+        ('\u200b'.encode(), 3, -1),
+        ('\u2028'.encode(), 3, -1),
+        ('\u202e'.encode(), 3, -1),
+        ('\u2066'.encode(), 3, -1),
+        ('\ufe0f'.encode(), 3, -1),
+        ('\U000e0100'.encode(), 4, -1),
         (b'\t', 1, -1),
         (b'\x07', 1, -1),
         (b'\xff', 0, -1),
@@ -805,6 +849,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix='dod-highlight-') as temporary:
         directory = Path(temporary)
         display_character_cases(directory)
+        hidden_character_cases(directory)
         native_cases(directory)
         renderer_cases(directory)
         replacement_cases(directory)

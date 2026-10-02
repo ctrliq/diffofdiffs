@@ -16,6 +16,47 @@
 #include <types.h>
 #include <util.h>
 
+static bool hidden_display_character(wchar_t wc)
+{
+	/* clang-format off */
+	static const struct {
+		wchar_t first, last;
+	} ranges[] = {
+		{ 0x00ad, 0x00ad },
+		{ 0x034f, 0x034f },
+		{ 0x061c, 0x061c },
+		{ 0x115f, 0x1160 },
+		{ 0x17b4, 0x17b5 },
+		{ 0x180b, 0x180f },
+		{ 0x200b, 0x200f },
+		{ 0x2028, 0x202e },
+		{ 0x2060, 0x206f },
+		{ 0x3164, 0x3164 },
+		{ 0xfe00, 0xfe0f },
+		{ 0xfeff, 0xfeff },
+		{ 0xffa0, 0xffa0 },
+		{ 0xfff0, 0xfff8 },
+		{ 0x1bca0, 0x1bca3 },
+		{ 0x1d173, 0x1d17a },
+		{ 0xe0000, 0xe0fff }
+	};
+	/* clang-format on */
+
+	/*
+	 * Unicode 17's Default_Ignorable_Code_Point ranges, plus its line and
+	 * paragraph separators, must stay visible in a source review. Escape
+	 * them even when the locale gives them a printable width: directional
+	 * controls can reorder nearby code, and invisible edits can disappear.
+	 */
+	for (size_t i = 0; i < ARRAY_SIZE(ranges); i++) {
+		if (wc < ranges[i].first)
+			return false;
+		if (wc <= ranges[i].last)
+			return true;
+	}
+	return false;
+}
+
 size_t display_character_bytes(const char *text, size_t len, int *columns)
 {
 	mbstate_t state = {};
@@ -32,7 +73,7 @@ size_t display_character_bytes(const char *text, size_t len, int *columns)
 	if (!n || n == (size_t)-1 || n == (size_t)-2)
 		return 0;
 
-	if (columns)
+	if (columns && !hidden_display_character(wc))
 		*columns = wcwidth(wc);
 	return n;
 }

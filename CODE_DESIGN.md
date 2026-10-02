@@ -318,6 +318,18 @@ Keep initial settings consistent between the HTML attributes, CSS, and
 controls, including when JavaScript is unavailable. Changing a viewing
 control affects only the open report.
 
+Every generated HTML report must treat input as text to display, even when
+crafted to alter the page's structure or behavior. Escape source text, paths,
+and commit subjects before inserting them into HTML. As an additional
+safeguard, place a Content Security Policy before input-derived content,
+permitting only the exact embedded viewer script by hash, inline styles,
+and the data images used by the renderer. Update the script hash from the
+emitted bytes at build time.
+
+These protections are also useful when users integrate diffofdiffs into
+their own CI pipelines, where reviewers open automatically generated HTML
+artifacts.
+
 Replacement alignment must keep corresponding calls together when one patch
 also inserts a nearby statement. For example, adding preempt_disable_nested()
 before write_seqcount_begin() must not prevent a changed argument in the

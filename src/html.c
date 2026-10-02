@@ -404,8 +404,11 @@ static void write_html_header(FILE *out, const char *const identities[2],
 				      subjects[leg] :
 				      "(no commit subject)";
 	}
-	fputs("<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>",
-	      out);
+
+	/* Only the embedded viewer may run; reports need no network access */
+	fprintf(out,
+		"<head><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src '%s'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>",
+		html_js_hash);
 	if (git_tree_dir) {
 		write_html_label(out, titles[0]);
 		if (strcmp(titles[0], titles[1])) {

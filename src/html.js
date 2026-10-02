@@ -187,6 +187,25 @@
 		});
 
 	/*
+	 * Theme messages let the containing page update the report without
+	 * changing the script covered by the Content Security Policy.
+	 */
+	if (window.parent !== window) {
+		window.addEventListener('message', event => {
+			if (event.source !== window.parent ||
+			    event.data?.type !== 'diffofdiffs-theme')
+				return;
+			if (event.data.theme === 'light' || event.data.theme === 'dark') {
+				root.dataset.theme = event.data.theme;
+				document.getElementById('theme-select').value = event.data.theme;
+				for (const id of ['copy-report', 'download-report'])
+					document.getElementById(id).hidden = true;
+				document.getElementById('theme-select').closest('label').hidden = true;
+			}
+		});
+	}
+
+	/*
 	 * Browsers can restore controls after this script runs without sending
 	 * change events. Apply the restored state when the document is shown.
 	 */

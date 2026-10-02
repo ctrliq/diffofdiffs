@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en" data-theme="light" data-highlight="words" data-layout="review" data-shared="true" data-gaps="true" data-wrap="true" data-text-size="medium">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>diffofdiffs report</title>
+<head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MvY2AT12N5AOnLtav0Jesc4nwUooVt2KFD0SWat8cMs='; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>diffofdiffs report</title>
 <!--
 diffofdiffs
 Copyright (C) 2025-2026 Ctrl IQ, Inc.
@@ -616,6 +616,25 @@ Signs mark lines present in only one result: - Backport, + Upstream.
 		.addEventListener('click', () => {
 			downloadText('diffofdiffs.txt', plainReport);
 		});
+
+	/*
+	 * Theme messages let the containing page update the report without
+	 * changing the script covered by the Content Security Policy.
+	 */
+	if (window.parent !== window) {
+		window.addEventListener('message', event => {
+			if (event.source !== window.parent ||
+			    event.data?.type !== 'diffofdiffs-theme')
+				return;
+			if (event.data.theme === 'light' || event.data.theme === 'dark') {
+				root.dataset.theme = event.data.theme;
+				document.getElementById('theme-select').value = event.data.theme;
+				for (const id of ['copy-report', 'download-report'])
+					document.getElementById(id).hidden = true;
+				document.getElementById('theme-select').closest('label').hidden = true;
+			}
+		});
+	}
 
 	/*
 	 * Browsers can restore controls after this script runs without sending

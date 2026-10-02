@@ -11,7 +11,8 @@
  * Return owned strings containing printable characters, tabs, newlines, and
  * ASCII \xNN escapes for all other bytes, with no embedded NUL. Decoding uses
  * the current LC_CTYPE locale, which must stay the same while measuring the
- * result. Source tabs survive escaping; labels expand them before centering.
+ * result. Invisible Unicode controls and separators are escaped too. Source
+ * tabs survive escaping; labels expand them before centering.
  */
 char *expand_display_text(const char *text, size_t len);
 char *escape_source_text(const char *text, size_t len);
