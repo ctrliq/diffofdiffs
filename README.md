@@ -208,6 +208,9 @@ make check
 make check-asan
 ```
 
+The release version is stored in [VERSION](VERSION). Change that file when
+preparing a release; the build picks it up automatically.
+
 See [tests/README.md](tests/README.md) for test coverage and optional corpus
 validation. Read [CODING_STYLE.md](CODING_STYLE.md) before contributing code;
 [DESIGN.md](DESIGN.md) describes the comparison engine, and

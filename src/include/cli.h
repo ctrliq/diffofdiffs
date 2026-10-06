@@ -12,9 +12,6 @@
 
 #include <stdbool.h>
 
-/* Update the version here when preparing a release */
-#define DIFFOFDIFFS_VERSION "1.0.0"
-
 /*
  * How --color's WHEN argument resolves. AUTO defers the terminal check to the
  * output layer; cli.c never calls isatty() itself.
