@@ -19,7 +19,21 @@ in the [user guide](../GUIDE.md).
 
 ## Regeneration
 
-Build diffofdiffs, then run these commands from the repository root:
+Run these commands from the repository root to rebuild diffofdiffs and
+regenerate the HTML reports, or check whether they need updating:
+
+```sh
+make update-samples
+make check-samples
+```
+
+`make check` and `make check-asan` also compare the tracked HTML against fresh
+output. These checks leave the reports untouched; regenerate and review them
+when the renderer, embedded assets, or example patches change. Matching the
+generated output establishes freshness, so review the result for correctness
+before committing it.
+
+The regeneration helper runs the equivalent of these commands:
 
 ```sh
 (
@@ -40,4 +54,5 @@ Add `--color=always` when saving ANSI output.
 The PNG screenshots show each report through the end of its delta section,
 with Text size set to Large, a 1440-pixel browser viewport, and a device scale
 factor of 1.5. Their themes match the commands above; the remaining controls
-use their defaults.
+use their defaults. Update the screenshots separately when a change affects
+their appearance.

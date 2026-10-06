@@ -490,9 +490,9 @@ $(ASAN_RUN_GOALS): export GITREAD_UNIT := $(CURDIR)/tests/support/gitread-unit-a
 $(ASAN_RUN_GOALS): export TOOL_SETUP_SO := $(CURDIR)/$(TOOL_SETUP_LIB)
 $(ASAN_RUN_GOALS): export RUN_VARIANT := asan
 
-check: checkstyle check-reader check-matches check-review check-highlight $(PLAIN_BINS) tests/support/udiff_driver tests/support/gitread-unit $(TOOL_SETUP_LIB) $(PLAIN_RUN_GOALS)
+check: checkstyle check-reader check-matches check-review check-highlight check-samples $(PLAIN_BINS) tests/support/udiff_driver tests/support/gitread-unit $(TOOL_SETUP_LIB) $(PLAIN_RUN_GOALS)
 
-check-asan: checkstyle check-reader-asan check-matches-asan check-review-asan check-highlight-asan $(ASAN_BINS) tests/support/udiff_driver-asan tests/support/gitread-unit-asan $(TOOL_SETUP_LIB) $(ASAN_RUN_GOALS)
+check-asan: checkstyle check-reader-asan check-matches-asan check-review-asan check-highlight-asan check-samples-asan $(ASAN_BINS) tests/support/udiff_driver-asan tests/support/gitread-unit-asan $(TOOL_SETUP_LIB) $(ASAN_RUN_GOALS)
 
 clean:
 	$(call show,CLEAN,build files)
@@ -504,6 +504,17 @@ check-highlight: diffofdiffs tests/support/highlight-driver
 
 check-highlight-asan: diffofdiffs-asan tests/support/highlight-driver-asan
 	$(Q)"$(PYTHON)" tests/check-highlight.py ./diffofdiffs-asan tests/support/highlight-driver-asan
+
+.PHONY: update-samples check-samples check-samples-asan
+update-samples: diffofdiffs
+	$(call show,GEN,sample reports)
+	$(Q)"$(PYTHON)" scripts/render-samples.py ./diffofdiffs
+
+check-samples: diffofdiffs
+	$(Q)"$(PYTHON)" scripts/render-samples.py --check ./diffofdiffs
+
+check-samples-asan: diffofdiffs-asan
+	$(Q)ASAN_OPTIONS="$$ASAN_OPTIONS:detect_leaks=1" UBSAN_OPTIONS="$$UBSAN_OPTIONS:halt_on_error=1" "$(PYTHON)" scripts/render-samples.py --check ./diffofdiffs-asan
 
 .PHONY: check-review check-review-asan
 check-review: diffofdiffs tests/support/derive-patch tests/support/gitread-unit tests/support/no-locale.so
