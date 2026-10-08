@@ -79,6 +79,14 @@ h1 { margin: 0; font-size: 28px; letter-spacing: -.03em; }
 h2 { font-size: 19px; margin: 0; }
 h3 { margin: 0; font-size: 13px; }
 header > p, .legend { color: var(--muted); }
+footer {
+	margin-top: 24px;
+	padding-top: 12px;
+	border-top: 1px solid var(--border);
+	color: var(--muted);
+	text-align: center;
+	font-size: 12px;
+}
 button, select, input { font: inherit; }
 button, select {
 	min-height: 34px;

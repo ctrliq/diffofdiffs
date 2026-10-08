@@ -29,9 +29,10 @@ make check-samples
 
 `make check` and `make check-asan` also compare the tracked HTML against fresh
 output. These checks leave the reports untouched; regenerate and review them
-when the renderer, embedded assets, or example patches change. Matching the
-generated output establishes freshness, so review the result for correctness
-before committing it.
+when the version, renderer, embedded assets, or example patches change. Each
+report's footer identifies the diffofdiffs version that generated it. Matching
+the generated output establishes freshness, so review the result for
+correctness before committing it.
 
 The regeneration helper runs the equivalent of these commands:
 

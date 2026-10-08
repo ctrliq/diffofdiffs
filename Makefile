@@ -71,9 +71,11 @@ build/html-assets.h: scripts/embed-assets.py src/html.css src/html.js src/html-c
 
 build/plain/html.o build/asan/html.o build/afl/html.o: build/html-assets.h
 
-# Only the CLI embeds the version, so release bumps leave other objects alone
-build/plain/cli.o build/asan/cli.o build/afl/cli.o: VERSION
-build/plain/cli.o build/asan/cli.o build/afl/cli.o: override CPPFLAGS += -DDIFFOFDIFFS_VERSION='"$(DIFFOFDIFFS_VERSION)"'
+# Keep the CLI version and HTML footer in sync after a release bump
+VERSION_OBJS := $(foreach mode,plain asan afl,\
+	build/$(mode)/cli.o build/$(mode)/html.o)
+$(VERSION_OBJS): VERSION
+$(VERSION_OBJS): override CPPFLAGS += -DDIFFOFDIFFS_VERSION='"$(DIFFOFDIFFS_VERSION)"'
 
 PLAIN_TOOL_OBJS := $(TOOL_SRCS:%.c=build/plain/%.o)
 PLAIN_DRIVER_OBJS := $(DRIVER_SRCS:%.c=build/plain/%.o)
