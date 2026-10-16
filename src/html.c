@@ -198,18 +198,21 @@ static void write_source_cell(FILE *out, const struct review_row *row,
 	fprintf(out, "><span class=\"sign\">%c</span>", row->sign);
 
 	for (int stage = 0; stage < 2; stage++) {
-		fprintf(out,
-			"<span class=\"number %s\" title=\"%s line number\">",
-			stage ? "new" : "old", stage ? "Result" : "Parent");
-		if (row->pos[stage] != SIZE_MAX) {
-			size_t digits = 1;
+		const char *name = stage ? "new" : "old";
+		size_t digits = 1;
 
-			for (size_t n = row->pos[stage] + 1; n >= 10; n /= 10)
-				digits++;
-			fprintf(out, "%zu", row->pos[stage] + 1);
-			layout->digits = MAX(layout->digits, digits);
+		/* An empty number cell has nothing for a tooltip to explain */
+		if (row->pos[stage] == SIZE_MAX) {
+			fprintf(out, "<span class=\"number %s\"></span>", name);
+			continue;
 		}
-		fputs("</span>", out);
+
+		for (size_t n = row->pos[stage] + 1; n >= 10; n /= 10)
+			digits++;
+		fprintf(out,
+			"<span class=\"number %s\" title=\"%s line number\">%zu</span>",
+			name, stage ? "Result" : "Parent", row->pos[stage] + 1);
+		layout->digits = MAX(layout->digits, digits);
 	}
 	fputs("<span class=\"source-text\">", out);
 	write_highlighted_text(out, text, h, leg);
