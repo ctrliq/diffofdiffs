@@ -191,9 +191,12 @@ static void write_source_cell(FILE *out, const struct review_row *row,
 	if (row->shared)
 		fputs(" title=\"Both patches make this edit; its counterpart may occur at another position.\"",
 		      out);
-	fprintf(out, " data-newline=\"%s\"><span class=\"sign\">%c</span>",
-		row->len && row->text[row->len - 1] == '\n' ? "yes" : "no",
-		row->sign);
+
+	/* Most lines end in a newline, so only a missing one is recorded */
+	if (!row->len || row->text[row->len - 1] != '\n')
+		fputs(" data-newline=\"no\"", out);
+	fprintf(out, "><span class=\"sign\">%c</span>", row->sign);
+
 	for (int stage = 0; stage < 2; stage++) {
 		fprintf(out,
 			"<span class=\"number %s\" title=\"%s line number\">",
