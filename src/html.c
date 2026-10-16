@@ -181,8 +181,8 @@ static void write_source_cell(FILE *out, const struct review_row *row,
 	else if (row->sign == '-')
 		kind = "remove";
 
-	fprintf(out, "<div class=\"side source-side %s\" data-side=\"%d\"",
-		row->text ? kind : "gap", leg);
+	fprintf(out, "<div class=\"side source-side %s\"",
+		row->text ? kind : "gap");
 	if (!row->text) {
 		fputs(" title=\"No aligned source line; this is a gap, not a blank source line.\"></div>",
 		      out);

@@ -178,11 +178,13 @@ html[data-wrap="false"] .source-text { white-space: pre; overflow-wrap: normal; 
 .note-pair { background: var(--header); }
 .newline-note { background: var(--surface); color: var(--muted); }
 .newline-note > div { padding: 0 12px; }
-.source-side[data-side="0"] {
+
+/* Each pair holds exactly two cells, left then right */
+.source-side:first-child {
 	--word-change: var(--word-remove);
 	--word-corner: var(--word-remove-corner);
 }
-.source-side[data-side="1"] {
+.source-side:last-child {
 	--word-change: var(--word-add);
 	--word-corner: var(--word-add-corner);
 }
