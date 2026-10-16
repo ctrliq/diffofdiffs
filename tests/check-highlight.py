@@ -86,7 +86,7 @@ class Report(HTMLParser):
             self.subjects.append('')
         if tag == 'div' and self.stack and 'operands' in self.stack[-1][1].get('class', '').split():
             self.identities.append('')
-        if 'source-side' in classes:
+        if 'source-side' in classes or 'gap' in classes:
             assert self.current is None
             self.current = dict(gap='gap' in classes, source='', sign='', old='', new='',
                                 newline=attrs.get('data-newline'), depth=len(self.stack),

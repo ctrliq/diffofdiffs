@@ -180,13 +180,14 @@ static void write_source_cell(FILE *out, const struct review_row *row,
 	else if (row->sign == '-')
 		kind = "remove";
 
-	fprintf(out, "<div class=\"side source-side %s\"",
-		row->text ? kind : "gap");
+	/* A gap holds no source, so it takes none of a source cell's styling */
 	if (!row->text) {
-		fputs(" title=\"No aligned source line; this is a gap, not a blank source line.\"></div>",
+		fputs("<div class=\"side gap\" title=\"No aligned source line; this is a gap, not a blank source line.\"></div>",
 		      out);
 		return;
 	}
+
+	fprintf(out, "<div class=\"side source-side %s\"", kind);
 	if (row->shared)
 		fputs(" title=\"Both patches make this edit; its counterpart may occur at another position.\"",
 		      out);

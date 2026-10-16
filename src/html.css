@@ -154,7 +154,6 @@ summary { cursor: pointer; }
 .source-side.remove { --source-background: var(--remove); }
 html[data-shared="true"] .source-side.shared { --source-background: var(--shared); }
 html[data-shared="false"] .chip.shared { background: var(--header); }
-.gap { background: transparent; }
 html[data-gaps="false"] .hunk { background-image: none; }
 .sign, .number { color: var(--muted); user-select: none; text-align: right; padding-right: 1ch; }
 .sign { padding-right: .4ch; color: var(--text); }
