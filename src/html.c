@@ -21,7 +21,6 @@
 struct html_layout {
 	size_t width;
 	size_t digits;
-	size_t row;
 };
 
 /* clang-format off */
@@ -297,8 +296,8 @@ static void write_source_pair(FILE *out, const struct review_pair *pair,
 	text[0] = left;
 	text[1] = right;
 	highlight_pair(raw, text, &h);
-	fprintf(out, "<div class=\"pair code-pair\" id=\"row-%zu\"%s",
-		layout->row++, change_start ? " data-change-start" : "");
+	fprintf(out, "<div class=\"pair code-pair\"%s",
+		change_start ? " data-change-start" : "");
 	if (h.indentation_only)
 		fprintf(out, " data-indent-shift=\"%td\"",
 			indentation_shift(text, &h));
